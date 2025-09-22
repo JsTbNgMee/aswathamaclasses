@@ -1,114 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Asteroid Viewer</title>
-    <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-        background-color: black;
-      }
-      canvas {
-        display: block;
-      }
-    </style>
-  </head>
-  <body>
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-        }
-      }
-    </script>
-    <script type="module">
-      import * as THREE from "three";
-      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+<head>
+  <meta charset="UTF-8">
+  <title>NASA Real Asteroid Viewer</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: black; }
+    canvas { display: block; }
+    #info {
+      position: absolute; top: 10px; left: 10px;
+      color: white; font-family: Arial, sans-serif;
+      background: rgba(0,0,0,0.5); padding: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div id="info">☄️ Real NASA Asteroids</div>
+  <script type="module">
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+    import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
 
-      // Scene setup
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x000000);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 5000);
+    camera.position.set(0, 80, 150);
 
-      const camera = new THREE.PerspectiveCamera(
-        75,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        2000
-      );
-      camera.position.set(0, 5, 15);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    // Lights
+    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambient);
+    const sunLight = new THREE.PointLight(0xffffff, 2, 2000);
+    scene.add(sunLight);
+
+    // Sun
+    const sunGeo = new THREE.SphereGeometry(10, 64, 64);
+    const sunMat = new THREE.MeshBasicMaterial({ color: 0xffdd33 });
+    const sun = new THREE.Mesh(sunGeo, sunMat);
+    scene.add(sun);
+
+    // Stars
+    function stars() {
+      const geo = new THREE.BufferGeometry();
+      const pos = [];
+      for (let i = 0; i < 5000; i++) {
+        pos.push((Math.random() - 0.5) * 4000);
+        pos.push((Math.random() - 0.5) * 4000);
+        pos.push((Math.random() - 0.5) * 4000);
+      }
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({ color: 0xffffff, size: 1 });
+      scene.add(new THREE.Points(geo, mat));
+    }
+    stars();
+
+    // Fetch asteroid data from Flask
+    fetch("/asteroids")
+      .then(res => res.json())
+      .then(data => {
+        data.forEach((ast, i) => {
+          const size = Math.max(ast.diameter / 500, 0.2); // scale size down
+          const geo = new THREE.SphereGeometry(size, 8, 8);
+          const mat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
+          const mesh = new THREE.Mesh(geo, mat);
+
+          const a = ast.orbit.semi_major_axis * 10; // scaled orbit radius
+          const e = ast.orbit.eccentricity;
+          const inc = ast.orbit.inclination * Math.PI / 180;
+
+          // Random start angle
+          const theta = Math.random() * Math.PI * 2;
+          const x = a * (Math.cos(theta) - e);
+          const z = a * Math.sin(theta);
+          mesh.position.set(x, Math.sin(inc) * z, Math.cos(inc) * z);
+
+          scene.add(mesh);
+        });
+      })
+      .catch(err => console.error("Error loading asteroids:", err));
+
+    // Animate
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      document.body.appendChild(renderer.domElement);
-
-      // Orbit controls
-      const controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.05;
-      controls.minDistance = 5;
-      controls.maxDistance = 100;
-
-      // Light
-      const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
-      scene.add(ambientLight);
-
-      const pointLight = new THREE.PointLight(0xffffff, 2);
-      pointLight.position.set(20, 20, 20);
-      scene.add(pointLight);
-
-      // Create Sun
-      const sunGeo = new THREE.SphereGeometry(2, 64, 64);
-      const sunMat = new THREE.MeshBasicMaterial({ color: 0xffcc00 });
-      const sun = new THREE.Mesh(sunGeo, sunMat);
-      scene.add(sun);
-
-      // Create asteroid belt
-      const asteroidGroup = new THREE.Group();
-      scene.add(asteroidGroup);
-
-      const asteroidGeometry = new THREE.SphereGeometry(0.1, 12, 12);
-      const asteroidMaterial = new THREE.MeshStandardMaterial({
-        color: 0x888888,
-        roughness: 0.9,
-        metalness: 0.2
-      });
-
-      for (let i = 0; i < 500; i++) {
-        const asteroid = new THREE.Mesh(asteroidGeometry, asteroidMaterial);
-
-        // random orbit radius
-        const radius = THREE.MathUtils.randFloat(5, 12);
-        const angle = Math.random() * Math.PI * 2;
-
-        asteroid.position.set(
-          Math.cos(angle) * radius,
-          (Math.random() - 0.5) * 0.5, // slight vertical spread
-          Math.sin(angle) * radius
-        );
-
-        asteroidGroup.add(asteroid);
-      }
-
-      // Animate
-      function animate() {
-        requestAnimationFrame(animate);
-
-        // Rotate asteroid belt
-        asteroidGroup.rotation.y += 0.0008;
-
-        controls.update();
-        renderer.render(scene, camera);
-      }
-      animate();
-
-      // Resize handling
-      window.addEventListener("resize", () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
-    </script>
-  </body>
+    });
+  </script>
+</body>
 </html>
+
