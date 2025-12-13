@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO and Responsiveness -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ASWATHAMA CLASSES - Professional Coaching Institute for Mathematics & Science">
+    <meta name="keywords" content="coaching, classes, mathematics, science, education, practical learning">
+    <meta name="author" content="ASWATHAMA CLASSES">
+
+    <!-- Title Block -->
+    <title>{% block title %}ASWATHAMA CLASSES - Learn Practically{% endblock %}</title>
+
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- Logo/Brand -->
+            <div class="nav-logo">
+                <a href="{{ url_for('home') }}">ASWATHAMA</a>
+            </div>
+
+            <!-- Navigation Links -->
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('home') }}" class="nav-link">Home</a></li>
+                <li><a href="{{ url_for('about') }}" class="nav-link">About</a></li>
+                <li><a href="{{ url_for('courses') }}" class="nav-link">Courses</a></li>
+                <li><a href="{{ url_for('admissions') }}" class="nav-link">Admissions</a></li>
+                <li><a href="{{ url_for('fees') }}" class="nav-link">Fees</a></li>
+                <li><a href="{{ url_for('gallery') }}" class="nav-link">Gallery</a></li>
+                <li><a href="{{ url_for('contact') }}" class="nav-link">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content Block -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>ASWATHAMA CLASSES</h4>
+                <p>Learn Practically</p>
+            </div>
+
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="{{ url_for('home') }}">Home</a></li>
+                    <li><a href="{{ url_for('about') }}">About</a></li>
+                    <li><a href="{{ url_for('courses') }}">Courses</a></li>
+                    <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Courses</h4>
+                <ul>
+                    <li>Class 8</li>
+                    <li>Class 9</li>
+                    <li>Class 10</li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <p>Email: <span class="placeholder">[Placeholder]</span></p>
+                <p>Phone: <span class="placeholder">[Placeholder]</span></p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 ASWATHAMA CLASSES. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+        </div>
+    </footer>
+</body>
+</html>

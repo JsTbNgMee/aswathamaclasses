@@ -1,150 +1,167 @@
-import os
-import time
-import requests
-from flask import Flask, render_template, jsonify, request, send_from_directory
-# Environment variables are handled directly by Replit
+"""
+ASWATHAMA CLASSES - Professional Coaching Institute Website
+Backend: Flask
+Author: Senior Full-Stack Developer
+Description: A premium, minimalist coaching institute website with black & white theme
+"""
 
-NASA_API_KEY = os.getenv("NASA_API_KEY")  # set this in environment
-if not NASA_API_KEY:
-    print("WARNING: NASA_API_KEY not set. Some endpoints will fail until you set it.")
+from flask import Flask, render_template, request, jsonify
+from datetime import datetime
 
-app = Flask(__name__, static_folder="static", template_folder="templates")
+# Initialize Flask app
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'aswathama-classes-secret-key'
 
-# Simple in-memory cache: { key: (timestamp, ttl_seconds, data) }
-_cache = {}
+# ==================== ROUTES ====================
 
-def cache_get(key):
-    item = _cache.get(key)
-    if not item:
-        return None
-    ts, ttl, data = item
-    if time.time() - ts > ttl:
-        del _cache[key]
-        return None
-    return data
+@app.route('/')
+def home():
+    """Home page - Hero section with institute intro and CTA"""
+    return render_template('index.html')
 
-def cache_set(key, data, ttl=300):
-    _cache[key] = (time.time(), ttl, data)
+@app.route('/about')
+def about():
+    """About page - Institute and founder details"""
+    founder_data = {
+        'name': 'Swaroop Kawale',
+        'qualifications': 'B.Tech in Engineering, M.Tech (Advanced Computing)',
+        'experience': '12+ years of teaching experience',
+        'subjects': 'Mathematics & Science',
+        'bio': 'Swaroop Kawale is a visionary educator dedicated to making mathematics and science accessible and practical. With over a decade of experience in classroom instruction and curriculum development, Swaroop believes in the power of practical learning over rote memorization. His unique methodology combines theoretical concepts with real-world applications, ensuring students develop both understanding and confidence.',
+        'philosophy': 'Education is not about filling buckets; it is about lighting fires. Every student has the potential to excel when given the right guidance, practice, and encouragement.'
+    }
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+    return render_template('about.html', founder=founder_data)
 
-# Proxy APOD (Astronomy Picture of the Day)
-@app.route("/api/apod")
-def api_apod():
-    key = "apod"
-    data = cache_get(key)
-    if data:
-        return jsonify(data)
-    url = "https://api.nasa.gov/planetary/apod"
-    params = {"api_key": NASA_API_KEY or "DEMO_KEY"}
-    r = requests.get(url, params=params, timeout=10)
-    r.raise_for_status()
-    data = r.json()
-    cache_set(key, data, ttl=60*30)  # 30 minutes
-    return jsonify(data)
-
-# Search NASA images (uses images-api.nasa.gov, doesn't require API key)
-@app.route("/api/search_images")
-def api_search_images():
-    q = request.args.get("q", "mars")
-    page = request.args.get("page", "1")
-    key = f"search_images:{q}:{page}"
-    data = cache_get(key)
-    if data:
-        return jsonify(data)
-    url = "https://images-api.nasa.gov/search"
-    params = {"q": q, "media_type": "image", "page": page}
-    r = requests.get(url, params=params, timeout=10)
-    r.raise_for_status()
-    js = r.json()
-    # pick top results and return useful fields
-    items = []
-    for it in js.get("collection", {}).get("items", [])[:12]:
-        link = None
-        links = it.get("links")
-        if links and isinstance(links, list):
-            link = links[0].get("href")
-        data_item = {
-            "title": (it.get("data") or [{}])[0].get("title"),
-            "nasa_id": (it.get("data") or [{}])[0].get("nasa_id"),
-            "date_created": (it.get("data") or [{}])[0].get("date_created"),
-            "href": link
-        }
-        items.append(data_item)
-    data = {"q": q, "results": items}
-    cache_set(key, data, ttl=60*15)  # 15 min
-    return jsonify(data)
-
-# Example: Near-Earth Objects feed (today)
-@app.route("/api/neo/today")
-def api_neo_today():
-    # Use today's date range
-    from datetime import date
-    today = date.today().isoformat()
-    key = f"neo:{today}"
-    data = cache_get(key)
-    if data:
-        return jsonify(data)
-    url = "https://api.nasa.gov/neo/rest/v1/feed"
-    params = {"start_date": today, "end_date": today, "api_key": NASA_API_KEY or "DEMO_KEY"}
-    r = requests.get(url, params=params, timeout=10)
-    r.raise_for_status()
-    js = r.json()
-    # keep compact
-    simplified = {"element_count": js.get("element_count", 0), "near_earth_objects": {}}
-    neos = js.get("near_earth_objects", {}).get(today, [])
-    simplified["near_earth_objects"][today] = [
+@app.route('/courses')
+def courses():
+    """Courses page - Display available classes"""
+    courses_data = [
         {
-            "id": n.get("id"),
-            "name": n.get("name"),
-            "is_potentially_hazardous": n.get("is_potentially_hazardous_asteroid"),
-            "estimated_diameter_m_min": n.get("estimated_diameter", {}).get("meters", {}).get("estimated_diameter_min"),
-            "estimated_diameter_m_max": n.get("estimated_diameter", {}).get("meters", {}).get("estimated_diameter_max"),
-            "close_approach_data": n.get("close_approach_data", [])[:1]  # first approach
-        } for n in neos
+            'class': 'Class 8',
+            'subjects': ['Mathematics', 'Science'],
+            'description': 'Foundation building course focusing on core concepts in algebra, geometry, physics, and chemistry. Interactive problem-solving sessions develop critical thinking.',
+            'duration': '1 Year',
+            'mode': 'Offline'
+        },
+        {
+            'class': 'Class 9',
+            'subjects': ['Mathematics', 'Science'],
+            'description': 'Intermediate level course with advanced topics in algebra, trigonometry, physics, chemistry, and biology. Emphasis on application-based learning.',
+            'duration': '1 Year',
+            'mode': 'Offline'
+        },
+        {
+            'class': 'Class 10',
+            'subjects': ['Mathematics', 'Science'],
+            'description': 'Board exam preparation course with comprehensive coverage of CBSE syllabus. Regular mock tests and doubt-clearing sessions included.',
+            'duration': '1 Year',
+            'mode': 'Offline'
+        }
     ]
-    cache_set(key, simplified, ttl=60*30)
-    return jsonify(simplified)
 
-# Asteroids endpoint for the 3D viewer
-@app.route("/asteroids")
-def asteroids():
-    """
-    Simple proxy to NASA NeoWs 'browse' endpoint.
-    Returns a simplified list of neos with their orbital_data.
-    """
+    return render_template('courses.html', courses=courses_data)
+
+@app.route('/admissions')
+def admissions():
+    """Admissions page - Admission details and requirements"""
+    admissions_data = {
+        'title': 'Join ASWATHAMA CLASSES',
+        'intro': 'We believe in nurturing young minds through practical learning and dedicated mentorship. Our admission process is simple and transparent.',
+        'eligibility': 'Placeholder - Eligibility criteria will be added soon',
+        'process': 'Placeholder - Admission process details will be added soon',
+        'documents': 'Placeholder - Required documents list will be added soon',
+        'contact_info': 'For admission queries, please contact us directly.'
+    }
+
+    return render_template('admissions.html', data=admissions_data)
+
+@app.route('/fees')
+def fees():
+    """Fees page - Fee structure information"""
+    fees_data = {
+        'title': 'Fee Structure',
+        'intro': 'Transparent and affordable fee structure designed to be accessible to all.',
+        'note': 'Detailed fee structure with payment options will be updated soon.',
+        'classes': [
+            {'name': 'Class 8', 'amount': 'Coming Soon'},
+            {'name': 'Class 9', 'amount': 'Coming Soon'},
+            {'name': 'Class 10', 'amount': 'Coming Soon'}
+        ],
+        'benefits': [
+            'Lifetime access to course materials',
+            'Regular doubt-clearing sessions',
+            'Monthly performance tracking',
+            'Flexible payment options available'
+        ]
+    }
+
+    return render_template('fees.html', data=fees_data)
+
+@app.route('/gallery')
+def gallery():
+    """Gallery page - Image showcase"""
+    gallery_data = {
+        'title': 'ASWATHAMA CLASSES Gallery',
+        'intro': 'Experience our state-of-the-art learning environment',
+        'images': [
+            {'id': 1, 'alt': 'Classroom Environment'},
+            {'id': 2, 'alt': 'Study Materials'},
+            {'id': 3, 'alt': 'Student Interaction'},
+            {'id': 4, 'alt': 'Teaching Session'},
+            {'id': 5, 'alt': 'Library Resources'},
+            {'id': 6, 'alt': 'Student Discussion'}
+        ]
+    }
+
+    return render_template('gallery.html', data=gallery_data)
+
+@app.route('/contact')
+def contact():
+    """Contact page - Address and contact form"""
+    contact_data = {
+        'address': 'Address placeholder - Will be added soon',
+        'phone': 'Phone placeholder - Will be added soon',
+        'email': 'email@placeholder.com'
+    }
+
+    return render_template('contact.html', data=contact_data)
+
+@app.route('/submit-contact', methods=['POST'])
+def submit_contact():
+    """Handle contact form submission"""
     try:
-        url = f"https://api.nasa.gov/neo/rest/v1/neo/browse?api_key={NASA_API_KEY or 'DEMO_KEY'}&size=50"
-        r = requests.get(url, timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        raw_neos = data.get("near_earth_objects", [])
-        # build a simplified list
-        neos = []
-        for neo in raw_neos:
-            od = neo.get("orbital_data", {})
-            neos.append({
-                "id": neo.get("id"),
-                "name": neo.get("name"),
-                "diameter": neo.get("estimated_diameter", {}).get("meters", {}).get("estimated_diameter_max", 100),
-                "is_hazardous": neo.get("is_potentially_hazardous_asteroid"),
-                "orbit": {
-                    "semi_major_axis": float(od.get("semi_major_axis", "1.5")),
-                    "eccentricity": float(od.get("eccentricity", "0.1")),
-                    "inclination": float(od.get("inclination", "0.0"))
-                }
-            })
-        return jsonify(neos)
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        data = request.get_json()
 
-# Static file fallback (if needed)
-@app.route("/static/<path:filename>")
-def static_files(filename):
-    return send_from_directory(app.static_folder, filename)
+        # Validate required fields
+        if not all([data.get('name'), data.get('phone'), data.get('message')]):
+            return jsonify({'success': False, 'message': 'All fields are required'}), 400
 
-if __name__ == "__main__":
-    # development server
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
+        # In production, this would save to database or send email
+        # For now, we'll just log it
+        print(f"Contact Form Submission - Name: {data['name']}, Phone: {data['phone']}, Message: {data['message']}")
+
+        return jsonify({'success': True, 'message': 'Thank you! We will contact you soon.'}), 200
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return jsonify({'success': False, 'message': 'An error occurred. Please try again.'}), 500
+
+# ==================== ERROR HANDLERS ====================
+
+@app.errorhandler(404)
+def page_not_found(error):
+    """Handle 404 errors"""
+    return jsonify({"error": "Not found"}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    """Handle 500 errors"""
+    return jsonify({"error": "Internal server error"}), 500
+
+# ==================== MAIN ====================
+
+if __name__ == '__main__':
+    # Run Flask development server
+    # For production, use Gunicorn or similar WSGI server
+    app.run(debug=True, host='0.0.0.0', port=5000)
