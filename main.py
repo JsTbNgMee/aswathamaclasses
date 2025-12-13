@@ -65,56 +65,47 @@ def courses():
 @app.route('/admissions')
 def admissions():
     """Admissions page - Admission details and requirements"""
-    admissions_data = {
-        'title': 'Join ASWATHAMA CLASSES',
-        'intro': 'We believe in nurturing young minds through practical learning and dedicated mentorship. Our admission process is simple and transparent.',
-        'eligibility': 'Placeholder - Eligibility criteria will be added soon',
-        'process': 'Placeholder - Admission process details will be added soon',
-        'documents': 'Placeholder - Required documents list will be added soon',
-        'contact_info': 'For admission queries, please contact us directly.'
-    }
-
-    return render_template('admissions.html', data=admissions_data)
+    admission_steps = [
+        {'step': '01', 'title': 'Enquiry', 'description': 'Contact us via phone or visit our center to enquire about available batches.'},
+        {'step': '02', 'title': 'Registration', 'description': 'Fill out the registration form with student details and submit required documents.'},
+        {'step': '03', 'title': 'Enrollment', 'description': 'Complete fee payment and get enrolled in your preferred batch.'}
+    ]
+    additional_info = [
+        'Admissions open throughout the year (subject to availability)',
+        'No entrance test required',
+        'Limited seats per batch to ensure personalized attention',
+        'Contact us for current batch timings'
+    ]
+    return render_template('admissions.html', admission_steps=admission_steps, additional_info=additional_info)
 
 @app.route('/fees')
 def fees():
     """Fees page - Fee structure information"""
-    fees_data = {
-        'title': 'Fee Structure',
-        'intro': 'Transparent and affordable fee structure designed to be accessible to all.',
-        'note': 'Detailed fee structure with payment options will be updated soon.',
-        'classes': [
-            {'name': 'Class 8', 'amount': 'Coming Soon'},
-            {'name': 'Class 9', 'amount': 'Coming Soon'},
-            {'name': 'Class 10', 'amount': 'Coming Soon'}
-        ],
-        'benefits': [
-            'Lifetime access to course materials',
-            'Regular doubt-clearing sessions',
-            'Monthly performance tracking',
-            'Flexible payment options available'
-        ]
-    }
-
-    return render_template('fees.html', data=fees_data)
+    fees_list = [
+        {'class': 'Class 8', 'subjects': 'Mathematics & Science', 'monthly': 'Contact Us', 'annual': 'Contact Us'},
+        {'class': 'Class 9', 'subjects': 'Mathematics & Science', 'monthly': 'Contact Us', 'annual': 'Contact Us'},
+        {'class': 'Class 10', 'subjects': 'Mathematics & Science', 'monthly': 'Contact Us', 'annual': 'Contact Us'}
+    ]
+    notes = [
+        'Fee structure will be shared upon enquiry',
+        'Flexible payment options available',
+        'Sibling discount available',
+        'All course materials included in the fee'
+    ]
+    return render_template('fees.html', fees=fees_list, notes=notes)
 
 @app.route('/gallery')
 def gallery():
     """Gallery page - Image showcase"""
-    gallery_data = {
-        'title': 'ASWATHAMA CLASSES Gallery',
-        'intro': 'Experience our state-of-the-art learning environment',
-        'images': [
-            {'id': 1, 'alt': 'Classroom Environment'},
-            {'id': 2, 'alt': 'Study Materials'},
-            {'id': 3, 'alt': 'Student Interaction'},
-            {'id': 4, 'alt': 'Teaching Session'},
-            {'id': 5, 'alt': 'Library Resources'},
-            {'id': 6, 'alt': 'Student Discussion'}
-        ]
-    }
-
-    return render_template('gallery.html', data=gallery_data)
+    gallery_items = [
+        {'title': 'Classroom', 'description': 'Our spacious and well-equipped classroom'},
+        {'title': 'Teaching Session', 'description': 'Interactive teaching in progress'},
+        {'title': 'Study Materials', 'description': 'Comprehensive study materials'},
+        {'title': 'Student Discussion', 'description': 'Collaborative learning sessions'},
+        {'title': 'Problem Solving', 'description': 'Hands-on problem solving activities'},
+        {'title': 'Exam Preparation', 'description': 'Focused exam preparation sessions'}
+    ]
+    return render_template('gallery.html', gallery_items=gallery_items)
 
 @app.route('/contact')
 def contact():

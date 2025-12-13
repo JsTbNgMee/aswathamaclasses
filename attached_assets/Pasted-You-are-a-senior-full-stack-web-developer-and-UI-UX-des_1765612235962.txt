@@ -1,0 +1,124 @@
+You are a senior full-stack web developer and UI/UX designer.
+
+Build a professional coaching-institute website using:
+- Flask (Python) for backend
+- HTML + CSS for frontend
+- Minimal JavaScript (only if necessary)
+- STRICT black & white theme (no colors)
+- Clean, modern, premium look
+- Mobile-first, fully responsive design
+
+Website Name:
+ASWATHAMA CLASSES
+
+Tagline:
+LEARN PRACTICALLY
+
+=====================
+CONTENT DETAILS
+=====================
+
+Institute Details:
+- Name: ASWATHAMA CLASSES
+- Tagline: LEARN PRACTICALLY
+- Address: Leave blank space (placeholder)
+- Contact details: placeholders (will be added later)
+- Mode: Offline only
+
+Founder / Faculty:
+- Name: Swaroop Kawale
+- Qualifications: Placeholder
+- Teaching Experience: Placeholder
+- Subjects: Mathematics & Science
+- Photo: Placeholder image
+- Short professional bio section (clean and confident tone)
+
+Courses Offered:
+- Mathematics & Science
+- Classes: 8, 9, 10
+- Mode: Offline only
+- Display each class as a separate clean card
+
+Skip:
+- Results section
+- Achievements section
+
+Admissions:
+- Create a dedicated “Admissions” page
+- Content placeholders (I will add details later)
+
+Fee Structure:
+- Create a “Fees” section
+- Keep it hidden or placeholder-based (no amounts yet)
+
+Gallery:
+- Create a gallery page
+- Use placeholder image links (I will replace later)
+
+Branding:
+- Black background + white text
+- Use modern typography
+- No gradients, no colors, no flashy animations
+- Elegant hover effects only
+
+=====================
+PAGES REQUIRED
+=====================
+
+1. Home
+   - Hero section with institute name & tagline
+   - Short intro paragraph
+   - Call-to-action button: “Enroll Now”
+
+2. About
+   - About ASWATHAMA CLASSES
+   - About Founder (Swaroop Kawale)
+
+3. Courses
+   - Class 8
+   - Class 9
+   - Class 10
+   - Maths & Science clearly mentioned
+
+4. Admissions
+   - Placeholder content
+
+5. Fees
+   - Placeholder content
+
+6. Gallery
+   - Image grid with placeholders
+
+7. Contact
+   - Address placeholder
+   - Phone placeholder
+   - Simple contact form (name, phone, message)
+
+=====================
+TECHNICAL REQUIREMENTS
+=====================
+
+- Flask app structure with:
+  - app.py
+  - templates folder
+  - static/css folder
+- Use Jinja templates
+- Base template with navbar & footer
+- SEO-friendly HTML
+- Clean comments in code
+- Ready to run locally
+- No external paid libraries
+
+=====================
+DELIVERABLE
+=====================
+
+Provide:
+1. Folder structure
+2. Complete Flask code
+3. HTML templates
+4. CSS file
+5. Instructions to run locally
+
+Think like a premium coaching brand website.
+Simple. Powerful. Professional.
