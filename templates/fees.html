@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Fees Structure - ASWATHAMA CLASSES{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Fees Structure</h1>
+</section>
+
+<section class="fees-section">
+    <div class="container">
+        <div class="fees-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Subjects</th>
+                        <th>Monthly Fee</th>
+                        <th>Annual Fee</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fee in fees %}
+                    <tr>
+                        <td>{{ fee.class }}</td>
+                        <td>{{ fee.subjects }}</td>
+                        <td>{{ fee.monthly }}</td>
+                        <td>{{ fee.annual }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="fees-notes">
+            <h3>Notes</h3>
+            <ul>
+                {% for note in notes %}
+                <li>{{ note }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Gallery - ASWATHAMA CLASSES{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Gallery</h1>
+</section>
+
+<section class="gallery-section">
+    <div class="container">
+        <p class="gallery-intro">Take a look at our learning environment and student activities.</p>
+        
+        <div class="gallery-grid">
+            {% for item in gallery_items %}
+            <div class="gallery-item">
+                <div class="gallery-placeholder">
+                    <span>{{ item.title }}</span>
+                </div>
+                <p>{{ item.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <p class="gallery-note">More photos coming soon!</p>
+    </div>
+</section>
+{% endblock %}

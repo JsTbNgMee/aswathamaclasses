@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}About Us - ASWATHAMA CLASSES{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>About Us</h1>
+</section>
+
+<section class="about-section">
+    <div class="container">
+        <div class="founder-profile">
+            <h2>Meet Our Founder</h2>
+            <div class="founder-info">
+                <h3>{{ founder.name }}</h3>
+                <p class="qualifications">{{ founder.qualifications }}</p>
+                <p class="experience">{{ founder.experience }}</p>
+                <p class="subjects">Specialization: {{ founder.subjects }}</p>
+            </div>
+            <div class="founder-bio">
+                <h4>About</h4>
+                <p>{{ founder.bio }}</p>
+            </div>
+            <div class="founder-philosophy">
+                <h4>Teaching Philosophy</h4>
+                <blockquote>"{{ founder.philosophy }}"</blockquote>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="mission-section">
+    <div class="container">
+        <h2>Our Mission</h2>
+        <p>At ASWATHAMA CLASSES, we are committed to providing quality education that goes beyond textbooks. Our mission is to nurture curious minds, build strong foundations, and prepare students for academic excellence and real-world challenges.</p>
+    </div>
+</section>
+{% endblock %}

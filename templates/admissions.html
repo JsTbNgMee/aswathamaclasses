@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Admissions - ASWATHAMA CLASSES{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Admissions</h1>
+</section>
+
+<section class="admissions-section">
+    <div class="container">
+        <h2>Admission Process</h2>
+        <div class="admission-steps">
+            {% for step in admission_steps %}
+            <div class="step-card">
+                <div class="step-number">{{ step.step }}</div>
+                <h3>{{ step.title }}</h3>
+                <p>{{ step.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="admission-info">
+            <h3>Important Information</h3>
+            <ul>
+                {% for info in additional_info %}
+                <li>{{ info }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="cta-box">
+            <h3>Ready to Join?</h3>
+            <a href="{{ url_for('contact') }}" class="btn btn-primary">Contact Us</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Courses - ASWATHAMA CLASSES{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Our Courses</h1>
+</section>
+
+<section class="courses-section">
+    <div class="container">
+        <div class="courses-list">
+            {% for course in courses %}
+            <div class="course-detail-card">
+                <h3>{{ course.class }}</h3>
+                <div class="course-subjects">
+                    <strong>Subjects:</strong>
+                    {% for subject in course.subjects %}
+                    <span class="subject-tag">{{ subject }}</span>
+                    {% endfor %}
+                </div>
+                <p class="course-description">{{ course.description }}</p>
+                <div class="course-meta">
+                    <span><strong>Duration:</strong> {{ course.duration }}</span>
+                    <span><strong>Mode:</strong> {{ course.mode }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="container">
+        <h2>Ready to Enroll?</h2>
+        <a href="{{ url_for('admissions') }}" class="btn btn-primary">Apply Now</a>
+    </div>
+</section>
+{% endblock %}

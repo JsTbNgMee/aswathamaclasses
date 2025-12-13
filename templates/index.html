@@ -1,177 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>NASA Real Asteroid Viewer - Babylon.js</title>
-  <style>
-    html, body {
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      background: black;
-    }
-    #renderCanvas {
-      width: 100%;
-      height: 100%;
-      touch-action: none;
-    }
-    #info {
-      position: absolute; top: 10px; left: 10px;
-      color: white; font-family: Arial, sans-serif;
-      background: rgba(0,0,0,0.8); padding: 15px;
-      border-radius: 8px; font-size: 18px;
-      z-index: 100;
-    }
-    #status {
-      position: absolute; top: 80px; left: 10px;
-      color: white; font-family: Arial, sans-serif;
-      background: rgba(0,150,0,0.8); padding: 10px;
-      border-radius: 5px; font-size: 14px;
-      z-index: 100;
-    }
-  </style>
-</head>
-<body>
-  <canvas id="renderCanvas"></canvas>
-  <div id="info">NASA Real Asteroid Viewer - Babylon.js</div>
-  <div id="status">Loading Babylon.js engine...</div>
-  
-  <script src="https://cdn.babylonjs.com/babylon.js"></script>
-  <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
-  <script>
-    document.getElementById('status').innerText = 'Initializing Babylon.js...';
-    
-    const canvas = document.getElementById("renderCanvas");
-    
-    if (typeof BABYLON === 'undefined') {
-      document.getElementById('status').innerText = 'ERROR: Babylon.js failed to load';
-      document.getElementById('status').style.background = 'rgba(255,0,0,0.8)';
-    } else {
-      document.getElementById('status').innerText = 'Creating Babylon.js engine...';
-      
-      const engine = new BABYLON.Engine(canvas, true);
-      const scene = new BABYLON.Scene(engine);
-      scene.useRightHandedSystem = true;
-      
-      document.getElementById('status').innerText = 'Setting up camera and lights...';
-      
-      const camera = new BABYLON.ArcRotateCamera("camera", Math.PI/4, Math.PI/3, 150, BABYLON.Vector3.Zero(), scene);
-      camera.setTarget(BABYLON.Vector3.Zero());
-      camera.attachControl(canvas, true);
-      camera.lowerRadiusLimit = 20;
-      camera.upperRadiusLimit = 500;
-      camera.inertia = 0.9;
-      
-      const ambientLight = new BABYLON.HemisphericLight("ambient", new BABYLON.Vector3(0, 1, 0), scene);
-      ambientLight.intensity = 0.3;
-      
-      const sunLight = new BABYLON.PointLight("sunLight", new BABYLON.Vector3(0, 0, 0), scene);
-      sunLight.intensity = 1.5;
-      sunLight.diffuse = new BABYLON.Color3(1, 1, 0.8);
-      
-      document.getElementById('status').innerText = 'Creating sun...';
-      
-      const sun = BABYLON.MeshBuilder.CreateSphere("sun", {diameter: 16}, scene);
-      const sunMaterial = new BABYLON.StandardMaterial("sunMat", scene);
-      sunMaterial.emissiveColor = new BABYLON.Color3(1, 0.8, 0);
-      sunMaterial.diffuseColor = new BABYLON.Color3(1, 0.9, 0.2);
-      sun.material = sunMaterial;
-      
-      const glowLayer = new BABYLON.GlowLayer("glow", scene);
-      glowLayer.addIncludedOnlyMesh(sun);
-      glowLayer.intensity = 0.8;
-      
-      document.getElementById('status').innerText = 'Creating starfield...';
-      
-      const starSystem = new BABYLON.ParticleSystem("stars", 3000, scene);
-      starSystem.particleTexture = new BABYLON.Texture("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==", scene);
-      starSystem.emitter = BABYLON.Vector3.Zero();
-      starSystem.minEmitBox = new BABYLON.Vector3(-1000, -1000, -1000);
-      starSystem.maxEmitBox = new BABYLON.Vector3(1000, 1000, 1000);
-      starSystem.color1 = new BABYLON.Color4(1, 1, 1, 1);
-      starSystem.color2 = new BABYLON.Color4(0.8, 0.8, 1, 1);
-      starSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0.0);
-      starSystem.minSize = 0.5;
-      starSystem.maxSize = 2.0;
-      starSystem.minLifeTime = Number.MAX_VALUE;
-      starSystem.maxLifeTime = Number.MAX_VALUE;
-      starSystem.emitRate = 3000;
-      starSystem.manualEmitCount = 3000;
-      starSystem.updateSpeed = 0;
-      starSystem.start();
-      
-      document.getElementById('status').innerText = 'Loading real asteroid data...';
-      
-      const asteroids = [];
-      
-      fetch('/asteroids')
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('status').innerText = 'Creating ' + Math.min(data.length, 100) + ' real asteroids...';
-          
-          data.forEach((asteroid, index) => {
-            if (index < 100) {
-              const size = Math.max(asteroid.diameter / 500, 0.6);
-              const asteroidMesh = BABYLON.MeshBuilder.CreateSphere('asteroid_' + index, {diameter: size}, scene);
-              
-              const asteroidMaterial = new BABYLON.StandardMaterial('asteroidMat_' + index, scene);
-              asteroidMaterial.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
-              asteroidMaterial.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
-              asteroidMaterial.roughness = 0.9;
-              asteroidMesh.material = asteroidMaterial;
+{% extends 'base.html' %}
 
-              const a = asteroid.orbit.semi_major_axis * 15;
-              const e = asteroid.orbit.eccentricity;
-              const inc = asteroid.orbit.inclination * Math.PI / 180;
+{% block title %}ASWATHAMA CLASSES - Learn Practically{% endblock %}
 
-              const theta = Math.random() * Math.PI * 2;
-              const r = a * (1 - e * e) / (1 + e * Math.cos(theta));
-              const x = r * Math.cos(theta);
-              const z = r * Math.sin(theta);
-              const y = Math.sin(inc) * z * 0.1;
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>ASWATHAMA CLASSES</h1>
+        <p class="tagline">Learn Practically</p>
+        <p class="hero-description">Expert coaching in Mathematics & Science for Classes 8, 9 & 10. Building strong foundations through practical learning.</p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('courses') }}" class="btn btn-primary">View Courses</a>
+            <a href="{{ url_for('contact') }}" class="btn btn-secondary">Contact Us</a>
+        </div>
+    </div>
+</section>
 
-              asteroidMesh.position = new BABYLON.Vector3(x, y, z);
-              
-              asteroids.push({
-                mesh: asteroidMesh,
-                name: asteroid.name,
-                orbitRadius: r,
-                angle: theta,
-                speed: 0.001 + Math.random() * 0.0005
-              });
-            }
-          });
+<!-- Features Section -->
+<section class="features">
+    <div class="container">
+        <h2>Why Choose Us?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>Practical Learning</h3>
+                <p>We believe in learning by doing. Our methodology focuses on real-world applications and hands-on problem solving.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Expert Faculty</h3>
+                <p>Learn from experienced educators with 12+ years of teaching excellence in Mathematics and Science.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Personalized Attention</h3>
+                <p>Small batch sizes ensure every student gets individual attention and guidance.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Proven Results</h3>
+                <p>Our students consistently achieve excellent results through our structured and effective teaching approach.</p>
+            </div>
+        </div>
+    </div>
+</section>
 
-          document.getElementById('status').innerText = asteroids.length + ' asteroids loaded! Use mouse to explore space.';
-        })
-        .catch(error => {
-          document.getElementById('status').innerText = 'Error loading asteroids: ' + error.message;
-          document.getElementById('status').style.background = 'rgba(255,0,0,0.8)';
-        });
+<!-- Courses Preview Section -->
+<section class="courses-preview">
+    <div class="container">
+        <h2>Our Courses</h2>
+        <div class="courses-grid">
+            <div class="course-card">
+                <h3>Class 8</h3>
+                <p>Foundation building in Mathematics & Science with focus on core concepts.</p>
+                <a href="{{ url_for('courses') }}" class="btn btn-outline">Learn More</a>
+            </div>
+            <div class="course-card">
+                <h3>Class 9</h3>
+                <p>Intermediate level with advanced topics and application-based learning.</p>
+                <a href="{{ url_for('courses') }}" class="btn btn-outline">Learn More</a>
+            </div>
+            <div class="course-card">
+                <h3>Class 10</h3>
+                <p>Board exam preparation with intensive revision and practice sessions.</p>
+                <a href="{{ url_for('courses') }}" class="btn btn-outline">Learn More</a>
+            </div>
+        </div>
+    </div>
+</section>
 
-      scene.onBeforeRenderObservable.add(() => {
-        sun.rotation.y += 0.005;
-
-        asteroids.forEach(asteroid => {
-          asteroid.angle += asteroid.speed;
-          const r = asteroid.orbitRadius;
-          asteroid.mesh.position.x = r * Math.cos(asteroid.angle);
-          asteroid.mesh.position.z = r * Math.sin(asteroid.angle);
-          asteroid.mesh.rotation.x += 0.01;
-          asteroid.mesh.rotation.y += 0.005;
-        });
-      });
-
-      engine.runRenderLoop(() => {
-        scene.render();
-      });
-
-      window.addEventListener('resize', () => {
-        engine.resize();
-      });
-    }
-  </script>
-</body>
-</html>
+<!-- CTA Section -->
+<section class="cta">
+    <div class="container">
+        <h2>Ready to Start Your Journey?</h2>
+        <p>Join ASWATHAMA CLASSES and unlock your potential in Mathematics and Science.</p>
+        <a href="{{ url_for('admissions') }}" class="btn btn-primary">Apply Now</a>
+    </div>
+</section>
+{% endblock %}
