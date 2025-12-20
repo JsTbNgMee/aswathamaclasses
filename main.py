@@ -98,12 +98,12 @@ def fees():
 def gallery():
     """Gallery page - Image showcase"""
     gallery_items = [
-        {'image': 'images/gallery/image1.jpg'},
-        {'image': 'images/gallery/image2.jpg'},
-        {'image': 'images/gallery/image3.jpg'},
-        {'image': 'images/gallery/image4.jpg'},
-        {'image': 'images/gallery/image5.jpg'},
-        {'image': 'images/gallery/image6.jpg'}
+        {'image': 'https://drive.google.com/file/d/1r7c6sLzjJBYFTsfAimW3atAWGNt3VATr/view?usp=drive_link'},
+        {'image': 'https://drive.google.com/file/d/1_7SlXPDPYsJ0XIhPKKJTuF6jTfyA4s-C/view?usp=drive_link'},
+        {'image': 'https://drive.google.com/file/d/1sKZbNIasgK5Ke-Rwm7Ty49_0ELtnXN8O/view?usp=drive_link'},
+        {'image': 'https://drive.google.com/file/d/1tivdSu8MRPeCCIrgdaBccf2YHaPaJKDm/view?usp=drive_link'},
+        {'image': 'https://drive.google.com/file/d/1c6bAiX-h_xz03N-VCpMB_2FPa4cZa98b/view?usp=drive_link'},
+        {'image': 'https://drive.google.com/file/d/1j8BLcIAsu18gM6pkAxNZemNU0bOKHy0i/view?usp=drive_link'}
     ]
     return render_template('gallery.html', gallery_items=gallery_items)
 
