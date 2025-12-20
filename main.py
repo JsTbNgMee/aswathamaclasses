@@ -23,11 +23,11 @@ def home():
 def about():
     """About page - Institute and founder details"""
     founder_data = {
-        'name': 'Swaroop Kawale',
-        'qualifications': 'B.Tech in Engineering, M.Tech (Advanced Computing)',
-        'experience': '12+ years of teaching experience',
-        'subjects': 'Mathematics & Science',
-        'bio': 'Swaroop Kawale is a visionary educator dedicated to making mathematics and science accessible and practical. With over a decade of experience in classroom instruction and curriculum development, Swaroop believes in the power of practical learning over rote memorization. His unique methodology combines theoretical concepts with real-world applications, ensuring students develop both understanding and confidence.',
+        'name': 'Sir',
+        'qualifications': 'MSc in Physics (Specialization: Solid State Physics), BSc in Physics (100/100)',
+        'experience': '6+ years of teaching experience',
+        'subjects': 'Physics',
+        'bio': 'An experienced physics educator dedicated to making physics accessible and practical. With over 6 years of teaching experience and advanced specialization in solid state physics, our founder believes in the power of practical learning over rote memorization. His unique methodology combines theoretical concepts with real-world applications, ensuring students develop both understanding and confidence.',
         'philosophy': 'Education is not about filling buckets; it is about lighting fires. Every student has the potential to excel when given the right guidance, practice, and encouragement.'
     }
 
@@ -98,12 +98,12 @@ def fees():
 def gallery():
     """Gallery page - Image showcase"""
     gallery_items = [
-        {'title': 'Classroom', 'description': 'Our spacious and well-equipped classroom'},
-        {'title': 'Teaching Session', 'description': 'Interactive teaching in progress'},
-        {'title': 'Study Materials', 'description': 'Comprehensive study materials'},
-        {'title': 'Student Discussion', 'description': 'Collaborative learning sessions'},
-        {'title': 'Problem Solving', 'description': 'Hands-on problem solving activities'},
-        {'title': 'Exam Preparation', 'description': 'Focused exam preparation sessions'}
+        {'title': 'Classroom', 'description': 'Our spacious and well-equipped classroom', 'image': 'gallery/classroom.jpg'},
+        {'title': 'Teaching Session', 'description': 'Interactive teaching in progress', 'image': 'gallery/teaching-session.jpg'},
+        {'title': 'Study Materials', 'description': 'Comprehensive study materials', 'image': 'gallery/study-materials.jpg'},
+        {'title': 'Student Discussion', 'description': 'Collaborative learning sessions', 'image': 'gallery/student-discussion.jpg'},
+        {'title': 'Problem Solving', 'description': 'Hands-on problem solving activities', 'image': 'gallery/problem-solving.jpg'},
+        {'title': 'Exam Preparation', 'description': 'Focused exam preparation sessions', 'image': 'gallery/exam-preparation.jpg'}
     ]
     return render_template('gallery.html', gallery_items=gallery_items)
 
@@ -113,7 +113,7 @@ def contact():
     contact_data = {
         'address': 'Address placeholder - Will be added soon',
         'phone': 'Phone placeholder - Will be added soon',
-        'email': 'email@placeholder.com'
+        'email': 'aswathamaclasses@gmail.com'
     }
 
     return render_template('contact.html', data=contact_data)
@@ -154,5 +154,5 @@ def internal_error(error):
 
 if __name__ == '__main__':
     # Run Flask development server
-    # For production, use Gunicorn or similar WSGI server
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # For production, use Gunicorn: gunicorn --bind 0.0.0.0:5000 --workers 4 main:app
+    app.run(debug=False, host='0.0.0.0', port=5000)

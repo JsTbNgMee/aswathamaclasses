@@ -14,9 +14,16 @@
         <div class="gallery-grid">
             {% for item in gallery_items %}
             <div class="gallery-item">
-                <div class="gallery-placeholder">
-                    <span>{{ item.title }}</span>
+                <div class="gallery-image-container">
+                    {% if item.image %}
+                    <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.title }}" class="gallery-image">
+                    {% else %}
+                    <div class="gallery-placeholder">
+                        <span>{{ item.title }}</span>
+                    </div>
+                    {% endif %}
                 </div>
+                <h3>{{ item.title }}</h3>
                 <p>{{ item.description }}</p>
             </div>
             {% endfor %}
