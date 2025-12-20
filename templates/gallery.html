@@ -15,7 +15,7 @@
             {% for item in gallery_items %}
             <div class="gallery-item">
                 <div class="gallery-image-container">
-                    <img src="{{ item.image }}" alt="Gallery image" class="gallery-image">
+                    <img src="{{ url_for('static', filename=item.image) }}" alt="Gallery image" class="gallery-image">
                 </div>
             </div>
             {% endfor %}
