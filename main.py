@@ -98,12 +98,12 @@ def fees():
 def gallery():
     """Gallery page - Image showcase"""
     gallery_items = [
-        {'title': 'Classroom', 'description': 'Our spacious and well-equipped classroom', 'image': 'https://drive.google.com/uc?export=download&id=1AhZqPE8KTMDTAjoX4X4PwZIE7G7KpnQ2'},
-        {'title': 'Teaching Session', 'description': 'Interactive teaching in progress', 'image': 'https://drive.google.com/uc?export=download&id=1r7c6sLzjJBYFTsfAimW3atAWGNt3VATr'},
-        {'title': 'Study Materials', 'description': 'Comprehensive study materials', 'image': 'https://drive.google.com/uc?export=download&id=1sKZbNIasgK5Ke-Rwm7Ty49_0ELtnXN8O'},
-        {'title': 'Student Discussion', 'description': 'Collaborative learning sessions', 'image': 'https://drive.google.com/uc?export=download&id=1tivdSu8MRPeCCIrgdaBccf2YHaPaJKDm'},
-        {'title': 'Problem Solving', 'description': 'Hands-on problem solving activities', 'image': 'https://drive.google.com/uc?export=download&id=1c6bAiX-h_xz03N-VCpMB_2FPa4cZa98b'},
-        {'title': 'Exam Preparation', 'description': 'Focused exam preparation sessions', 'image': 'https://drive.google.com/uc?export=download&id=1mQDGNiKwex-gOcqwYXDIHLJVt6w_LtPI'}
+        {'image': 'https://drive.google.com/uc?export=download&id=1r7c6sLzjJBYFTsfAimW3atAWGNt3VATr'},
+        {'image': 'https://drive.google.com/uc?export=download&id=1_7SlXPDPYsJ0XIhPKKJTuF6jTfyA4s-C'},
+        {'image': 'https://drive.google.com/uc?export=download&id=1sKZbNIasgK5Ke-Rwm7Ty49_0ELtnXN8O'},
+        {'image': 'https://drive.google.com/uc?export=download&id=1tivdSu8MRPeCCIrgdaBccf2YHaPaJKDm'},
+        {'image': 'https://drive.google.com/uc?export=download&id=1c6bAiX-h_xz03N-VCpMB_2FPa4cZa98b'},
+        {'image': 'https://drive.google.com/uc?export=download&id=1j8BLcIAsu18gM6pkAxNZemNU0bOKHy0i'}
     ]
     return render_template('gallery.html', gallery_items=gallery_items)
 

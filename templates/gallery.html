@@ -15,10 +15,8 @@
             {% for item in gallery_items %}
             <div class="gallery-item">
                 <div class="gallery-image-container">
-                    <img src="{{ item.image }}" alt="{{ item.title }}" class="gallery-image">
+                    <img src="{{ item.image }}" alt="Gallery image" class="gallery-image">
                 </div>
-                <h3>{{ item.title }}</h3>
-                <p>{{ item.description }}</p>
             </div>
             {% endfor %}
         </div>
