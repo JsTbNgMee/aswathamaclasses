@@ -51,27 +51,23 @@
 </section>
 
 <script>
-document.getElementById('contactForm').addEventListener('submit', async function(e) {
+document.getElementById('contactForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const formData = {
-        name: document.getElementById('name').value,
-        phone: document.getElementById('phone').value,
-        message: document.getElementById('message').value
-    };
-    try {
-        const response = await fetch('/submit-contact', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(formData)
-        });
-        const result = await response.json();
-        document.getElementById('formMessage').innerText = result.message;
-        if (result.success) {
-            document.getElementById('contactForm').reset();
-        }
-    } catch (error) {
-        document.getElementById('formMessage').innerText = 'Error sending message. Please try again.';
-    }
+    const name = document.getElementById('name').value;
+    const phone = document.getElementById('phone').value;
+    const message = document.getElementById('message').value;
+    
+    // Create WhatsApp message
+    const whatsappMessage = `Hello! I am ${name}.\n\nPhone: ${phone}\n\nMessage: ${message}`;
+    const whatsappNumber = '919019374771';
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+    
+    // Open WhatsApp
+    window.open(whatsappUrl, '_blank');
+    
+    // Reset form
+    document.getElementById('contactForm').reset();
+    document.getElementById('formMessage').innerText = 'Redirecting to WhatsApp...';
 });
 </script>
 {% endblock %}
