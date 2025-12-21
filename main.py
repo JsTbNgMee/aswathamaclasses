@@ -26,6 +26,16 @@ GOOGLE_SHEETS_API_KEY = os.getenv('GOOGLE_SHEETS_API_KEY', '')
 STUDENTS_DATA = {}  # {class: [{'id': '...', 'roll_no': '...', 'name': '...'}]}
 ATTENDANCE_DATA = {}  # {date: [{student_id, status, notes}]}
 
+# Initialize with sample data
+def init_sample_data():
+    """Initialize with sample data for testing"""
+    for cls in ['Class 8', 'Class 9', 'Class 10']:
+        STUDENTS_DATA[cls] = [
+            {'id': str(uuid.uuid4()), 'roll_no': '1', 'name': 'Student One', 'class': cls},
+            {'id': str(uuid.uuid4()), 'roll_no': '2', 'name': 'Student Two', 'class': cls},
+            {'id': str(uuid.uuid4()), 'roll_no': '3', 'name': 'Student Three', 'class': cls},
+        ]
+
 # ==================== ROUTES ====================
 
 @app.route('/admin/login', methods=['GET', 'POST'])
@@ -195,6 +205,9 @@ def sync_to_google_sheets():
     # 2. Create sheets for each class if they don't exist
     # 3. Update student and attendance data
     pass
+
+# Initialize sample data when app starts
+init_sample_data()
 
 @app.route('/')
 def home():
