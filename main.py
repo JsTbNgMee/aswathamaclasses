@@ -98,12 +98,20 @@ def fees():
 def gallery():
     """Gallery page - Image showcase"""
     gallery_items = [
-        {'embed': 'https://drive.google.com/file/d/1r7c6sLzjJBYFTsfAimW3atAWGNt3VATr/preview'},
-        {'embed': 'https://drive.google.com/file/d/1_7SlXPDPYsJ0XIhPKKJTuF6jTfyA4s-C/preview'},
-        {'embed': 'https://drive.google.com/file/d/1sKZbNIasgK5Ke-Rwm7Ty49_0ELtnXN8O/preview'},
-        {'embed': 'https://drive.google.com/file/d/1tivdSu8MRPeCCIrgdaBccf2YHaPaJKDm/preview'},
-        {'embed': 'https://drive.google.com/file/d/1c6bAiX-h_xz03N-VCpMB_2FPa4cZa98b/preview'},
-        {'embed': 'https://drive.google.com/file/d/1j8BLcIAsu18gM6pkAxNZemNU0bOKHy0i/preview'}
+        {'url': 'https://imagizer.imageshack.com/img922/7606/usgJRC.jpg'},
+        {'url': 'https://imagizer.imageshack.com/img921/3791/y3C04k.jpg'},
+        {'url': 'https://imagizer.imageshack.com/img924/9615/ea2NaK.jpg'},
+        {'url': 'https://imagizer.imageshack.com/img921/7320/uyWjAu.jpg'},
+        {'url': 'https://imagizer.imageshack.com/img924/7164/rHHmGA.jpg'},
+        {'url': 'https://imagizer.imageshack.com/img924/8174/8IV5f4.jpg'},
+        {'url': 'https://imagizer.imageshack.com/img924/790/xq6kSf.jpg'},
+        {'url': 'https://imagizer.imageshack.com/img922/1155/6lvvSV.jpg'},
+        {'url': 'https://imagizer.imageshack.com/img923/6659/zcwtBM.jpg'},
+        {'url': 'https://imagizer.imageshack.com/img923/782/f8FTG2.jpg'},
+        {'url': 'https://imagizer.imageshack.com/img924/9574/WrZoRX.jpg'},
+        {'url': 'https://imagizer.imageshack.com/img922/38/xUu0Ao.jpg'},
+        {'url': 'https://imagizer.imageshack.com/img924/1170/Y2aiAj.jpg'},
+        {'url': 'https://imagizer.imageshack.com/img923/8562/FKIXv4.jpg'}
     ]
     return render_template('gallery.html', gallery_items=gallery_items)
 

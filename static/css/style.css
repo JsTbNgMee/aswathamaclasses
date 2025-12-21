@@ -711,6 +711,90 @@ th {
     border-radius: 4px;
 }
 
+/* Social Media Section */
+.social-media-section {
+    padding: 80px 24px;
+    text-align: center;
+    background: var(--bg-secondary);
+}
+
+.social-media-section h2 {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.social-subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+}
+
+.social-buttons {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.social-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 40px;
+    border: 2px solid var(--text-primary);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all var(--transition);
+    border-radius: 4px;
+}
+
+.social-btn:hover {
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.social-icon {
+    font-size: 24px;
+}
+
+.social-text {
+    display: inline;
+}
+
+.youtube-btn {
+    border-color: #ff0000;
+    color: #ff0000;
+}
+
+.youtube-btn:hover {
+    background: #ff0000;
+    color: white;
+    border-color: #ff0000;
+}
+
+.instagram-btn {
+    border-color: #E4405F;
+    color: #E4405F;
+}
+
+.instagram-btn:hover {
+    background: #E4405F;
+    color: white;
+    border-color: #E4405F;
+}
+
 /* Responsive */
 @media (max-width: 992px) {
     .features-grid, .courses-grid, .courses-list {

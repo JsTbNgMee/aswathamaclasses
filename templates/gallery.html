@@ -14,9 +14,7 @@
         <div class="gallery-grid">
             {% for item in gallery_items %}
             <div class="gallery-item">
-                <div class="gallery-image-container">
-                    <iframe src="{{ item.embed }}" style="width: 100%; height: 100%; border: none;" allowfullscreen="" loading="lazy"></iframe>
-                </div>
+                <img src="{{ item.url }}" alt="Gallery Image" class="gallery-image">
             </div>
             {% endfor %}
         </div>
