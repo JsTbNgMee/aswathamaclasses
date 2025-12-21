@@ -5,105 +5,366 @@
 {% block content %}
 <section class="admin-dashboard-section">
     <div class="admin-header">
-        <h1>Attendance Management</h1>
+        <h1>Attendance Management System</h1>
         <a href="{{ url_for('admin_logout') }}" class="btn btn-secondary" style="float: right;">Logout</a>
     </div>
 
     <div class="container">
-        <div class="admin-toolbar">
-            <div class="class-selector">
-                <label for="class-select">Select Class:</label>
-                <select id="class-select">
+        <!-- Tabs Navigation -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" data-tab="students">Manage Students</button>
+            <button class="tab-btn" data-tab="mark-attendance">Mark Attendance</button>
+            <button class="tab-btn" data-tab="view-attendance">View Attendance</button>
+        </div>
+
+        <!-- Tab 1: Manage Students -->
+        <div id="students-tab" class="tab-content active">
+            <h2>Add New Student</h2>
+            <form id="addStudentForm" class="student-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="student-class">Class:</label>
+                        <select id="student-class" required>
+                            <option value="">Select Class</option>
+                            <option value="Class 8">Class 8</option>
+                            <option value="Class 9">Class 9</option>
+                            <option value="Class 10">Class 10</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="student-name">Student Name:</label>
+                        <input type="text" id="student-name" placeholder="Enter student name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="student-roll">Roll Number:</label>
+                        <input type="number" id="student-roll" placeholder="Enter roll number" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Student</button>
+                <div id="addStudentMessage" class="message"></div>
+            </form>
+
+            <h2>Students List</h2>
+            <div class="students-toolbar">
+                <select id="students-class-select" onchange="loadStudents()">
                     <option value="Class 8">Class 8</option>
                     <option value="Class 9">Class 9</option>
                     <option value="Class 10">Class 10</option>
                 </select>
             </div>
-            <button id="refresh-btn" class="btn btn-primary">Refresh Data</button>
+
+            <div class="students-table-container">
+                <table class="students-table" id="studentsTable">
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th>Class</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-tbody">
+                        <tr>
+                            <td colspan="4" class="loading-message">Loading students...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="attendance-table-container">
-            <table class="attendance-table" id="attendanceTable">
-                <thead>
-                    <tr>
-                        <th>Roll No</th>
-                        <th>Student Name</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Notes</th>
-                    </tr>
-                </thead>
-                <tbody id="attendance-tbody">
-                    <tr>
-                        <td colspan="5" class="loading-message">Loading attendance data...</td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- Tab 2: Mark Attendance -->
+        <div id="mark-attendance-tab" class="tab-content">
+            <h2>Mark Attendance</h2>
+            <div class="attendance-selector">
+                <div class="form-group">
+                    <label for="attendance-class">Select Class:</label>
+                    <select id="attendance-class" onchange="loadStudentsForAttendance()">
+                        <option value="Class 8">Class 8</option>
+                        <option value="Class 9">Class 9</option>
+                        <option value="Class 10">Class 10</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="attendance-date">Select Date:</label>
+                    <input type="date" id="attendance-date" required>
+                </div>
+            </div>
+
+            <div class="attendance-form-container">
+                <table class="attendance-form-table">
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-form-tbody">
+                        <tr>
+                            <td colspan="4" class="loading-message">Loading students...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-primary" onclick="submitAttendance()">Submit Attendance</button>
+                <div id="submitMessage" class="message"></div>
+            </div>
         </div>
 
-        <div class="attendance-stats" id="attendance-stats">
-            <div class="stat-card">
-                <h3>Present</h3>
-                <p id="stat-present">0</p>
+        <!-- Tab 3: View Attendance -->
+        <div id="view-attendance-tab" class="tab-content">
+            <h2>View Attendance Records</h2>
+            <div class="view-toolbar">
+                <div class="form-group">
+                    <label for="view-class">Select Class:</label>
+                    <select id="view-class" onchange="loadAttendance()">
+                        <option value="Class 8">Class 8</option>
+                        <option value="Class 9">Class 9</option>
+                        <option value="Class 10">Class 10</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="view-date">Filter by Date:</label>
+                    <input type="date" id="view-date" onchange="loadAttendance()">
+                </div>
+                <button class="btn btn-primary" onclick="loadAttendance()">Refresh</button>
             </div>
-            <div class="stat-card">
-                <h3>Absent</h3>
-                <p id="stat-absent">0</p>
+
+            <div class="attendance-table-container">
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-tbody">
+                        <tr>
+                            <td colspan="5" class="loading-message">Loading attendance data...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="stat-card">
-                <h3>Total</h3>
-                <p id="stat-total">0</p>
+
+            <div class="attendance-stats">
+                <div class="stat-card">
+                    <h3>Present</h3>
+                    <p id="stat-present">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Absent</h3>
+                    <p id="stat-absent">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total</h3>
+                    <p id="stat-total">0</p>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
 <script>
-    function loadAttendance() {
-        const selectedClass = document.getElementById('class-select').value;
-        const tbody = document.getElementById('attendance-tbody');
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById(this.dataset.tab + '-tab').classList.add('active');
         
-        tbody.innerHTML = '<tr><td colspan="5" class="loading-message">Loading attendance data...</td></tr>';
-        
-        fetch('/api/attendance?class=' + encodeURIComponent(selectedClass))
-            .then(response => response.json())
+        if (this.dataset.tab === 'students') {
+            loadStudents();
+        } else if (this.dataset.tab === 'mark-attendance') {
+            loadStudentsForAttendance();
+        } else if (this.dataset.tab === 'view-attendance') {
+            loadAttendance();
+        }
+    });
+});
+
+// Set date input to today
+document.getElementById('attendance-date').valueAsDate = new Date();
+document.getElementById('view-date').valueAsDate = new Date();
+
+// Add Student Form
+document.getElementById('addStudentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const studentClass = document.getElementById('student-class').value;
+    const studentName = document.getElementById('student-name').value;
+    const studentRoll = document.getElementById('student-roll').value;
+    
+    fetch('/api/add-student', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            class: studentClass,
+            name: studentName,
+            roll_no: studentRoll
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        const msg = document.getElementById('addStudentMessage');
+        if (data.success) {
+            msg.className = 'message success';
+            msg.textContent = 'Student added successfully!';
+            document.getElementById('addStudentForm').reset();
+            setTimeout(() => loadStudents(), 500);
+        } else {
+            msg.className = 'message error';
+            msg.textContent = data.message || 'Error adding student';
+        }
+    });
+});
+
+// Load students for list
+function loadStudents() {
+    const selectedClass = document.getElementById('students-class-select').value;
+    fetch(`/api/students?class=${encodeURIComponent(selectedClass)}`)
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.getElementById('students-tbody');
+            if (data.success && data.students.length > 0) {
+                tbody.innerHTML = data.students.map(s => `
+                    <tr>
+                        <td>${s.roll_no}</td>
+                        <td>${s.name}</td>
+                        <td>${s.class}</td>
+                        <td><button class="btn btn-small" onclick="deleteStudent('${s.id}')">Delete</button></td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" class="no-data">No students found</td></tr>';
+            }
+        });
+}
+
+// Load students for attendance form
+function loadStudentsForAttendance() {
+    const selectedClass = document.getElementById('attendance-class').value;
+    fetch(`/api/students?class=${encodeURIComponent(selectedClass)}`)
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.getElementById('attendance-form-tbody');
+            if (data.success && data.students.length > 0) {
+                tbody.innerHTML = data.students.map(s => `
+                    <tr>
+                        <td>${s.roll_no}</td>
+                        <td>${s.name}</td>
+                        <td>
+                            <select class="status-select" data-student-id="${s.id}">
+                                <option value="Present">Present</option>
+                                <option value="Absent">Absent</option>
+                                <option value="Leave">Leave</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" class="notes-input" data-student-id="${s.id}" placeholder="Notes (optional)">
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" class="no-data">No students found</td></tr>';
+            }
+        });
+}
+
+// Submit attendance
+function submitAttendance() {
+    const selectedClass = document.getElementById('attendance-class').value;
+    const attendanceDate = document.getElementById('attendance-date').value;
+    
+    const attendanceRecords = [];
+    document.querySelectorAll('.status-select').forEach(select => {
+        const studentId = select.dataset.studentId;
+        const status = select.value;
+        const notes = document.querySelector(`.notes-input[data-student-id="${studentId}"]`).value;
+        attendanceRecords.push({ student_id: studentId, status, notes });
+    });
+    
+    fetch('/api/submit-attendance', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            class: selectedClass,
+            date: attendanceDate,
+            records: attendanceRecords
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        const msg = document.getElementById('submitMessage');
+        if (data.success) {
+            msg.className = 'message success';
+            msg.textContent = 'Attendance submitted successfully!';
+        } else {
+            msg.className = 'message error';
+            msg.textContent = data.message || 'Error submitting attendance';
+        }
+    });
+}
+
+// Load attendance records
+function loadAttendance() {
+    const selectedClass = document.getElementById('view-class').value;
+    const selectedDate = document.getElementById('view-date').value;
+    const tbody = document.getElementById('attendance-tbody');
+    
+    tbody.innerHTML = '<tr><td colspan="5" class="loading-message">Loading attendance data...</td></tr>';
+    
+    fetch(`/api/attendance?class=${encodeURIComponent(selectedClass)}&date=${selectedDate}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success && data.records.length > 0) {
+                tbody.innerHTML = '';
+                let presentCount = 0;
+                let absentCount = 0;
+                
+                data.records.forEach(record => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${record.roll_no || 'N/A'}</td>
+                        <td>${record.student_name || 'N/A'}</td>
+                        <td>${record.date || 'N/A'}</td>
+                        <td class="status ${record.status ? record.status.toLowerCase() : ''}">${record.status || 'N/A'}</td>
+                        <td>${record.notes || '-'}</td>
+                    `;
+                    tbody.appendChild(row);
+                    
+                    if (record.status === 'Present') presentCount++;
+                    if (record.status === 'Absent') absentCount++;
+                });
+                
+                document.getElementById('stat-present').textContent = presentCount;
+                document.getElementById('stat-absent').textContent = absentCount;
+                document.getElementById('stat-total').textContent = data.records.length;
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" class="no-data">No attendance records found</td></tr>';
+            }
+        });
+}
+
+// Delete student
+function deleteStudent(studentId) {
+    if (confirm('Are you sure you want to delete this student?')) {
+        fetch(`/api/delete-student/${studentId}`, { method: 'DELETE' })
+            .then(r => r.json())
             .then(data => {
-                if (data.success && data.records.length > 0) {
-                    tbody.innerHTML = '';
-                    let presentCount = 0;
-                    let absentCount = 0;
-                    
-                    data.records.forEach(record => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${record.roll_no || 'N/A'}</td>
-                            <td>${record.student_name || 'N/A'}</td>
-                            <td>${record.date || 'N/A'}</td>
-                            <td class="status ${record.status ? record.status.toLowerCase() : ''}">${record.status || 'N/A'}</td>
-                            <td>${record.notes || '-'}</td>
-                        `;
-                        tbody.appendChild(row);
-                        
-                        if (record.status === 'Present') presentCount++;
-                        if (record.status === 'Absent') absentCount++;
-                    });
-                    
-                    document.getElementById('stat-present').textContent = presentCount;
-                    document.getElementById('stat-absent').textContent = absentCount;
-                    document.getElementById('stat-total').textContent = data.records.length;
+                if (data.success) {
+                    loadStudents();
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="5" class="no-data">No attendance records found for this class.</td></tr>';
+                    alert('Error deleting student');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                tbody.innerHTML = '<tr><td colspan="5" class="error-message">Error loading attendance data.</td></tr>';
             });
     }
-    
-    document.getElementById('class-select').addEventListener('change', loadAttendance);
-    document.getElementById('refresh-btn').addEventListener('click', loadAttendance);
-    
-    loadAttendance();
+}
+
+// Load initial data
+loadStudents();
+loadAttendance();
 </script>
 {% endblock %}
