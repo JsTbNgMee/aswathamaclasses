@@ -111,8 +111,8 @@ def gallery():
 def contact():
     """Contact page - Address and contact form"""
     contact_data = {
-        'address': 'Address placeholder - Will be added soon',
-        'phone': 'Phone placeholder - Will be added soon',
+        'address': 'View Location on Map',
+        'address_map': 'https://maps.app.goo.gl/s9szEdbYXsgZKVAE7',
         'email': 'aswathamaclasses@gmail.com'
     }
 

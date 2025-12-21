@@ -570,6 +570,17 @@ th {
     color: var(--text-secondary);
 }
 
+.map-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--text-primary);
+    transition: opacity var(--transition);
+}
+
+.map-link:hover {
+    opacity: 0.7;
+}
+
 .contact-form {
     display: flex;
     flex-direction: column;
