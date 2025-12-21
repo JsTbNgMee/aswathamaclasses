@@ -8,8 +8,7 @@ Description: A premium, minimalist coaching institute website with black & white
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from datetime import datetime
 import os
-import json
-import uuid
+from google_sheets_service import gs_service
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -17,24 +16,6 @@ app.config['SECRET_KEY'] = 'aswathama-classes-secret-key'
 
 # Admin credentials (change this to your desired password)
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
-
-# Google Sheets API Configuration (User will add their credentials here)
-GOOGLE_SHEETS_ID = os.getenv('GOOGLE_SHEETS_ID', '')
-GOOGLE_SHEETS_API_KEY = os.getenv('GOOGLE_SHEETS_API_KEY', '')
-
-# In-memory storage (replace with database or Google Sheets later)
-STUDENTS_DATA = {}  # {class: [{'id': '...', 'roll_no': '...', 'name': '...'}]}
-ATTENDANCE_DATA = {}  # {date: [{student_id, status, notes}]}
-
-# Initialize with sample data
-def init_sample_data():
-    """Initialize with sample data for testing"""
-    for cls in ['Class 8', 'Class 9', 'Class 10']:
-        STUDENTS_DATA[cls] = [
-            {'id': str(uuid.uuid4()), 'roll_no': '1', 'name': 'Student One', 'class': cls},
-            {'id': str(uuid.uuid4()), 'roll_no': '2', 'name': 'Student Two', 'class': cls},
-            {'id': str(uuid.uuid4()), 'roll_no': '3', 'name': 'Student Three', 'class': cls},
-        ]
 
 # ==================== ROUTES ====================
 
@@ -65,9 +46,12 @@ def admin_logout():
 
 @app.route('/api/add-student', methods=['POST'])
 def add_student():
-    """Add a new student"""
+    """Add a new student to Google Sheets"""
     if not session.get('admin_authenticated'):
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    if not gs_service.is_initialized():
+        return jsonify({'success': False, 'message': 'Google Sheets not configured'}), 400
     
     try:
         data = request.get_json() or {}
@@ -78,59 +62,57 @@ def add_student():
         if not all([student_class, student_name, student_roll]):
             return jsonify({'success': False, 'message': 'Missing required fields'}), 400
         
-        if student_class not in STUDENTS_DATA:
-            STUDENTS_DATA[student_class] = []
+        success = gs_service.add_student(student_class, student_roll, student_name)
         
-        student = {
-            'id': str(uuid.uuid4()),
-            'roll_no': student_roll,
-            'name': student_name,
-            'class': student_class
-        }
-        
-        STUDENTS_DATA[student_class].append(student)
-        
-        # TODO: Sync to Google Sheets
-        sync_to_google_sheets()
-        
-        return jsonify({'success': True, 'message': 'Student added successfully'})
+        if success:
+            return jsonify({'success': True, 'message': 'Student added to Google Sheets'})
+        else:
+            return jsonify({'success': False, 'message': 'Failed to add student'}), 500
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/students')
 def get_students():
-    """Get all students for a class"""
+    """Get all students for a class from Google Sheets"""
     if not session.get('admin_authenticated'):
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
     
+    if not gs_service.is_initialized():
+        return jsonify({'success': False, 'message': 'Google Sheets not configured'}), 400
+    
     student_class = request.args.get('class', 'Class 8')
-    students = STUDENTS_DATA.get(student_class, [])
+    students = gs_service.get_students(student_class)
     
     return jsonify({'success': True, 'students': students})
 
-@app.route('/api/delete-student/<student_id>', methods=['DELETE'])
-def delete_student(student_id):
-    """Delete a student"""
+@app.route('/api/delete-student/<roll_no>', methods=['DELETE'])
+def delete_student(roll_no):
+    """Delete a student from Google Sheets"""
     if not session.get('admin_authenticated'):
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
     
+    if not gs_service.is_initialized():
+        return jsonify({'success': False, 'message': 'Google Sheets not configured'}), 400
+    
     try:
-        for class_name in STUDENTS_DATA:
-            for i, student in enumerate(STUDENTS_DATA[class_name]):
-                if student['id'] == student_id:
-                    STUDENTS_DATA[class_name].pop(i)
-                    sync_to_google_sheets()
-                    return jsonify({'success': True})
+        student_class = request.args.get('class', 'Class 8')
+        success = gs_service.delete_student(student_class, roll_no)
         
-        return jsonify({'success': False, 'message': 'Student not found'}), 404
+        if success:
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'message': 'Student not found'}), 404
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/submit-attendance', methods=['POST'])
 def submit_attendance():
-    """Submit attendance for a class on a given date"""
+    """Submit attendance to Google Sheets"""
     if not session.get('admin_authenticated'):
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    if not gs_service.is_initialized():
+        return jsonify({'success': False, 'message': 'Google Sheets not configured'}), 400
     
     try:
         data = request.get_json() or {}
@@ -141,73 +123,32 @@ def submit_attendance():
         if not attendance_date:
             return jsonify({'success': False, 'message': 'Date is required'}), 400
         
-        # Store attendance records
-        for record in records:
-            student_id = record.get('student_id')
-            status = record.get('status')
-            notes = record.get('notes', '')
-            
-            key = f"{attendance_date}_{selected_class}"
-            if key not in ATTENDANCE_DATA:
-                ATTENDANCE_DATA[key] = []
-            
-            ATTENDANCE_DATA[key].append({
-                'student_id': student_id,
-                'status': status,
-                'notes': notes
-            })
+        success = gs_service.submit_attendance(selected_class, attendance_date, records)
         
-        # TODO: Sync to Google Sheets
-        sync_to_google_sheets()
-        
-        return jsonify({'success': True, 'message': 'Attendance submitted successfully'})
+        if success:
+            return jsonify({'success': True, 'message': 'Attendance submitted to Google Sheets'})
+        else:
+            return jsonify({'success': False, 'message': 'Failed to submit attendance'}), 500
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/attendance')
 def get_attendance():
-    """Fetch attendance data for a class and date"""
+    """Fetch attendance data from Google Sheets"""
     if not session.get('admin_authenticated'):
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
     
+    if not gs_service.is_initialized():
+        return jsonify({'success': False, 'message': 'Google Sheets not configured'}), 400
+    
     selected_class = request.args.get('class', 'Class 8')
-    selected_date = request.args.get('date', datetime.now().strftime('%Y-%m-%d'))
+    selected_date = request.args.get('date', '')
     
     try:
-        key = f"{selected_date}_{selected_class}"
-        attendance_records = ATTENDANCE_DATA.get(key, [])
-        
-        # Merge with student info
-        results = []
-        for record in attendance_records:
-            student_id = record.get('student_id')
-            # Find student info
-            for class_name, students in STUDENTS_DATA.items():
-                for student in students:
-                    if student['id'] == student_id:
-                        results.append({
-                            'roll_no': student['roll_no'],
-                            'student_name': student['name'],
-                            'date': selected_date,
-                            'status': record.get('status'),
-                            'notes': record.get('notes')
-                        })
-        
-        return jsonify({'success': True, 'records': results})
+        records = gs_service.get_attendance(selected_class, selected_date if selected_date else None)
+        return jsonify({'success': True, 'records': records})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
-
-def sync_to_google_sheets():
-    """Sync data to Google Sheets (TODO: Implement with actual API)"""
-    # TODO: Replace with actual Google Sheets API integration
-    # You'll need to:
-    # 1. Authenticate with Google Sheets API using service account
-    # 2. Create sheets for each class if they don't exist
-    # 3. Update student and attendance data
-    pass
-
-# Initialize sample data when app starts
-init_sample_data()
 
 @app.route('/')
 def home():

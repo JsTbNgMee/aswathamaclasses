@@ -351,7 +351,8 @@ function loadAttendance() {
 // Delete student
 function deleteStudent(studentId) {
     if (confirm('Are you sure you want to delete this student?')) {
-        fetch(`/api/delete-student/${studentId}`, { method: 'DELETE' })
+        const selectedClass = document.getElementById('students-class-select').value;
+        fetch(`/api/delete-student/${studentId}?class=${encodeURIComponent(selectedClass)}`, { method: 'DELETE' })
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
