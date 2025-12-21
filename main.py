@@ -23,9 +23,9 @@ def home():
 def about():
     """About page - Institute and founder details"""
     founder_data = {
-        'name': 'Sir',
+        'name': 'Swaroop Kawale',
         'qualifications': 'MSc in Physics (Specialization: Solid State Physics), BSc in Physics (100/100)',
-        'experience': '6+ years of teaching experience',
+        'experience': '6 years of teaching experience',
         'subjects': 'Physics',
         'bio': 'An experienced physics educator dedicated to making physics accessible and practical. With over 6 years of teaching experience and advanced specialization in solid state physics, our founder believes in the power of practical learning over rote memorization. His unique methodology combines theoretical concepts with real-world applications, ensuring students develop both understanding and confidence.',
         'philosophy': 'Education is not about filling buckets; it is about lighting fires. Every student has the potential to excel when given the right guidance, practice, and encouragement.'
