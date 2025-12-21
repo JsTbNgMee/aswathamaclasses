@@ -5,14 +5,83 @@ Author: Senior Full-Stack Developer
 Description: A premium, minimalist coaching institute website with black & white theme
 """
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from datetime import datetime
+import os
 
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'aswathama-classes-secret-key'
 
+# Admin credentials (change this to your desired password)
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
+
+# Google Sheets API Configuration (User will add their credentials here)
+# TODO: Add your Google Sheets credentials
+# GOOGLE_SHEETS_ID = 'YOUR_GOOGLE_SHEET_ID_HERE'
+# GOOGLE_SHEETS_API_KEY = 'YOUR_GOOGLE_SHEETS_API_KEY_HERE'
+
 # ==================== ROUTES ====================
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    """Admin login page"""
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == ADMIN_PASSWORD:
+            session['admin_authenticated'] = True
+            return redirect(url_for('admin_dashboard'))
+        else:
+            return render_template('admin_login.html', error='Invalid password')
+    return render_template('admin_login.html')
+
+@app.route('/admin/dashboard')
+def admin_dashboard():
+    """Admin dashboard for attendance"""
+    if not session.get('admin_authenticated'):
+        return redirect(url_for('admin_login'))
+    return render_template('admin_dashboard.html')
+
+@app.route('/admin/logout')
+def admin_logout():
+    """Logout from admin panel"""
+    session.pop('admin_authenticated', None)
+    return redirect(url_for('admin_login'))
+
+@app.route('/api/attendance')
+def get_attendance():
+    """API endpoint to fetch attendance data from Google Sheets"""
+    if not session.get('admin_authenticated'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    selected_class = request.args.get('class', 'Class 8')
+    
+    # TODO: Replace with actual Google Sheets API call
+    # This is a placeholder structure. User will add their Google Sheets credentials
+    # and implement the API call here
+    
+    try:
+        # Placeholder: Replace this with actual Google Sheets API call
+        attendance_data = [
+            {
+                'roll_no': '1',
+                'student_name': 'Student Name 1',
+                'date': '2024-12-21',
+                'status': 'Present',
+                'notes': 'On time'
+            },
+            {
+                'roll_no': '2',
+                'student_name': 'Student Name 2',
+                'date': '2024-12-21',
+                'status': 'Absent',
+                'notes': 'Sick leave'
+            }
+        ]
+        
+        return jsonify({'success': True, 'records': attendance_data})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/')
 def home():

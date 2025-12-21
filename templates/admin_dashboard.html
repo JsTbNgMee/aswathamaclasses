@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - ASWATHAMA CLASSES{% endblock %}
+
+{% block content %}
+<section class="admin-dashboard-section">
+    <div class="admin-header">
+        <h1>Attendance Management</h1>
+        <a href="{{ url_for('admin_logout') }}" class="btn btn-secondary" style="float: right;">Logout</a>
+    </div>
+
+    <div class="container">
+        <div class="admin-toolbar">
+            <div class="class-selector">
+                <label for="class-select">Select Class:</label>
+                <select id="class-select">
+                    <option value="Class 8">Class 8</option>
+                    <option value="Class 9">Class 9</option>
+                    <option value="Class 10">Class 10</option>
+                </select>
+            </div>
+            <button id="refresh-btn" class="btn btn-primary">Refresh Data</button>
+        </div>
+
+        <div class="attendance-table-container">
+            <table class="attendance-table" id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>Roll No</th>
+                        <th>Student Name</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="attendance-tbody">
+                    <tr>
+                        <td colspan="5" class="loading-message">Loading attendance data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="attendance-stats" id="attendance-stats">
+            <div class="stat-card">
+                <h3>Present</h3>
+                <p id="stat-present">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Absent</h3>
+                <p id="stat-absent">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total</h3>
+                <p id="stat-total">0</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function loadAttendance() {
+        const selectedClass = document.getElementById('class-select').value;
+        const tbody = document.getElementById('attendance-tbody');
+        
+        tbody.innerHTML = '<tr><td colspan="5" class="loading-message">Loading attendance data...</td></tr>';
+        
+        fetch('/api/attendance?class=' + encodeURIComponent(selectedClass))
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.records.length > 0) {
+                    tbody.innerHTML = '';
+                    let presentCount = 0;
+                    let absentCount = 0;
+                    
+                    data.records.forEach(record => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${record.roll_no || 'N/A'}</td>
+                            <td>${record.student_name || 'N/A'}</td>
+                            <td>${record.date || 'N/A'}</td>
+                            <td class="status ${record.status ? record.status.toLowerCase() : ''}">${record.status || 'N/A'}</td>
+                            <td>${record.notes || '-'}</td>
+                        `;
+                        tbody.appendChild(row);
+                        
+                        if (record.status === 'Present') presentCount++;
+                        if (record.status === 'Absent') absentCount++;
+                    });
+                    
+                    document.getElementById('stat-present').textContent = presentCount;
+                    document.getElementById('stat-absent').textContent = absentCount;
+                    document.getElementById('stat-total').textContent = data.records.length;
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="no-data">No attendance records found for this class.</td></tr>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                tbody.innerHTML = '<tr><td colspan="5" class="error-message">Error loading attendance data.</td></tr>';
+            });
+    }
+    
+    document.getElementById('class-select').addEventListener('change', loadAttendance);
+    document.getElementById('refresh-btn').addEventListener('click', loadAttendance);
+    
+    loadAttendance();
+</script>
+{% endblock %}

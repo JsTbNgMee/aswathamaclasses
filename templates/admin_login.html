@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Login - ASWATHAMA CLASSES{% endblock %}
+
+{% block content %}
+<section class="admin-login-section">
+    <div class="admin-login-container">
+        <div class="admin-login-box">
+            <h1>Admin Panel</h1>
+            <p class="admin-subtitle">Attendance Management System</p>
+            
+            <form method="POST" action="{{ url_for('admin_login') }}" class="admin-login-form">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter admin password">
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            
+            {% if error %}
+            <div class="error-message">{{ error }}</div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
