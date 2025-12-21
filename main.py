@@ -8,7 +8,12 @@ Description: A premium, minimalist coaching institute website with black & white
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from datetime import datetime
 import os
-from google_sheets_service import gs_service
+
+# Try to import Google Apps Script service first, fallback to direct API
+try:
+    from google_apps_script_service import gs_service
+except ImportError:
+    from google_sheets_service import gs_service
 
 # Initialize Flask app
 app = Flask(__name__)
