@@ -8,6 +8,7 @@ Description: A premium, minimalist coaching institute website with black & white
 from flask import Flask, render_template, request, jsonify
 from datetime import datetime
 import os
+from youtube_service import yt_service
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -115,6 +116,14 @@ def gallery():
         {'url': 'https://imagizer.imageshack.com/img923/8562/FKIXv4.jpg'}
     ]
     return render_template('gallery.html', gallery_items=gallery_items)
+
+@app.route('/media')
+def media():
+    """Media page - YouTube videos and Instagram feed"""
+    videos = yt_service.get_latest_videos(max_results=12) if yt_service.is_configured() else []
+    instagram_username = 'ashwathamaclasses'
+    
+    return render_template('media.html', videos=videos, instagram_username=instagram_username)
 
 @app.route('/contact')
 def contact():
