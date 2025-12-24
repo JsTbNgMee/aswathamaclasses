@@ -12,10 +12,28 @@
         <div class="contact-grid">
             <div class="contact-info">
                 <h2>Get in Touch</h2>
+                
+                <!-- Branches -->
+                {% for branch in data.branches %}
                 <div class="info-item">
-                    <h4>Address</h4>
-                    <p><a href="{{ data.address_map }}" target="_blank" class="map-link">{{ data.address }}</a></p>
+                    <h4>{{ branch.name }}</h4>
+                    <p><strong>Address:</strong> 
+                        {% if branch.address_map != '#' %}
+                            <a href="{{ branch.address_map }}" target="_blank" class="map-link">{{ branch.address }}</a>
+                        {% else %}
+                            <span class="coming-soon">{{ branch.address }}</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Phone:</strong> 
+                        {% if branch.phone.startswith('+91') %}
+                            <a href="tel:{{ branch.phone }}" class="map-link">{{ branch.phone }}</a>
+                        {% else %}
+                            <span>{{ branch.phone }}</span>
+                        {% endif %}
+                    </p>
                 </div>
+                {% endfor %}
+                
                 <div class="info-item">
                     <h4>Email</h4>
                     <p>{{ data.email }}</p>
@@ -50,9 +68,27 @@
             </div>
         </div>
 
-        <!-- Map Section -->
-        <div class="map-container">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d30703.54288429916!2d74.49336313476563!3d15.859600199999997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sin!4v1766297615423!5m2!1sen!2sin" class="map-embed" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <!-- Maps Section -->
+        <div class="maps-section">
+            <h2>Our Locations</h2>
+            <div class="maps-grid">
+                {% for branch in data.branches %}
+                <div class="map-item">
+                    <h3>{{ branch.name }}</h3>
+                    {% if branch.address_map != '#' %}
+                    <div class="map-container">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d30703.54288429916!2d74.49336313476563!3d15.859600199999997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sin!4v1766297615423!5m2!1sen!2sin" class="map-embed" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                    <a href="{{ branch.address_map }}" target="_blank" class="view-map-link">View on Google Maps</a>
+                    {% else %}
+                    <div class="map-placeholder">
+                        <p>Coming Soon</p>
+                        <p class="placeholder-text">Second branch location will be announced soon</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </section>

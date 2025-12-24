@@ -132,9 +132,21 @@ def instagram():
 def contact():
     """Contact page - Address and contact form"""
     contact_data = {
-        'address': 'View Location on Map',
-        'address_map': 'https://maps.app.goo.gl/s9szEdbYXsgZKVAE7',
-        'email': 'aswathamaclasses@gmail.com'
+        'email': 'aswathamaclasses@gmail.com',
+        'branches': [
+            {
+                'name': 'Main Branch',
+                'address': 'View Location on Map',
+                'address_map': 'https://maps.app.goo.gl/s9szEdbYXsgZKVAE7',
+                'phone': '+91 90193 74771'
+            },
+            {
+                'name': 'Second Branch',
+                'address': 'Coming Soon',
+                'address_map': '#',
+                'phone': 'Contact us for details'
+            }
+        ]
     }
 
     return render_template('contact.html', data=contact_data)
