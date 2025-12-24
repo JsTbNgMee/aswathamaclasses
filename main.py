@@ -5,14 +5,15 @@ Author: Senior Full-Stack Developer
 Description: A premium, minimalist coaching institute website with black & white theme
 """
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from datetime import datetime
 import os
 from youtube_service import yt_service
+from student_data import authenticate_student, get_student
 
 # Initialize Flask app
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'aswathama-classes-secret-key'
+app.config['SECRET_KEY'] = 'aswathama-classes-secret-key-secure'
 
 # ==================== ROUTES ====================
 
@@ -127,6 +128,44 @@ def youtube():
 def instagram():
     """Instagram page - Link to Instagram profile"""
     return render_template('instagram.html')
+
+@app.route('/student/login', methods=['GET', 'POST'])
+def student_login():
+    """Student login page"""
+    if request.method == 'POST':
+        student_id = request.form.get('student_id', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        student = authenticate_student(student_id, password)
+        
+        if student:
+            session['student_id'] = student['id']
+            session['student_name'] = student['name']
+            return redirect(url_for('student_dashboard'))
+        else:
+            return render_template('student_login.html', error='Invalid Student ID or Password')
+    
+    return render_template('student_login.html')
+
+@app.route('/student/dashboard')
+def student_dashboard():
+    """Student dashboard - view grades, attendance, progress"""
+    if 'student_id' not in session:
+        return redirect(url_for('student_login'))
+    
+    student = get_student(session['student_id'])
+    
+    if not student:
+        session.clear()
+        return redirect(url_for('student_login'))
+    
+    return render_template('student_dashboard.html', student=student)
+
+@app.route('/student/logout')
+def student_logout():
+    """Logout student"""
+    session.clear()
+    return redirect(url_for('student_login'))
 
 @app.route('/contact')
 def contact():
