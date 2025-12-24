@@ -1,18 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Media - ASWATHAMA CLASSES{% endblock %}
+{% block title %}YouTube - ASWATHAMA CLASSES{% endblock %}
 
 {% block content %}
 <section class="page-hero">
     <div class="page-hero-content">
-        <h1>Media & Updates</h1>
-        <p>Latest videos and updates from ASWATHAMA CLASSES</p>
+        <h1>YouTube Channel</h1>
+        <p>Latest educational videos and tutorials</p>
     </div>
 </section>
 
-<section class="media-container">
-    <!-- YouTube Videos Section -->
-    <div class="media-section">
+<section class="content-container">
+    <div class="youtube-section">
         <h2>Latest Videos</h2>
         <p class="section-subtitle">Watch our latest educational content on YouTube</p>
         
@@ -41,23 +40,11 @@
             <p>Then subscribe to our channel: <a href="https://www.youtube.com/@ASHWATHAMACLASSES" target="_blank">@ASHWATHAMACLASSES</a></p>
         </div>
         {% endif %}
-    </div>
 
-    <!-- Instagram Feed Section -->
-    <div class="media-section instagram-section">
-        <h2>Follow Us on Instagram</h2>
-        <p class="section-subtitle">Updates, behind-the-scenes, and announcements</p>
-        
-        <div class="instagram-feed">
-            <div class="instagram-embed-container">
-                <iframe src="https://www.instagram.com/ashwathamaclasses/embed" width="100%" height="600" frameborder="0" scrolling="no" allowtransparency="true"></iframe>
-            </div>
-            
-            <div class="instagram-link-box">
-                <h3>Not seeing the feed?</h3>
-                <p>Follow us directly on Instagram for daily updates and announcements.</p>
-                <a href="https://www.instagram.com/ashwathamaclasses/" target="_blank" rel="noopener noreferrer" class="cta-button">Follow @ashwathamaclasses</a>
-            </div>
+        <div class="channel-info">
+            <h3>Subscribe to our Channel</h3>
+            <p>Get regular updates on educational content, tips, and announcements</p>
+            <a href="https://www.youtube.com/@ASHWATHAMACLASSES" target="_blank" rel="noopener noreferrer" class="cta-button">Subscribe @ASHWATHAMACLASSES</a>
         </div>
     </div>
 </section>
@@ -82,17 +69,13 @@
     margin: 0;
 }
 
-.media-container {
+.content-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 60px 20px;
 }
 
-.media-section {
-    margin-bottom: 80px;
-}
-
-.media-section h2 {
+.youtube-section h2 {
     font-size: 2.2rem;
     margin-bottom: 10px;
     color: #000;
@@ -104,12 +87,11 @@
     margin-bottom: 40px;
 }
 
-/* YouTube Videos Grid */
 .videos-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 30px;
-    margin-bottom: 40px;
+    margin-bottom: 60px;
 }
 
 .video-card {
@@ -197,13 +179,13 @@
     border-bottom-color: #666;
 }
 
-/* No Videos Message */
 .no-videos-message {
     background: #f0f0f0;
     border-left: 4px solid #000;
     padding: 30px;
     border-radius: 4px;
     text-align: center;
+    margin-bottom: 60px;
 }
 
 .no-videos-message p {
@@ -227,56 +209,41 @@
     border-bottom-color: #666;
 }
 
-/* Instagram Section */
-.instagram-section {
+.channel-info {
+    background: linear-gradient(135deg, #000000 0%, #333333 100%);
+    color: white;
+    padding: 50px 40px;
     text-align: center;
+    border-radius: 8px;
 }
 
-.instagram-feed {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 40px;
-    margin-top: 40px;
-}
-
-.instagram-embed-container {
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.instagram-link-box {
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    padding: 40px 30px;
-    border-radius: 4px;
-}
-
-.instagram-link-box h3 {
+.channel-info h3 {
     margin: 0 0 10px 0;
-    font-size: 1.3rem;
-    color: #000;
+    font-size: 1.5rem;
 }
 
-.instagram-link-box p {
-    color: #666;
-    margin: 0 0 20px 0;
+.channel-info p {
+    margin: 0 0 25px 0;
+    color: #ccc;
+    font-size: 1rem;
 }
 
 .cta-button {
     display: inline-block;
-    background: #000;
-    color: white;
-    padding: 12px 30px;
+    background: white;
+    color: #000;
+    padding: 12px 35px;
     text-decoration: none;
-    border: 2px solid #000;
-    transition: all 0.3s ease;
+    border: 2px solid white;
+    border-radius: 25px;
     font-weight: 600;
-    border-radius: 2px;
+    transition: all 0.3s ease;
+    font-size: 1rem;
 }
 
 .cta-button:hover {
-    background: white;
-    color: #000;
+    background: transparent;
+    color: white;
 }
 
 @media (max-width: 768px) {
@@ -288,7 +255,7 @@
         font-size: 1rem;
     }
     
-    .media-section h2 {
+    .youtube-section h2 {
         font-size: 1.8rem;
     }
     
@@ -297,8 +264,8 @@
         gap: 20px;
     }
     
-    .instagram-feed {
-        grid-template-columns: 1fr;
+    .channel-info {
+        padding: 30px 20px;
     }
 }
 </style>

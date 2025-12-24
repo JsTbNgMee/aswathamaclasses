@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}Instagram - ASWATHAMA CLASSES{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="page-hero-content">
+        <h1>Instagram</h1>
+        <p>Daily updates, behind-the-scenes & announcements</p>
+    </div>
+</section>
+
+<section class="content-container">
+    <div class="instagram-section">
+        <h2>Follow Us on Instagram</h2>
+        <p class="section-subtitle">Stay updated with daily content and announcements</p>
+        
+        <div class="instagram-content">
+            <div class="instagram-card">
+                <div class="instagram-header">
+                    <img src="https://via.placeholder.com/120/000000/ffffff?text=@ashwathamaclasses" alt="Instagram Profile" class="profile-pic">
+                    <div class="profile-info">
+                        <h3>@ashwathamaclasses</h3>
+                        <p class="handle">ASWATHAMA CLASSES</p>
+                        <p class="bio">Expert coaching in Mathematics & Science for Classes 8, 9 & 10. Learn Practically 📚</p>
+                        <a href="https://www.instagram.com/ashwathamaclasses/" target="_blank" rel="noopener noreferrer" class="follow-button">Follow on Instagram</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="content-item">
+                    <div class="icon">📸</div>
+                    <h4>Class Photos</h4>
+                    <p>Behind-the-scenes from our coaching sessions and student achievements</p>
+                </div>
+                <div class="content-item">
+                    <div class="icon">🎓</div>
+                    <h4>Tips & Tricks</h4>
+                    <p>Quick tips for Mathematics & Science to boost your understanding</p>
+                </div>
+                <div class="content-item">
+                    <div class="icon">📢</div>
+                    <h4>Announcements</h4>
+                    <p>Important updates about batches, exams, and special programs</p>
+                </div>
+                <div class="content-item">
+                    <div class="icon">🏆</div>
+                    <h4>Success Stories</h4>
+                    <p>Celebrate achievements of our students and their results</p>
+                </div>
+            </div>
+
+            <div class="instagram-link-section">
+                <h3>Can't see the feed?</h3>
+                <p>Visit our Instagram profile directly for all our latest posts</p>
+                <a href="https://www.instagram.com/ashwathamaclasses/" target="_blank" rel="noopener noreferrer" class="cta-button">Visit @ashwathamaclasses</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.page-hero {
+    background: linear-gradient(135deg, #000000 0%, #333333 100%);
+    color: white;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.page-hero-content h1 {
+    font-size: 3rem;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+}
+
+.page-hero-content p {
+    font-size: 1.2rem;
+    color: #ccc;
+    margin: 0;
+}
+
+.content-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 20px;
+}
+
+.instagram-section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    color: #000;
+    text-align: center;
+}
+
+.section-subtitle {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+.instagram-content {
+    margin-top: 40px;
+}
+
+.instagram-card {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 40px;
+    border-radius: 8px;
+    margin-bottom: 50px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.instagram-header {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.profile-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #000;
+    object-fit: cover;
+}
+
+.profile-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.5rem;
+    color: #000;
+}
+
+.handle {
+    margin: 0 0 10px 0;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.bio {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.follow-button {
+    display: inline-block;
+    background: #000;
+    color: white;
+    padding: 10px 25px;
+    text-decoration: none;
+    border: 2px solid #000;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.follow-button:hover {
+    background: white;
+    color: #000;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 25px;
+    margin-bottom: 50px;
+}
+
+.content-item {
+    background: #f9f9f9;
+    padding: 30px 20px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.content-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.content-item h4 {
+    margin: 0 0 10px 0;
+    color: #000;
+    font-size: 1.1rem;
+}
+
+.content-item p {
+    margin: 0;
+    color: #666;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.instagram-link-section {
+    background: linear-gradient(135deg, #000000 0%, #333333 100%);
+    color: white;
+    padding: 50px 40px;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.instagram-link-section h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.5rem;
+}
+
+.instagram-link-section p {
+    margin: 0 0 25px 0;
+    color: #ccc;
+    font-size: 1rem;
+}
+
+.cta-button {
+    display: inline-block;
+    background: white;
+    color: #000;
+    padding: 12px 35px;
+    text-decoration: none;
+    border: 2px solid white;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.cta-button:hover {
+    background: transparent;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .page-hero-content h1 {
+        font-size: 2rem;
+    }
+    
+    .page-hero-content p {
+        font-size: 1rem;
+    }
+    
+    .instagram-section h2 {
+        font-size: 1.8rem;
+    }
+    
+    .instagram-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .instagram-link-section {
+        padding: 30px 20px;
+    }
+}
+</style>
+{% endblock %}

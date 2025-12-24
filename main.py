@@ -117,13 +117,16 @@ def gallery():
     ]
     return render_template('gallery.html', gallery_items=gallery_items)
 
-@app.route('/media')
-def media():
-    """Media page - YouTube videos and Instagram feed"""
+@app.route('/youtube')
+def youtube():
+    """YouTube page - Display latest videos"""
     videos = yt_service.get_latest_videos(max_results=12) if yt_service.is_configured() else []
-    instagram_username = 'ashwathamaclasses'
-    
-    return render_template('media.html', videos=videos, instagram_username=instagram_username)
+    return render_template('youtube.html', videos=videos)
+
+@app.route('/instagram')
+def instagram():
+    """Instagram page - Link to Instagram profile"""
+    return render_template('instagram.html')
 
 @app.route('/contact')
 def contact():
