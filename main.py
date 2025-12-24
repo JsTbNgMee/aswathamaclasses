@@ -5,155 +5,15 @@ Author: Senior Full-Stack Developer
 Description: A premium, minimalist coaching institute website with black & white theme
 """
 
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify
 from datetime import datetime
 import os
-
-# Try to import Google Apps Script service first, fallback to direct API
-try:
-    from google_apps_script_service import gs_service
-except ImportError:
-    from google_sheets_service import gs_service
 
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'aswathama-classes-secret-key'
 
-# Admin credentials (change this to your desired password)
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
-
 # ==================== ROUTES ====================
-
-@app.route('/admin/login', methods=['GET', 'POST'])
-def admin_login():
-    """Admin login page"""
-    if request.method == 'POST':
-        password = request.form.get('password')
-        if password == ADMIN_PASSWORD:
-            session['admin_authenticated'] = True
-            return redirect(url_for('admin_dashboard'))
-        else:
-            return render_template('admin_login.html', error='Invalid password')
-    return render_template('admin_login.html')
-
-@app.route('/admin/dashboard')
-def admin_dashboard():
-    """Admin dashboard for attendance"""
-    if not session.get('admin_authenticated'):
-        return redirect(url_for('admin_login'))
-    return render_template('admin_dashboard.html')
-
-@app.route('/admin/logout')
-def admin_logout():
-    """Logout from admin panel"""
-    session.pop('admin_authenticated', None)
-    return redirect(url_for('admin_login'))
-
-@app.route('/api/add-student', methods=['POST'])
-def add_student():
-    """Add a new student to Google Sheets"""
-    if not session.get('admin_authenticated'):
-        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
-    
-    if not gs_service.is_initialized():
-        return jsonify({'success': False, 'message': 'Google Sheets not configured'}), 400
-    
-    try:
-        data = request.get_json() or {}
-        student_class = data.get('class')
-        student_name = data.get('name')
-        student_roll = data.get('roll_no')
-        
-        if not all([student_class, student_name, student_roll]):
-            return jsonify({'success': False, 'message': 'Missing required fields'}), 400
-        
-        success = gs_service.add_student(student_class, student_roll, student_name)
-        
-        if success:
-            return jsonify({'success': True, 'message': 'Student added to Google Sheets'})
-        else:
-            return jsonify({'success': False, 'message': 'Failed to add student'}), 500
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
-
-@app.route('/api/students')
-def get_students():
-    """Get all students for a class from Google Sheets"""
-    if not session.get('admin_authenticated'):
-        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
-    
-    if not gs_service.is_initialized():
-        return jsonify({'success': False, 'message': 'Google Sheets not configured'}), 400
-    
-    student_class = request.args.get('class', 'Class 8')
-    students = gs_service.get_students(student_class)
-    
-    return jsonify({'success': True, 'students': students})
-
-@app.route('/api/delete-student/<roll_no>', methods=['DELETE'])
-def delete_student(roll_no):
-    """Delete a student from Google Sheets"""
-    if not session.get('admin_authenticated'):
-        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
-    
-    if not gs_service.is_initialized():
-        return jsonify({'success': False, 'message': 'Google Sheets not configured'}), 400
-    
-    try:
-        student_class = request.args.get('class', 'Class 8')
-        success = gs_service.delete_student(student_class, roll_no)
-        
-        if success:
-            return jsonify({'success': True})
-        else:
-            return jsonify({'success': False, 'message': 'Student not found'}), 404
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
-
-@app.route('/api/submit-attendance', methods=['POST'])
-def submit_attendance():
-    """Submit attendance to Google Sheets"""
-    if not session.get('admin_authenticated'):
-        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
-    
-    if not gs_service.is_initialized():
-        return jsonify({'success': False, 'message': 'Google Sheets not configured'}), 400
-    
-    try:
-        data = request.get_json() or {}
-        attendance_date = data.get('date')
-        selected_class = data.get('class')
-        records = data.get('records', [])
-        
-        if not attendance_date:
-            return jsonify({'success': False, 'message': 'Date is required'}), 400
-        
-        success = gs_service.submit_attendance(selected_class, attendance_date, records)
-        
-        if success:
-            return jsonify({'success': True, 'message': 'Attendance submitted to Google Sheets'})
-        else:
-            return jsonify({'success': False, 'message': 'Failed to submit attendance'}), 500
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
-
-@app.route('/api/attendance')
-def get_attendance():
-    """Fetch attendance data from Google Sheets"""
-    if not session.get('admin_authenticated'):
-        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
-    
-    if not gs_service.is_initialized():
-        return jsonify({'success': False, 'message': 'Google Sheets not configured'}), 400
-    
-    selected_class = request.args.get('class', 'Class 8')
-    selected_date = request.args.get('date', '')
-    
-    try:
-        records = gs_service.get_attendance(selected_class, selected_date if selected_date else None)
-        return jsonify({'success': True, 'records': records})
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/')
 def home():
