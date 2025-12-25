@@ -171,37 +171,45 @@ class GoogleSheetsService:
             return None
 
     def authenticate_student(self, student_id, password):
-        """Authenticate student by ID and password with explicit comparison logging"""
+        """Authenticate student with simplified name-based matching"""
         try:
-            student_id = str(student_id).strip()
-            password = str(password).strip()
-            print(f"[DEBUG] AUTH START - ID: '{student_id}', PWD: '{password}'")
+            # Normalize provided ID: remove spaces, lowercase, and replace '0' with 'o' for common typos
+            provided_id = str(student_id).strip().lower().replace('0', 'o')
+            provided_password = str(password).strip().lower() # Make passwords case-insensitive too for simplicity
             
+            print(f"[DEBUG] AUTH ATTEMPT - Cleaned ID: '{provided_id}'")
+            
+            # Refresh connection
             self.sheet = self.spreadsheet.worksheet("Students")
-            student = self.get_student(student_id)
+            all_values = self.sheet.get_all_values()
             
-            if not student:
-                print(f"[AUTH_FAILED] Student '{student_id}' not found")
+            if not all_values:
                 return None
+                
+            headers = [str(h).strip().lower() for h in all_values[0]]
+            id_idx = headers.index('id') if 'id' in headers else 0
             
-            stored_password = ""
-            for key, val in student.items():
-                if key.lower().strip() == 'password':
-                    stored_password = str(val).strip()
-                    break
+            for row in all_values[1:]:
+                if len(row) > id_idx:
+                    # Normalize stored ID the same way
+                    stored_id = str(row[id_idx]).strip().lower().replace('0', 'o')
+                    
+                    if stored_id == provided_id:
+                        # Find password column
+                        pwd_idx = -1
+                        for i, h in enumerate(headers):
+                            if 'password' in h:
+                                pwd_idx = i
+                                break
+                        
+                        if pwd_idx != -1 and len(row) > pwd_idx:
+                            stored_password = str(row[pwd_idx]).strip().lower()
+                            if stored_password == provided_password:
+                                student = {headers[i]: str(row[i]).strip() for i in range(len(headers)) if i < len(row)}
+                                print(f"[AUTH_SUCCESS] {provided_id}")
+                                return student
             
-            print(f"[DEBUG] COMPARE - Stored: '{stored_password}' (len {len(stored_password)}), Provided: '{password}' (len {len(password)})")
-            
-            if stored_password == password:
-                print(f"[AUTH_SUCCESS] {student_id}")
-                return {k: v for k, v in student.items() if k.lower() != 'password'}
-            
-            # Last ditch: check if stored is numeric and provided is string
-            if str(stored_password) == str(password):
-                print(f"[AUTH_SUCCESS_CAST] {student_id}")
-                return {k: v for k, v in student.items() if k.lower() != 'password'}
-
-            print(f"[AUTH_FAILED] Password mismatch for {student_id}")
+            print(f"[AUTH_FAILED] No match for {provided_id}")
             return None
         except Exception as e:
             print(f"[ERROR] authenticate_student: {e}")
