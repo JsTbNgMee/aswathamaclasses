@@ -14,6 +14,11 @@ from student_data import authenticate_student, get_student
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'aswathama-classes-secret-key-secure'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+from student_data import init_db
+init_db(app)
 
 # ==================== ROUTES ====================
 
