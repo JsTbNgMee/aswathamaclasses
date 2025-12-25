@@ -85,6 +85,23 @@ a:hover {
     text-transform: uppercase;
 }
 
+.student-login {
+    background: #000;
+    color: #fff !important;
+    padding: 8px 15px !important;
+    border-radius: 4px;
+    margin-left: 10px;
+}
+
+.student-login:hover {
+    background: #333;
+}
+
+.logout-link {
+    color: #c62828 !important;
+    font-weight: 600;
+}
+
 .nav-toggle {
     display: none;
     flex-direction: column;

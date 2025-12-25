@@ -136,6 +136,7 @@ def student_login():
         student_id = request.form.get('student_id', '').strip()
         password = request.form.get('password', '').strip()
         
+        from student_data import authenticate_student
         student = authenticate_student(student_id, password)
         
         if student:
