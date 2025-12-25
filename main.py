@@ -217,20 +217,42 @@ def teacher_edit_student(student_id):
         updated_data['email'] = request.form.get('email')
         updated_data['phone'] = request.form.get('phone')
         
-        # Update Marks
-        for sub in updated_data['marks']:
-            updated_data['marks'][sub] = int(request.form.get(f'mark_{sub}', 0))
-            
-        # Update Attendance
-        att = updated_data['attendance']
-        att['attended'] = int(request.form.get('attended', 0))
-        att['total_classes'] = int(request.form.get('total_classes', 0))
-        att['percentage'] = (att['attended'] / att['total_classes'] * 100) if att['total_classes'] > 0 else 0
+        # Update Weekly Tests
+        names = request.form.getlist('test_name[]')
+        dates = request.form.getlist('test_date[]')
+        marks = request.form.getlist('test_marks[]')
+        totals = request.form.getlist('test_total[]')
+        updated_data['tests'] = []
+        for i in range(len(names)):
+            if names[i]:
+                updated_data['tests'].append({
+                    'name': names[i],
+                    'date': dates[i],
+                    'marks': int(marks[i] or 0),
+                    'total': int(totals[i] or 0)
+                })
+
+        # Update Attendance Log
+        att_dates = request.form.getlist('att_date[]')
+        att_status = request.form.getlist('att_status[]')
+        updated_data['attendance_log'] = []
+        present_count = 0
+        for i in range(len(att_dates)):
+            if att_dates[i]:
+                updated_data['attendance_log'].append({
+                    'date': att_dates[i],
+                    'status': att_status[i]
+                })
+                if att_status[i] == 'Present':
+                    present_count += 1
         
-        # Update Progress
-        prog = updated_data['progress']
-        prog['completion'] = int(request.form.get('completion', 0))
-        prog['status'] = request.form.get('status')
+        # Calculate overall attendance summary
+        total_days = len(updated_data['attendance_log'])
+        updated_data['attendance'] = {
+            'total_classes': total_days,
+            'attended': present_count,
+            'percentage': (present_count / total_days * 100) if total_days > 0 else 0
+        }
         
         update_student(student_id, updated_data)
         return redirect(url_for('teacher_dashboard'))
