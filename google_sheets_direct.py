@@ -124,92 +124,87 @@ class GoogleSheetsService:
             return []
     
     def get_student(self, student_id):
-        """Get a single student by ID"""
+        """Get a single student by ID with aggressive logging"""
         try:
-            print(f"[DEBUG] Fetching student {student_id}")
-            # Get all values once
+            print(f"[DEBUG] Fetching student ID: {student_id}")
             all_values = self.sheet.get_all_values()
             if not all_values:
-                print("[ERROR] Sheet is empty")
+                print("[ERROR] Sheet is completely empty")
                 return None
             
             headers = [str(h).strip().lower() for h in all_values[0]]
-            print(f"[DEBUG] Detected Headers: {headers}")
+            print(f"[DEBUG] Raw Headers: {all_values[0]}")
+            print(f"[DEBUG] Normalized Headers: {headers}")
             
-            # Find the ID column
-            try:
-                id_col_idx = headers.index('id')
-            except ValueError:
-                print("[ERROR] 'id' column not found in headers")
+            id_col_idx = -1
+            for i, h in enumerate(headers):
+                if h == 'id':
+                    id_col_idx = i
+                    break
+            
+            if id_col_idx == -1:
+                print("[ERROR] No 'id' column found")
                 return None
             
-            # Find the row
-            student_row = None
             target_id = str(student_id).strip().lower()
             for row in all_values[1:]:
                 if len(row) > id_col_idx:
-                    if str(row[id_col_idx]).strip().lower() == target_id:
-                        student_row = row
-                        break
+                    row_id = str(row[id_col_idx]).strip().lower()
+                    if row_id == target_id:
+                        student = {}
+                        for i, h in enumerate(headers):
+                            val = str(row[i]).strip() if i < len(row) else ""
+                            student[h] = val
+                            if h.endswith('_json'):
+                                key = h.replace('_json', '')
+                                try:
+                                    student[key] = json.loads(val) if val else []
+                                except:
+                                    student[key] = []
+                        print(f"[DEBUG] Found student: { {k:v for k,v in student.items() if 'password' not in k.lower()} }")
+                        return student
             
-            if not student_row:
-                print(f"[WARNING] Student {student_id} not found in data rows")
-                return None
-            
-            # Build student object
-            student = {}
-            for i, header in enumerate(headers):
-                if i < len(student_row):
-                    val = str(student_row[i]).strip()
-                    # Keep original name for display, lower for logic
-                    student[header] = val
-                    # Handle JSON fields
-                    if header.endswith('_json'):
-                        key = header.replace('_json', '')
-                        try:
-                            student[key] = json.loads(val) if val else []
-                        except:
-                            student[key] = []
-            
-            print(f"[INFO] Successfully mapped student {student_id}")
-            return student
+            print(f"[WARNING] Student {student_id} not found in {len(all_values)-1} rows")
+            return None
         except Exception as e:
-            print(f"[ERROR] get_student failed: {e}")
+            print(f"[ERROR] get_student: {e}")
             return None
 
     def authenticate_student(self, student_id, password):
-        """Authenticate student by ID and password"""
+        """Authenticate student by ID and password with explicit comparison logging"""
         try:
             student_id = str(student_id).strip()
             password = str(password).strip()
-            print(f"[DEBUG] AUTH ATTEMPT - ID: '{student_id}', PWD: '{password}'")
+            print(f"[DEBUG] AUTH START - ID: '{student_id}', PWD: '{password}'")
             
-            # Refresh connection
             self.sheet = self.spreadsheet.worksheet("Students")
             student = self.get_student(student_id)
             
             if not student:
-                print(f"[WARNING] Student '{student_id}' not found")
+                print(f"[AUTH_FAILED] Student '{student_id}' not found")
                 return None
             
-            # Check password in any variation
             stored_password = ""
-            for key in student:
+            for key, val in student.items():
                 if key.lower().strip() == 'password':
-                    stored_password = str(student[key]).strip()
+                    stored_password = str(val).strip()
                     break
             
-            print(f"[DEBUG] PWD COMPARE - Stored: '{stored_password}', Provided: '{password}'")
+            print(f"[DEBUG] COMPARE - Stored: '{stored_password}' (len {len(stored_password)}), Provided: '{password}' (len {len(password)})")
             
             if stored_password == password:
-                # Return data excluding password for security
-                result = {k: v for k, v in student.items() if k.lower() != 'password'}
-                return result
+                print(f"[AUTH_SUCCESS] {student_id}")
+                return {k: v for k, v in student.items() if k.lower() != 'password'}
             
-            print(f"[WARNING] Password mismatch for {student_id}")
+            # Last ditch: check if stored is numeric and provided is string
+            if str(stored_password) == str(password):
+                print(f"[AUTH_SUCCESS_CAST] {student_id}")
+                return {k: v for k, v in student.items() if k.lower() != 'password'}
+
+            print(f"[AUTH_FAILED] Password mismatch for {student_id}")
             return None
         except Exception as e:
-            print(f"[ERROR] authenticate_student failed: {e}")
+            print(f"[ERROR] authenticate_student: {e}")
             return None
     
     def add_student(self, data):
