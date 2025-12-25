@@ -88,9 +88,15 @@ def init_sheets_service(app):
     global sheets_service
     try:
         sheets_service = SheetsService()
-        print("Google Sheets service initialized")
+        print("Google Sheets service initialized successfully")
+        # Test connection and initialize sheet structure
+        try:
+            sheets_service._make_request('get_all')
+            print("[INFO] Google Sheets connection verified and headers initialized")
+        except Exception as e:
+            print(f"[WARNING] Could not verify sheet connection: {e}")
     except ValueError as e:
-        print(f"Warning: {e}")
+        print(f"[ERROR] {e}")
 
 def get_sheets_service():
     """Get the global sheets service instance"""

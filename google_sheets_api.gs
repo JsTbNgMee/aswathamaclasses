@@ -4,7 +4,15 @@
 const SHEET_ID = "YOUR_SHEET_ID"; // Replace with your Sheet ID
 const SHEET_NAME = "Students";
 
+// Initialize sheet on first load
+try {
+  initializeSheet();
+} catch (e) {
+  console.log("Note: Initialize on first request: " + e);
+}
+
 function doGet(e) {
+  initializeSheet();
   const action = e.parameter.action;
   
   try {
@@ -32,6 +40,7 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  initializeSheet();
   const action = e.parameter.action;
   const data = JSON.parse(e.postData.contents);
   
@@ -210,11 +219,16 @@ function rowToStudent(row, headers) {
 // Initialize sheet structure
 function initializeSheet() {
   const sheet = getSheet();
-  if (sheet.getLastRow() === 0) {
+  const lastRow = sheet.getLastRow();
+  
+  if (lastRow === 0) {
     const headers = [
       'id', 'name', 'password', 'email', 'phone', 'student_class', 
       'enrollment_date', 'tests_json', 'attendance_log_json', 'progress_json'
     ];
     sheet.appendRow(headers);
+    Logger.log("Headers created: " + headers.join(", "));
   }
+  
+  return true;
 }
