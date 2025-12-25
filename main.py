@@ -161,8 +161,9 @@ def student_login():
         student = service.authenticate_student(username, password) if service else None
         
         if student:
-            session['student_id'] = str(student['id']).strip()
-            session['student_name'] = student['name']
+            # Crucial: ID is the key for fetching data later
+            session['student_id'] = str(student.get('id', username)).strip()
+            session['student_name'] = student.get('name', username)
             return redirect(url_for('student_dashboard'))
         else:
             print(f"[AUTH_FAILED] User: '{username}', PWD: '{password}'")

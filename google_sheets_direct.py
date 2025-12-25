@@ -34,54 +34,44 @@ class GoogleSheetsService:
             self.client = gspread.authorize(credentials)
             self.spreadsheet = self.client.open_by_key(self.sheet_id)
             
-            # Get or create the Students sheet
-            try:
-                self.sheet = self.spreadsheet.worksheet("Students")
-            except gspread.exceptions.WorksheetNotFound:
-                try:
-                    self.sheet = self.spreadsheet.add_worksheet("Students", rows=1000, cols=10)
-                except:
-                    self.sheet = self.spreadsheet.worksheet("Students")
-
-            # Ensure 'StudentAuth' sheet exists
-            try:
-                self.auth_sheet = self.spreadsheet.worksheet("StudentAuth")
-            except gspread.exceptions.WorksheetNotFound:
-                try:
-                    self.auth_sheet = self.spreadsheet.add_worksheet(title="StudentAuth", rows=100, cols=3)
-                    self.auth_sheet.append_row(["Username", "Password", "StudentID"])
-                except:
-                    self.auth_sheet = self.spreadsheet.worksheet("StudentAuth")
+            # Ensure required sheets exist
+            self.sheet = self._get_or_create_sheet("Students", ["id", "name", "password", "email", "phone", "student_class", "enrollment_date"])
+            self.auth_sheet = self._get_or_create_sheet("StudentAuth", ["Username", "Password", "StudentID"])
+            self.tests_sheet = self._get_or_create_sheet("Tests", ["StudentID", "TestName", "Date", "Marks", "Total"])
+            self.attendance_sheet = self._get_or_create_sheet("Attendance", ["StudentID", "Date", "Status"])
             
-            # Initialize sheet with headers if empty
-            self._initialize_headers()
             print("[INFO] Google Sheets service initialized successfully")
             
         except Exception as e:
             print(f"[ERROR] Failed to initialize Google Sheets service: {e}")
             raise
-    
-    def _initialize_headers(self):
-        """Create header row if sheet is empty"""
+
+    def _get_or_create_sheet(self, title, headers):
         try:
-            if not self.sheet.get_all_values():
-                headers = [
-                    'id', 'name', 'password', 'email', 'phone', 'student_class',
-                    'enrollment_date', 'tests_json', 'attendance_log_json', 'progress_json'
-                ]
-                self.sheet.insert_row(headers, 1)
-        except:
-            pass
+            worksheet = self.spreadsheet.worksheet(title)
+            # Check if headers exist
+            rows = worksheet.get_all_values()
+            if not rows:
+                worksheet.append_row(headers)
+            return worksheet
+        except gspread.exceptions.WorksheetNotFound:
+            worksheet = self.spreadsheet.add_worksheet(title=title, rows=1000, cols=len(headers) + 5)
+            worksheet.append_row(headers)
+            return worksheet
+        except Exception as e:
+            # Handle potential race conditions by trying to fetch again
+            try:
+                return self.spreadsheet.worksheet(title)
+            except:
+                raise e
     
     def _get_headers(self):
-        """Get header row"""
         try:
             return self.sheet.row_values(1)
         except:
             return []
     
     def _find_row_by_id(self, student_id):
-        """Find row index by student ID"""
         try:
             headers = self._get_headers()
             if not headers: return None
@@ -96,65 +86,72 @@ class GoogleSheetsService:
             return None
     
     def get_all_students(self):
-        """Get all student records"""
         try:
             headers = self._get_headers()
             rows = self.sheet.get_all_values()
             students = []
             for row in rows[1:]:
                 if row and any(row):
-                    student = {}
-                    for i, header in enumerate(headers):
-                        if i < len(row):
-                            val = row[i]
-                            if header.endswith('_json'):
-                                try:
-                                    student[header.replace('_json', '')] = json.loads(val) if val else []
-                                except:
-                                    student[header.replace('_json', '')] = []
-                            else:
-                                student[header] = val
+                    student = {headers[i]: row[i] for i in range(len(headers)) if i < len(row)}
                     students.append(student)
             return students
         except:
             return []
     
     def get_student(self, student_id):
-        """Get a single student by ID"""
+        """Get full student data including tests and attendance from separate sheets"""
         try:
             all_values = self.sheet.get_all_values()
             if not all_values: return None
             headers = [str(h).strip().lower() for h in all_values[0]]
-            id_col_idx = -1
-            for i, h in enumerate(headers):
-                if h == 'id':
-                    id_col_idx = i
-                    break
+            id_col_idx = headers.index('id') if 'id' in headers else -1
             if id_col_idx == -1: return None
+            
             target_id = str(student_id).strip().lower()
+            student = None
             for row in all_values[1:]:
-                if len(row) > id_col_idx:
-                    row_id = str(row[id_col_idx]).strip().lower()
-                    if row_id == target_id:
-                        student = {}
-                        for i, h in enumerate(headers):
-                            val = str(row[i]).strip() if i < len(row) else ""
-                            student[h] = val
-                            if h.endswith('_json'):
-                                key = h.replace('_json', '')
-                                try:
-                                    student[key] = json.loads(val) if val else []
-                                except:
-                                    student[key] = []
-                        return student
-            return None
-        except:
+                if len(row) > id_col_idx and str(row[id_col_idx]).strip().lower() == target_id:
+                    student = {headers[i]: row[i] for i in range(len(headers)) if i < len(row)}
+                    break
+            
+            if student:
+                # Fetch Tests
+                all_tests = self.tests_sheet.get_all_values()
+                student['tests'] = []
+                if all_tests and len(all_tests) > 1:
+                    test_headers = [h.lower() for h in all_tests[0]]
+                    s_id_idx = test_headers.index('studentid')
+                    for t_row in all_tests[1:]:
+                        if len(t_row) > s_id_idx and str(t_row[s_id_idx]).strip().lower() == target_id:
+                            student['tests'].append({test_headers[i]: t_row[i] for i in range(len(test_headers)) if i < len(t_row)})
+                
+                # Fetch Attendance
+                all_att = self.attendance_sheet.get_all_values()
+                student['attendance_log'] = []
+                if all_att and len(all_att) > 1:
+                    att_headers = [h.lower() for h in all_att[0]]
+                    s_id_idx = att_headers.index('studentid')
+                    for a_row in all_att[1:]:
+                        if len(a_row) > s_id_idx and str(a_row[s_id_idx]).strip().lower() == target_id:
+                            student['attendance_log'].append({att_headers[i]: a_row[i] for i in range(len(att_headers)) if i < len(a_row)})
+                
+                # Mock progress for dashboard compatibility
+                student['progress'] = {"completion": 0, "status": "In Progress"}
+                if student['attendance_log']:
+                    present = len([a for a in student['attendance_log'] if a.get('status', '').lower() == 'present'])
+                    total = len(student['attendance_log'])
+                    student['attendance_percentage'] = round((present/total)*100) if total > 0 else 0
+                    student['progress']['completion'] = student['attendance_percentage']
+                else:
+                    student['attendance_percentage'] = 0
+
+            return student
+        except Exception as e:
+            print(f"Error in get_student: {e}")
             return None
 
     def sync_auth_record(self, username, password, student_id):
-        """Sync or create a record in the StudentAuth sheet"""
         try:
-            self.auth_sheet = self.spreadsheet.worksheet("StudentAuth")
             all_auth = self.auth_sheet.get_all_values()
             clean_user = "".join(str(username).split()).lower()
             found_idx = -1
@@ -173,72 +170,71 @@ class GoogleSheetsService:
             return False
 
     def authenticate_student(self, username, password):
-        """Authentication using the dedicated StudentAuth sheet"""
         try:
-            self.auth_sheet = self.spreadsheet.worksheet("StudentAuth")
             all_auth = self.auth_sheet.get_all_values()
             if not all_auth or len(all_auth) < 2: return None
             def super_clean(s):
                 return "".join(str(s).split()).lower().replace('0', 'o')
             p_user = super_clean(username)
             p_pass = super_clean(password)
-            student_id = None
             for row in all_auth[1:]:
                 if len(row) < 2: continue
-                s_user = super_clean(row[0])
-                s_pass = super_clean(row[1])
-                if s_user == p_user and s_pass == p_pass:
-                    student_id = row[2] if len(row) > 2 else row[0]
-                    break
-            if student_id:
-                return self.get_student(student_id)
+                if super_clean(row[0]) == p_user and super_clean(row[1]) == p_pass:
+                    return self.get_student(row[2] if len(row) > 2 else row[0])
             return None
         except:
             return None
     
     def add_student(self, data):
-        """Add a new student record"""
         try:
             headers = self._get_headers()
-            row = []
-            if 'password' in data:
-                data['password'] = str(data['password']).strip()
-            for header in headers:
-                if header.endswith('_json'):
-                    key = header.replace('_json', '')
-                    value = data.get(key, [])
-                    row.append(json.dumps(value) if isinstance(value, list) else value)
-                else:
-                    row.append(str(data.get(header, '')).strip())
+            row = [str(data.get(h, '')).strip() for h in headers]
             self.sheet.append_row(row)
             return True
         except:
             return False
 
     def update_student(self, student_id, data):
-        """Update student record"""
         try:
             row_num = self._find_row_by_id(student_id)
             if not row_num: return False
-            if 'password' in data:
-                data['password'] = str(data['password']).strip()
             headers = self._get_headers()
-            row = []
-            for header in headers:
-                if header.endswith('_json'):
-                    key = header.replace('_json', '')
-                    value = data.get(key, [])
-                    row.append(json.dumps(value) if isinstance(value, list) else value)
-                else:
-                    row.append(str(data.get(header, '')).strip())
+            row = [str(data.get(h, '')).strip() for h in headers]
             self.sheet.delete_rows(row_num)
             self.sheet.insert_row(row, row_num)
+            
+            # Sync tests
+            if 'tests' in data:
+                all_tests = self.tests_sheet.get_all_values()
+                if all_tests:
+                    rows_to_delete = []
+                    for i, t_row in enumerate(all_tests[1:], 2):
+                        if len(t_row) > 0 and str(t_row[0]).strip().lower() == str(student_id).strip().lower():
+                            rows_to_delete.append(i)
+                    for r in reversed(rows_to_delete):
+                        self.tests_sheet.delete_rows(r)
+                for t in data['tests']:
+                    self.tests_sheet.append_row([str(student_id), t.get('name'), t.get('date'), str(t.get('marks')), str(t.get('total'))])
+
+            # Sync attendance
+            if 'attendance_log' in data:
+                all_att = self.attendance_sheet.get_all_values()
+                if all_att:
+                    rows_to_delete = []
+                    for i, a_row in enumerate(all_att[1:], 2):
+                        if len(a_row) > 0 and str(a_row[0]).strip().lower() == str(student_id).strip().lower():
+                            rows_to_delete.append(i)
+                    for r in reversed(rows_to_delete):
+                        self.attendance_sheet.delete_rows(r)
+                for a in data['attendance_log']:
+                    self.attendance_sheet.append_row([str(student_id), a.get('date'), a.get('status')])
+            
             return True
-        except:
+        except Exception as e:
+            print(f"Error in update_student: {e}")
             return False
     
     def delete_student(self, student_id):
-        """Delete a student record"""
         try:
             row_num = self._find_row_by_id(student_id)
             if not row_num: return False
@@ -248,9 +244,7 @@ class GoogleSheetsService:
             return False
 
 sheets_service = None
-
 def init_sheets_service(app):
-    """Initialize sheets service"""
     global sheets_service
     try:
         sheets_service = GoogleSheetsService()
@@ -258,5 +252,4 @@ def init_sheets_service(app):
         print(f"[ERROR] Failed to initialize sheets service: {e}")
 
 def get_sheets_service():
-    """Get the global sheets service instance"""
     return sheets_service
