@@ -1576,3 +1576,27 @@ tbody tr:hover {
         gap: 40px;
     }
 }
+
+/* ===== FEATURED IMAGE SECTION ===== */
+.featured-image-section {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: calc(100vh - 80px); /* Full height minus navbar */
+    overflow: hidden;
+    background: var(--bg-primary);
+}
+
+.featured-image-section .container {
+    max-width: none;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.featured-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
