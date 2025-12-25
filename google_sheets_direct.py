@@ -37,14 +37,21 @@ class GoogleSheetsService:
             # Get or create the Students sheet
             try:
                 self.sheet = self.spreadsheet.worksheet("Students")
-                print("[INFO] Using existing 'Students' sheet")
             except gspread.exceptions.WorksheetNotFound:
                 try:
                     self.sheet = self.spreadsheet.add_worksheet("Students", rows=1000, cols=10)
-                    print("[INFO] Created new 'Students' sheet")
-                except Exception as e:
-                    print(f"[WARNING] Could not create sheet, using first sheet: {e}")
-                    self.sheet = self.spreadsheet.sheet1
+                except:
+                    self.sheet = self.spreadsheet.worksheet("Students")
+
+            # Ensure 'StudentAuth' sheet exists
+            try:
+                self.auth_sheet = self.spreadsheet.worksheet("StudentAuth")
+            except gspread.exceptions.WorksheetNotFound:
+                try:
+                    self.auth_sheet = self.spreadsheet.add_worksheet(title="StudentAuth", rows=100, cols=3)
+                    self.auth_sheet.append_row(["Username", "Password", "StudentID"])
+                except:
+                    self.auth_sheet = self.spreadsheet.worksheet("StudentAuth")
             
             # Initialize sheet with headers if empty
             self._initialize_headers()
@@ -57,36 +64,35 @@ class GoogleSheetsService:
     def _initialize_headers(self):
         """Create header row if sheet is empty"""
         try:
-            if self.sheet.cell(1, 1).value is None:
+            if not self.sheet.get_all_values():
                 headers = [
                     'id', 'name', 'password', 'email', 'phone', 'student_class',
                     'enrollment_date', 'tests_json', 'attendance_log_json', 'progress_json'
                 ]
                 self.sheet.insert_row(headers, 1)
-                print("[INFO] Sheet headers initialized")
-        except Exception as e:
-            print(f"[ERROR] Failed to initialize headers: {e}")
+        except:
+            pass
     
     def _get_headers(self):
         """Get header row"""
         try:
             return self.sheet.row_values(1)
-        except Exception as e:
-            print(f"[ERROR] Failed to get headers: {e}")
+        except:
             return []
     
     def _find_row_by_id(self, student_id):
         """Find row index by student ID"""
         try:
-            id_index = self._get_headers().index('id')
+            headers = self._get_headers()
+            if not headers: return None
+            id_index = headers.index('id')
             cells = self.sheet.col_values(id_index + 1)
             target_id = str(student_id).strip().lower()
             for i, cell_value in enumerate(cells):
                 if str(cell_value).strip().lower() == target_id:
-                    return i + 1  # Row numbers start at 1
+                    return i + 1
             return None
-        except Exception as e:
-            print(f"[ERROR] Failed to find row by ID: {e}")
+        except:
             return None
     
     def get_all_students(self):
@@ -94,10 +100,9 @@ class GoogleSheetsService:
         try:
             headers = self._get_headers()
             rows = self.sheet.get_all_values()
-            
             students = []
-            for row in rows[1:]:  # Skip header row
-                if row and any(row):  # Check if row is not completely empty
+            for row in rows[1:]:
+                if row and any(row):
                     student = {}
                     for i, header in enumerate(headers):
                         if i < len(row):
@@ -109,43 +114,23 @@ class GoogleSheetsService:
                                     student[header.replace('_json', '')] = []
                             else:
                                 student[header] = val
-                        else:
-                            # Handle missing columns in row
-                            if header.endswith('_json'):
-                                student[header.replace('_json', '')] = []
-                            else:
-                                student[header] = ''
                     students.append(student)
-            
-            print(f"[INFO] Retrieved {len(students)} students from sheet")
             return students
-        except Exception as e:
-            print(f"[ERROR] Failed to get all students: {e}")
+        except:
             return []
     
     def get_student(self, student_id):
-        """Get a single student by ID with aggressive logging"""
+        """Get a single student by ID"""
         try:
-            print(f"[DEBUG] Fetching student ID: {student_id}")
             all_values = self.sheet.get_all_values()
-            if not all_values:
-                print("[ERROR] Sheet is completely empty")
-                return None
-            
+            if not all_values: return None
             headers = [str(h).strip().lower() for h in all_values[0]]
-            print(f"[DEBUG] Raw Headers: {all_values[0]}")
-            print(f"[DEBUG] Normalized Headers: {headers}")
-            
             id_col_idx = -1
             for i, h in enumerate(headers):
                 if h == 'id':
                     id_col_idx = i
                     break
-            
-            if id_col_idx == -1:
-                print("[ERROR] No 'id' column found")
-                return None
-            
+            if id_col_idx == -1: return None
             target_id = str(student_id).strip().lower()
             for row in all_values[1:]:
                 if len(row) > id_col_idx:
@@ -161,68 +146,54 @@ class GoogleSheetsService:
                                     student[key] = json.loads(val) if val else []
                                 except:
                                     student[key] = []
-                        print(f"[DEBUG] Found student: { {k:v for k,v in student.items() if 'password' not in k.lower()} }")
                         return student
-            
-            print(f"[WARNING] Student {student_id} not found in {len(all_values)-1} rows")
             return None
-        except Exception as e:
-            print(f"[ERROR] get_student: {e}")
+        except:
             return None
 
-    def authenticate_student(self, student_id, password):
-        """Final attempt at authentication - extremely permissive"""
+    def sync_auth_record(self, username, password, student_id):
+        """Sync or create a record in the StudentAuth sheet"""
         try:
-            # Clean provided input - absolute cleaning
+            self.auth_sheet = self.spreadsheet.worksheet("StudentAuth")
+            all_auth = self.auth_sheet.get_all_values()
+            clean_user = "".join(str(username).split()).lower()
+            found_idx = -1
+            for i, row in enumerate(all_auth):
+                if i == 0: continue
+                if len(row) > 0 and "".join(str(row[0]).split()).lower() == clean_user:
+                    found_idx = i + 1
+                    break
+            if found_idx != -1:
+                self.auth_sheet.update_cell(found_idx, 2, str(password))
+                self.auth_sheet.update_cell(found_idx, 3, str(student_id))
+            else:
+                self.auth_sheet.append_row([str(username), str(password), str(student_id)])
+            return True
+        except:
+            return False
+
+    def authenticate_student(self, username, password):
+        """Authentication using the dedicated StudentAuth sheet"""
+        try:
+            self.auth_sheet = self.spreadsheet.worksheet("StudentAuth")
+            all_auth = self.auth_sheet.get_all_values()
+            if not all_auth or len(all_auth) < 2: return None
             def super_clean(s):
                 return "".join(str(s).split()).lower().replace('0', 'o')
-            
-            p_user = super_clean(student_id)
+            p_user = super_clean(username)
             p_pass = super_clean(password)
-            
-            print(f"[DEBUG] FINAL AUTH ATTEMPT - User: '{p_user}', Pass: '{p_pass}'")
-            
-            # Refresh connection
-            self.sheet = self.spreadsheet.worksheet("Students")
-            all_values = self.sheet.get_all_values()
-            
-            if not all_values or len(all_values) < 2:
-                return None
-                
-            headers = [str(h).strip().lower() for h in all_values[0]]
-            
-            # Identify columns
-            id_col = -1
-            name_col = -1
-            pwd_col = -1
-            for i, h in enumerate(headers):
-                if 'id' in h: id_col = i
-                elif 'name' in h: name_col = i
-                elif 'password' in h or 'pwd' in h: pwd_col = i
-            
-            for row in all_values[1:]:
-                # Check for match in ANY column for username
-                match = False
-                for cell in row:
-                    if super_clean(cell) == p_user:
-                        match = True
-                        break
-                
-                if match:
-                    # Check password in the password column
-                    stored_pass = ""
-                    if pwd_col != -1 and len(row) > pwd_col:
-                        stored_pass = super_clean(row[pwd_col])
-                    
-                    if stored_pass == p_pass:
-                        student = {headers[i]: str(row[i]).strip() for i in range(len(headers)) if i < len(row)}
-                        print(f"[AUTH_SUCCESS] {p_user}")
-                        return student
-            
-            print(f"[AUTH_FAILED] {p_user}")
+            student_id = None
+            for row in all_auth[1:]:
+                if len(row) < 2: continue
+                s_user = super_clean(row[0])
+                s_pass = super_clean(row[1])
+                if s_user == p_user and s_pass == p_pass:
+                    student_id = row[2] if len(row) > 2 else row[0]
+                    break
+            if student_id:
+                return self.get_student(student_id)
             return None
-        except Exception as e:
-            print(f"[ERROR] authenticate_student: {e}")
+        except:
             return None
     
     def add_student(self, data):
@@ -230,11 +201,8 @@ class GoogleSheetsService:
         try:
             headers = self._get_headers()
             row = []
-            
-            # CRITICAL: Clean password during addition
             if 'password' in data:
                 data['password'] = str(data['password']).strip()
-            
             for header in headers:
                 if header.endswith('_json'):
                     key = header.replace('_json', '')
@@ -242,29 +210,20 @@ class GoogleSheetsService:
                     row.append(json.dumps(value) if isinstance(value, list) else value)
                 else:
                     row.append(str(data.get(header, '')).strip())
-            
             self.sheet.append_row(row)
-            print(f"[INFO] Added student {data.get('id')} with cleaned password")
             return True
-        except Exception as e:
-            print(f"[ERROR] Failed to add student: {e}")
+        except:
             return False
 
     def update_student(self, student_id, data):
         """Update student record"""
         try:
             row_num = self._find_row_by_id(student_id)
-            if not row_num:
-                print(f"[WARNING] Student {student_id} not found")
-                return False
-            
-            # CRITICAL: Clean password during update
+            if not row_num: return False
             if 'password' in data:
                 data['password'] = str(data['password']).strip()
-            
             headers = self._get_headers()
             row = []
-            
             for header in headers:
                 if header.endswith('_json'):
                     key = header.replace('_json', '')
@@ -272,33 +231,22 @@ class GoogleSheetsService:
                     row.append(json.dumps(value) if isinstance(value, list) else value)
                 else:
                     row.append(str(data.get(header, '')).strip())
-            
-            # Update the row
             self.sheet.delete_rows(row_num)
             self.sheet.insert_row(row, row_num)
-            
-            print(f"[INFO] Updated student {student_id} with cleaned password")
             return True
-        except Exception as e:
-            print(f"[ERROR] Failed to update student {student_id}: {e}")
+        except:
             return False
     
     def delete_student(self, student_id):
         """Delete a student record"""
         try:
             row_num = self._find_row_by_id(student_id)
-            if not row_num:
-                print(f"[WARNING] Student {student_id} not found")
-                return False
-            
+            if not row_num: return False
             self.sheet.delete_rows(row_num)
-            print(f"[INFO] Deleted student {student_id}")
             return True
-        except Exception as e:
-            print(f"[ERROR] Failed to delete student {student_id}: {e}")
+        except:
             return False
 
-# Global instance
 sheets_service = None
 
 def init_sheets_service(app):

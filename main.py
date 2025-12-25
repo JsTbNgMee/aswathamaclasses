@@ -154,20 +154,19 @@ def instagram():
 def student_login():
     """Student login page"""
     if request.method == 'POST':
-        student_id = str(request.form.get('student_id', '')).strip()
+        username = str(request.form.get('student_id', '')).strip()
         password = str(request.form.get('password', '')).strip()
         
-        from student_data import authenticate_student
-        student = authenticate_student(student_id, password)
+        service = get_sheets_service()
+        student = service.authenticate_student(username, password) if service else None
         
         if student:
             session['student_id'] = str(student['id']).strip()
             session['student_name'] = student['name']
             return redirect(url_for('student_dashboard'))
         else:
-            # Debugging - log the failure with cleaned values
-            print(f"[AUTH_FAILED] ID: '{student_id}', PWD: '{password}'")
-            return render_template('student_login.html', error='Invalid Student ID or Password')
+            print(f"[AUTH_FAILED] User: '{username}', PWD: '{password}'")
+            return render_template('student_login.html', error='Invalid Student Name/ID or Password')
     
     return render_template('student_login.html')
 
@@ -226,6 +225,8 @@ def teacher_add_student():
     }
     if service:
         service.add_student(student_data)
+        # Sync to Auth sheet
+        service.sync_auth_record(student_data.get('name'), student_data.get('password'), student_data.get('id'))
     return redirect(url_for('teacher_dashboard'))
 
 @app.route('/teacher/edit-student/<student_id>', methods=['GET', 'POST'])
@@ -274,6 +275,8 @@ def teacher_edit_student(student_id):
         
         if service:
             service.update_student(student_id, updated_data)
+            # Sync to Auth sheet
+            service.sync_auth_record(updated_data.get('name'), updated_data.get('password'), student_id)
         return redirect(url_for('teacher_dashboard'))
     
     return render_template('teacher_edit.html', student=student)
