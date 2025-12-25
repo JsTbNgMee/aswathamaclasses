@@ -37,8 +37,14 @@ class GoogleSheetsService:
             # Get or create the Students sheet
             try:
                 self.sheet = self.spreadsheet.worksheet("Students")
+                print("[INFO] Using existing 'Students' sheet")
             except gspread.exceptions.WorksheetNotFound:
-                self.sheet = self.spreadsheet.add_worksheet("Students", rows=1000, cols=10)
+                try:
+                    self.sheet = self.spreadsheet.add_worksheet("Students", rows=1000, cols=10)
+                    print("[INFO] Created new 'Students' sheet")
+                except Exception as e:
+                    print(f"[WARNING] Could not create sheet, using first sheet: {e}")
+                    self.sheet = self.spreadsheet.sheet1
             
             # Initialize sheet with headers if empty
             self._initialize_headers()
