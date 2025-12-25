@@ -23,24 +23,40 @@ class GoogleSheetsService:
             if service_account_json.startswith('"') and service_account_json.endswith('"'):
                 service_account_json = service_account_json[1:-1]
                 
-            # Parse the JSON key
-            try:
-                service_account_info = json.loads(service_account_json)
-            except json.JSONDecodeError as e:
-                # Try to handle escaped newlines if they were pasted literally
-                try:
-                    service_account_info = json.loads(service_account_json.replace('\\n', '\n'))
-                except:
-                    print(f"[ERROR] JSON Decode Error: {e}")
-                    raise ValueError(f"Invalid JSON format in GOOGLE_SERVICE_ACCOUNT_KEY: {e}")
+            # Authenticate with Google Sheets API
+            scopes = [
+                'https://www.googleapis.com/auth/spreadsheets',
+                'https://www.googleapis.com/auth/drive'
+            ]
             
-            # Get Sheet ID from environment
+            # Use raw string handling to preserve the private key format exactly as pasted
+            raw_key = os.environ.get('GOOGLE_SERVICE_ACCOUNT_KEY', '').strip()
+            
+            # Remove wrapping quotes if present
+            if (raw_key.startswith("'") and raw_key.endswith("'")) or (raw_key.startswith('"') and raw_key.endswith('"')):
+                raw_key = raw_key[1:-1]
+
+            try:
+                # First attempt: direct parse
+                service_account_info = json.loads(raw_key)
+            except Exception:
+                try:
+                    # Second attempt: handle escaped newlines
+                    fixed_key = raw_key.replace('\\n', '\n')
+                    service_account_info = json.loads(fixed_key)
+                except Exception:
+                    # Third attempt: handle literal newlines and control characters
+                    # (This is often where 'Invalid control character' errors come from)
+                    import re
+                    # Remove non-printable characters except for whitespace
+                    cleaned_key = "".join(c for c in raw_key if c.isprintable() or c in "\n\r\t")
+                    service_account_info = json.loads(cleaned_key)
+
+            # Re-fetch Sheet ID and set it properly to fix LSP error
             self.sheet_id = os.environ.get('GOOGLE_SHEETS_ID')
             if not self.sheet_id:
                 raise ValueError("GOOGLE_SHEETS_ID environment variable not set")
             
-            # Authenticate with Google Sheets API
-            scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
             credentials = Credentials.from_service_account_info(
                 service_account_info,
                 scopes=scopes
