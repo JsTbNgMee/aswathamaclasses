@@ -147,6 +147,8 @@ a:hover {
     list-style: none;
     gap: 32px;
     align-items: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
 }
 
 .nav-link {
@@ -179,22 +181,31 @@ a:hover {
     width: 100%;
 }
 
+.auth-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border-color);
+    margin: 0 8px !important;
+    display: none;
+}
+
 .student-login {
     background: #000;
     color: #fff !important;
-    padding: 10px 24px !important;
+    padding: 9px 18px !important;
     border-radius: 5px;
     font-weight: 600;
-    font-size: 12px;
-    letter-spacing: 1.2px;
+    font-size: 11px;
+    letter-spacing: 1px;
     text-transform: uppercase;
     border: none;
     transition: var(--transition);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     position: relative;
     overflow: hidden;
-    margin-left: 12px;
+    margin-left: 0 !important;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .student-login:hover {
@@ -210,18 +221,19 @@ a:hover {
 .teacher-login {
     background: transparent;
     color: #000 !important;
-    padding: 10px 24px !important;
+    padding: 9px 18px !important;
     border-radius: 5px;
     font-weight: 600;
-    font-size: 12px;
-    letter-spacing: 1.2px;
+    font-size: 11px;
+    letter-spacing: 1px;
     text-transform: uppercase;
     border: 2px solid #000;
     transition: var(--transition);
-    margin-left: 8px;
+    margin-left: 8px !important;
     position: relative;
     cursor: pointer;
     overflow: hidden;
+    white-space: nowrap;
 }
 
 .teacher-login:hover {
