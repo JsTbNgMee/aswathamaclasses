@@ -145,16 +145,28 @@ class GoogleSheetsService:
     def authenticate_student(self, student_id, password):
         """Authenticate student by ID and password"""
         try:
+            print(f"[DEBUG] Attempting to authenticate student: {student_id}")
             student = self.get_student(student_id)
-            if student and student.get('password') == password:
+            print(f"[DEBUG] Student data retrieved: {student}")
+            if not student:
+                print(f"[WARNING] Student {student_id} not found in sheet")
+                return None
+            
+            stored_password = student.get('password')
+            print(f"[DEBUG] Stored password: '{stored_password}', Provided password: '{password}'")
+            
+            if stored_password == password:
                 # Return student data without password
                 result = {k: v for k, v in student.items() if k != 'password'}
                 print(f"[INFO] Student {student_id} authenticated successfully")
                 return result
-            print(f"[WARNING] Authentication failed for student {student_id}")
+            else:
+                print(f"[WARNING] Password mismatch for student {student_id}")
             return None
         except Exception as e:
             print(f"[ERROR] Failed to authenticate student: {e}")
+            import traceback
+            traceback.print_exc()
             return None
     
     def add_student(self, data):
