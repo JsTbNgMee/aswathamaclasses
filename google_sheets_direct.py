@@ -16,8 +16,23 @@ class GoogleSheetsService:
             if not service_account_json:
                 raise ValueError("GOOGLE_SERVICE_ACCOUNT_KEY environment variable not set")
             
+            # Clean common pasting errors
+            service_account_json = service_account_json.strip()
+            if service_account_json.startswith("'") and service_account_json.endswith("'"):
+                service_account_json = service_account_json[1:-1]
+            if service_account_json.startswith('"') and service_account_json.endswith('"'):
+                service_account_json = service_account_json[1:-1]
+                
             # Parse the JSON key
-            service_account_info = json.loads(service_account_json)
+            try:
+                service_account_info = json.loads(service_account_json)
+            except json.JSONDecodeError as e:
+                # Try to handle escaped newlines if they were pasted literally
+                try:
+                    service_account_info = json.loads(service_account_json.replace('\\n', '\n'))
+                except:
+                    print(f"[ERROR] JSON Decode Error: {e}")
+                    raise ValueError(f"Invalid JSON format in GOOGLE_SERVICE_ACCOUNT_KEY: {e}")
             
             # Get Sheet ID from environment
             self.sheet_id = os.environ.get('GOOGLE_SHEETS_ID')
