@@ -31,8 +31,8 @@
             </button>
 
             <!-- Navigation Links -->
-            <div class="nav-wrapper">
-                <ul class="nav-menu" id="navMenu">
+            <div class="nav-wrapper" id="navWrapper">
+                <ul class="nav-menu">
                     <li><a href="{{ url_for('home') }}" class="nav-link">Home</a></li>
                     <li><a href="{{ url_for('about') }}" class="nav-link">About</a></li>
                     <li><a href="{{ url_for('courses') }}" class="nav-link">Courses</a></li>
@@ -43,9 +43,21 @@
                     <li><a href="{{ url_for('instagram') }}" class="nav-link">Instagram</a></li>
                     <li><a href="{{ url_for('contact') }}" class="nav-link">Contact</a></li>
                 </ul>
+                <div class="nav-auth-mobile">
+                    {% if session.get('student_id') %}
+                        <a href="{{ url_for('student_dashboard') }}" class="nav-btn btn-black">Dashboard</a>
+                        <a href="{{ url_for('student_logout') }}" class="nav-link logout-link">Logout</a>
+                    {% elif session.get('teacher_logged_in') %}
+                        <a href="{{ url_for('teacher_dashboard') }}" class="nav-btn btn-black">Panel</a>
+                        <a href="{{ url_for('teacher_logout') }}" class="nav-link logout-link">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('student_login') }}" class="nav-btn btn-black">Student Login</a>
+                        <a href="{{ url_for('teacher_login') }}" class="nav-btn btn-outline">Teacher Login</a>
+                    {% endif %}
+                </div>
             </div>
 
-            <div class="nav-auth">
+            <div class="nav-auth-desktop">
                 {% if session.get('student_id') %}
                     <a href="{{ url_for('student_dashboard') }}" class="nav-btn">Dashboard</a>
                     <a href="{{ url_for('student_logout') }}" class="nav-link logout-link">Logout</a>
