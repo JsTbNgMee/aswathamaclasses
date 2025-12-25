@@ -5,13 +5,15 @@
 {% block content %}
 <!-- Hero Section -->
 <section class="hero">
-    <div class="hero-content">
-        <div class="tagline-pill">Established 2020</div>
-        <h1>ASWATHAMA<br>CLASSES</h1>
-        <p class="hero-description">The elite institute for Mathematics & Science. Redefining coaching for Classes 8, 9 & 10 through practical excellence.</p>
-        <div class="hero-buttons">
-            <a href="{{ url_for('courses') }}" class="btn btn-black btn-premium">Get Started</a>
-            <a href="{{ url_for('contact') }}" class="btn btn-outline btn-premium">Connect</a>
+    <div class="container">
+        <div class="hero-content">
+            <span class="tagline-pill">Established 2020</span>
+            <h1>ASWATHAMA CLASSES</h1>
+            <p class="hero-description">The elite institute for Mathematics & Science. Redefining coaching for Classes 8, 9 & 10 through practical excellence.</p>
+            <div class="hero-buttons">
+                <a href="{{ url_for('courses') }}">Learn more ></a>
+                <a href="{{ url_for('admissions') }}">Join today ></a>
+            </div>
         </div>
     </div>
 </section>
