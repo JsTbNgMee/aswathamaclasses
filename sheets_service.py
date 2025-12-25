@@ -15,22 +15,22 @@ class SheetsService:
     def _make_request(self, action, method='GET', data=None):
         """Make HTTP request to Google Apps Script"""
         try:
-            if method == 'GET':
-                response = requests.get(
-                    f"{self.app_script_url}?action={action}",
-                    timeout=10
-                )
-            else:
-                response = requests.post(
-                    f"{self.app_script_url}?action={action}",
-                    json=data,
-                    timeout=10
-                )
+            url = f"{self.app_script_url}?action={action}"
+            print(f"[DEBUG] {method} request to: {url[:80]}...")
             
+            if method == 'GET':
+                response = requests.get(url, timeout=10)
+            else:
+                response = requests.post(url, json=data, timeout=10)
+            
+            print(f"[DEBUG] Response status: {response.status_code}")
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            print(f"Sheets API Error: {e}")
+            print(f"[ERROR] Sheets API Error: {e}")
+            return {"error": str(e)}
+        except Exception as e:
+            print(f"[ERROR] Unexpected error: {e}")
             return {"error": str(e)}
     
     def authenticate_student(self, student_id, password):

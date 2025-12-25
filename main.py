@@ -233,39 +233,41 @@ def teacher_edit_student(student_id):
     student = get_student(student_id) if service else None
     if request.method == 'POST':
         updated_data = student.copy() if student else {}
-        updated_data['name'] = request.form.get('name')
-        updated_data['student_class'] = request.form.get('class')
-        updated_data['email'] = request.form.get('email')
-        updated_data['phone'] = request.form.get('phone')
+        updated_data['name'] = request.form.get('name') or ''
+        updated_data['student_class'] = request.form.get('class') or ''
+        updated_data['email'] = request.form.get('email') or ''
+        updated_data['phone'] = request.form.get('phone') or ''
         
         # Update Weekly Tests
-        names = request.form.getlist('test_name[]')
-        dates = request.form.getlist('test_date[]')
-        marks = request.form.getlist('test_marks[]')
-        totals = request.form.getlist('test_total[]')
-        updated_data['tests'] = []
+        names = request.form.getlist('test_name[]') or []
+        dates = request.form.getlist('test_date[]') or []
+        marks = request.form.getlist('test_marks[]') or []
+        totals = request.form.getlist('test_total[]') or []
+        tests = []
         for i in range(len(names)):
             if names[i]:
-                updated_data['tests'].append({
+                tests.append({
                     'name': names[i],
                     'date': dates[i],
                     'marks': int(marks[i] or 0),
                     'total': int(totals[i] or 0)
                 })
+        updated_data['tests'] = tests
 
         # Update Attendance Log
-        att_dates = request.form.getlist('att_date[]')
-        att_status = request.form.getlist('att_status[]')
-        updated_data['attendance_log'] = []
+        att_dates = request.form.getlist('att_date[]') or []
+        att_status = request.form.getlist('att_status[]') or []
+        attendance_log = []
         present_count = 0
         for i in range(len(att_dates)):
             if att_dates[i]:
-                updated_data['attendance_log'].append({
+                attendance_log.append({
                     'date': att_dates[i],
                     'status': att_status[i]
                 })
                 if att_status[i] == 'Present':
                     present_count += 1
+        updated_data['attendance_log'] = attendance_log
         
         if service:
             service.update_student(student_id, updated_data)
