@@ -1,0 +1,52 @@
+{
+    "STU001": {
+        "id": "STU001",
+        "name": "Rahul Kumar",
+        "password": "rahul123",
+        "email": "rahul@example.com",
+        "phone": "+91 9876543210",
+        "class": "Class 10",
+        "enrollment_date": "2024-01-15",
+        "marks": {
+            "Mathematics": 85,
+            "Science": 78,
+            "Physics": 82,
+            "Chemistry": 75
+        },
+        "attendance": {
+            "total_classes": 40,
+            "attended": 38,
+            "percentage": 95.0
+        },
+        "progress": {
+            "completion": 75,
+            "status": "On Track",
+            "performance": "Good"
+        }
+    },
+    "STU002": {
+        "id": "STU002",
+        "name": "Aayush",
+        "password": "aayush@2011",
+        "class": "Class 9",
+        "email": "",
+        "phone": "",
+        "enrollment_date": "2025-12-25",
+        "marks": {
+            "Mathematics": 0,
+            "Science": 0,
+            "Physics": 0,
+            "Chemistry": 0
+        },
+        "attendance": {
+            "total_classes": 0,
+            "attended": 0,
+            "percentage": 0
+        },
+        "progress": {
+            "completion": 0,
+            "status": "New",
+            "performance": "N/A"
+        }
+    }
+}
