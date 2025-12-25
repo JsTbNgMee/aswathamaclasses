@@ -27,7 +27,6 @@
     "STU002": {
         "id": "STU002",
         "name": "Aayush",
-        "password": "aayush@2011",
         "class": "Class 9",
         "email": "",
         "phone": "",
@@ -39,14 +38,29 @@
             "Chemistry": 0
         },
         "attendance": {
-            "total_classes": 0,
+            "total_classes": 1,
             "attended": 0,
-            "percentage": 0
+            "percentage": 0.0
         },
         "progress": {
             "completion": 0,
             "status": "New",
             "performance": "N/A"
-        }
+        },
+        "tests": [
+            {
+                "name": "new",
+                "date": "2025-12-25",
+                "marks": 25,
+                "total": 25
+            }
+        ],
+        "attendance_log": [
+            {
+                "date": "2025-12-25",
+                "status": "Absent"
+            }
+        ],
+        "password": "aayush@2011"
     }
 }
