@@ -9,7 +9,7 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 from datetime import datetime
 import os
 from youtube_service import yt_service
-from sheets_service import init_sheets_service, get_sheets_service
+from google_sheets_direct import init_sheets_service, get_sheets_service
 
 # Initialize Flask app
 app = Flask(__name__)
