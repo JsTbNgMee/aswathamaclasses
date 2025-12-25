@@ -25,7 +25,7 @@
                         </div>
                         <div style="text-align:right;">
                             <span style="font-size:20px; font-weight:700;">{{ test.marks }}/{{ test.total }}</span>
-                            <div style="font-size:12px; color:#666;">{{ (test.marks/test.total*100)|round|int }}%</div>
+                            <div style="font-size:12px; color:#666;">{{ ((test.marks|int)/(test.total|int)*100)|round|int }}%</div>
                         </div>
                     </div>
                     {% endfor %}
