@@ -62,8 +62,19 @@
 
     <script>
         document.getElementById('navToggle').addEventListener('click', function() {
-            document.getElementById('navMenu').classList.toggle('active');
+            const navWrapper = document.querySelector('.nav-wrapper');
+            navWrapper.classList.toggle('active');
             this.classList.toggle('active');
+            document.body.style.overflow = navWrapper.classList.contains('active') ? 'hidden' : '';
+        });
+
+        // Close menu on link click
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                document.querySelector('.nav-wrapper').classList.remove('active');
+                document.getElementById('navToggle').classList.remove('active');
+                document.body.style.overflow = '';
+            });
         });
     </script>
 
