@@ -192,6 +192,19 @@ a:hover {
 .btn-black {
     background: #000;
     color: #fff !important;
+    border: 1px solid #000;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #000 !important;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.btn-outline:hover {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
 }
 
 .btn-black:hover {
