@@ -9,38 +9,32 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 from datetime import datetime
 import os
 from youtube_service import yt_service
-from student_data import authenticate_student, get_student
+from sheets_service import init_sheets_service, get_sheets_service
 
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'aswathama-classes-secret-key-secure'
 
-# Handle Render's DATABASE_URL which often starts with 'postgres://'
-db_url = os.environ.get('DATABASE_URL')
-if db_url:
-    # Use a fixed version of the URL to prevent "helium" host translation error
-    # Render's Internal Database URL only works inside Render. 
-    # For external connections (like here), the External Database URL is required.
-    
-    # Fix Render's 'postgres://' scheme
-    if db_url.startswith('postgres://'):
-        db_url = db_url.replace('postgres://', 'postgresql://', 1)
-        
-    # Ensure SSL mode is enabled for Render/Neon if not explicitly disabled in string
-    if 'sslmode=' not in db_url:
-        separator = '&' if '?' in db_url else '?'
-        db_url = f"{db_url}{separator}sslmode=require"
+# Initialize Google Sheets service
+init_sheets_service(app)
 
-# Log the database connection attempt (redacted password)
-if db_url:
-    safe_log_url = db_url.split('@')[-1] if '@' in db_url else db_url
-    print(f"Connecting to database: {safe_log_url}")
+# Helper functions for student operations
+def authenticate_student(student_id, password):
+    """Authenticate student via Google Sheets"""
+    service = get_sheets_service()
+    if not service:
+        return None
+    return service.authenticate_student(student_id, password)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///local_students.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-from student_data import init_db
-init_db(app)
+def get_student(student_id):
+    """Get student data from Google Sheets"""
+    service = get_sheets_service()
+    if not service:
+        return None
+    student = service.get_student(student_id)
+    if student and isinstance(student, dict):
+        return student
+    return None
 
 # ==================== ROUTES ====================
 
@@ -212,35 +206,35 @@ def teacher_login():
 def teacher_dashboard():
     if not session.get('teacher_logged_in'):
         return redirect(url_for('teacher_login'))
-    from student_data import get_all_students
-    return render_template('teacher_dashboard.html', students=get_all_students())
+    service = get_sheets_service()
+    students = service.get_all_students() if service else []
+    return render_template('teacher_dashboard.html', students=students)
 
 @app.route('/teacher/add-student', methods=['POST'])
 def teacher_add_student():
     if not session.get('teacher_logged_in'): return redirect(url_for('teacher_login'))
-    from student_data import add_student
+    service = get_sheets_service()
     student_data = {
         'id': request.form.get('id'),
         'name': request.form.get('name'),
         'password': request.form.get('password'),
-        'class': request.form.get('class'),
+        'student_class': request.form.get('class'),
         'email': '', 'phone': '', 'enrollment_date': datetime.now().strftime('%Y-%m-%d'),
-        'marks': {'Mathematics': 0, 'Science': 0, 'Physics': 0, 'Chemistry': 0},
-        'attendance': {'total_classes': 0, 'attended': 0, 'percentage': 0},
-        'progress': {'completion': 0, 'status': 'New', 'performance': 'N/A'}
+        'tests_json': '[]', 'attendance_log_json': '[]', 'progress_json': '{"completion": 0, "status": "New", "performance": "N/A"}'
     }
-    add_student(student_data)
+    if service:
+        service.add_student(student_data)
     return redirect(url_for('teacher_dashboard'))
 
 @app.route('/teacher/edit-student/<student_id>', methods=['GET', 'POST'])
 def teacher_edit_student(student_id):
     if not session.get('teacher_logged_in'): return redirect(url_for('teacher_login'))
-    from student_data import get_student, update_student
-    student = get_student(student_id)
+    service = get_sheets_service()
+    student = get_student(student_id) if service else None
     if request.method == 'POST':
-        updated_data = student.copy()
+        updated_data = student.copy() if student else {}
         updated_data['name'] = request.form.get('name')
-        updated_data['class'] = request.form.get('class')
+        updated_data['student_class'] = request.form.get('class')
         updated_data['email'] = request.form.get('email')
         updated_data['phone'] = request.form.get('phone')
         
@@ -273,15 +267,8 @@ def teacher_edit_student(student_id):
                 if att_status[i] == 'Present':
                     present_count += 1
         
-        # Calculate overall attendance summary
-        total_days = len(updated_data['attendance_log'])
-        updated_data['attendance'] = {
-            'total_classes': total_days,
-            'attended': present_count,
-            'percentage': (present_count / total_days * 100) if total_days > 0 else 0
-        }
-        
-        update_student(student_id, updated_data)
+        if service:
+            service.update_student(student_id, updated_data)
         return redirect(url_for('teacher_dashboard'))
     
     return render_template('teacher_edit.html', student=student)
@@ -289,8 +276,9 @@ def teacher_edit_student(student_id):
 @app.route('/teacher/delete-student/<student_id>', methods=['POST'])
 def teacher_delete_student(student_id):
     if not session.get('teacher_logged_in'): return redirect(url_for('teacher_login'))
-    from student_data import delete_student
-    delete_student(student_id)
+    service = get_sheets_service()
+    if service:
+        service.delete_student(student_id)
     return redirect(url_for('teacher_dashboard'))
 
 @app.route('/teacher/logout')
