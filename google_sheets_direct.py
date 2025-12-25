@@ -25,7 +25,7 @@ class GoogleSheetsService:
                 raise ValueError("GOOGLE_SHEETS_ID environment variable not set")
             
             # Authenticate with Google Sheets API
-            scopes = ['https://www.googleapis.com/auth/spreadsheets']
+            scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
             credentials = Credentials.from_service_account_info(
                 service_account_info,
                 scopes=scopes
