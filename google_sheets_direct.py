@@ -46,10 +46,16 @@ class GoogleSheetsService:
                     service_account_info = json.loads(fixed_key)
                 except Exception:
                     # Third attempt: handle literal newlines and control characters
-                    # (This is often where 'Invalid control character' errors come from)
                     import re
                     # Remove non-printable characters except for whitespace
                     cleaned_key = "".join(c for c in raw_key if c.isprintable() or c in "\n\r\t")
+                    # Special fix for private_key field which often has \n
+                    if '"private_key":' in cleaned_key:
+                        # Extract the private key part
+                        pk_match = re.search(r'("private_key":\s*")(.*?)(")', cleaned_key, re.DOTALL)
+                        if pk_match:
+                            pk_content = pk_match.group(2).replace('\\n', '\n')
+                            cleaned_key = cleaned_key[:pk_match.start(2)] + pk_content + cleaned_key[pk_match.end(2):]
                     service_account_info = json.loads(cleaned_key)
 
             # Re-fetch Sheet ID and set it properly to fix LSP error
