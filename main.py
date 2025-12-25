@@ -17,8 +17,14 @@ app.config['SECRET_KEY'] = 'aswathama-classes-secret-key-secure'
 
 # Handle Render's DATABASE_URL which often starts with 'postgres://'
 db_url = os.environ.get('DATABASE_URL')
-if db_url and db_url.startswith('postgres://'):
-    db_url = db_url.replace('postgres://', 'postgresql://', 1)
+if db_url:
+    # Fix Render's 'postgres://' scheme
+    if db_url.startswith('postgres://'):
+        db_url = db_url.replace('postgres://', 'postgresql://', 1)
+    # Ensure SSL mode is enabled for Render/Neon if not explicitly disabled in string
+    if 'sslmode=' not in db_url:
+        separator = '&' if '?' in db_url else '?'
+        db_url = f"{db_url}{separator}sslmode=require"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///local_students.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
