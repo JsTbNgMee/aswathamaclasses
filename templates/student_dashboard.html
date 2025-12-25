@@ -39,19 +39,23 @@
             <div class="dashboard-card" style="background:white; padding:30px; border:1px solid #ddd;">
                 <h3 style="border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:20px;">Attendance Status</h3>
                 <div style="text-align:center; margin-bottom:30px; padding:30px; background:#000; color:white;">
-                    <div style="font-size:48px; font-weight:700;">{{ student.attendance.percentage|round(1) }}%</div>
+                    <div style="font-size:48px; font-weight:700;">{{ student.attendance_percentage|default(0)|round(1) }}%</div>
                     <div style="font-size:14px; opacity:0.7;">Overall Attendance</div>
                 </div>
                 
                 <h4 style="margin-bottom:15px; font-size:14px; text-transform:uppercase;">Recent Attendance Log</h4>
+                {% if student.attendance_log %}
                 <div style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
                     {% for log in student.attendance_log|reverse %}
                     <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
                         <span>{{ log.date }}</span>
-                        <span style="font-weight:600; color:{% if log.status == 'Present' %}#2e7d32{% else %}#c62828{% endif %};">{{ log.status }}</span>
+                        <span style="font-weight:600; color:{% if log.status|lower == 'present' %}#2e7d32{% else %}#c62828{% endif %};">{{ log.status }}</span>
                     </div>
                     {% endfor %}
                 </div>
+                {% else %}
+                <p style="color:#999; text-align:center;">No attendance records available yet.</p>
+                {% endif %}
             </div>
         </div>
     </div>

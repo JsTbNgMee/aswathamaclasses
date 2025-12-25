@@ -135,15 +135,15 @@ class GoogleSheetsService:
                         if len(a_row) > s_id_idx and str(a_row[s_id_idx]).strip().lower() == target_id:
                             student['attendance_log'].append({att_headers[i]: a_row[i] for i in range(len(att_headers)) if i < len(a_row)})
                 
-                # Mock progress for dashboard compatibility
-                student['progress'] = {"completion": 0, "status": "In Progress"}
+                # Calculate attendance percentage
                 if student['attendance_log']:
                     present = len([a for a in student['attendance_log'] if a.get('status', '').lower() == 'present'])
                     total = len(student['attendance_log'])
-                    student['attendance_percentage'] = round((present/total)*100) if total > 0 else 0
-                    student['progress']['completion'] = student['attendance_percentage']
+                    student['attendance_percentage'] = (present/total)*100 if total > 0 else 0
+                    student['progress'] = {"completion": student['attendance_percentage'], "status": "In Progress"}
                 else:
                     student['attendance_percentage'] = 0
+                    student['progress'] = {"completion": 0, "status": "New"}
 
             return student
         except Exception as e:
