@@ -171,18 +171,32 @@ class GoogleSheetsService:
 
     def authenticate_student(self, username, password):
         try:
+            # First attempt: Exact match from StudentAuth sheet
             all_auth = self.auth_sheet.get_all_values()
             if not all_auth or len(all_auth) < 2: return None
+            
             def super_clean(s):
-                return "".join(str(s).split()).lower().replace('0', 'o')
+                return "".join(str(s).split()).lower()
+            
             p_user = super_clean(username)
             p_pass = super_clean(password)
+            
             for row in all_auth[1:]:
                 if len(row) < 2: continue
+                # Match username and password
                 if super_clean(row[0]) == p_user and super_clean(row[1]) == p_pass:
-                    return self.get_student(row[2] if len(row) > 2 else row[0])
+                    student_id = row[2] if len(row) > 2 else row[0]
+                    return self.get_student(student_id)
+            
+            # Fallback: Check Students sheet directly if Auth sheet fails
+            students = self.get_all_students()
+            for s in students:
+                if super_clean(s.get('name', '')) == p_user and super_clean(s.get('password', '')) == p_pass:
+                    return self.get_student(s.get('id'))
+                    
             return None
-        except:
+        except Exception as e:
+            print(f"Error in authenticate_student: {e}")
             return None
     
     def add_student(self, data):
