@@ -258,16 +258,17 @@ def teacher_edit_student(student_id):
         att_dates = request.form.getlist('att_date[]') or []
         att_status = request.form.getlist('att_status[]') or []
         attendance_log = []
-        present_count = 0
         for i in range(len(att_dates)):
             if att_dates[i]:
                 attendance_log.append({
                     'date': att_dates[i],
                     'status': att_status[i]
                 })
-                if att_status[i] == 'Present':
-                    present_count += 1
         updated_data['attendance_log'] = attendance_log
+        
+        # Ensure password is preserved
+        if 'password' not in updated_data and student and 'password' in student:
+            updated_data['password'] = student['password']
         
         if service:
             service.update_student(student_id, updated_data)
