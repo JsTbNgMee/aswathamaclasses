@@ -57,27 +57,33 @@ class Student(db.Model):
 def init_db(app):
     db.init_app(app)
     with app.app_context():
-        db.create_all()
-        # Migrate existing JSON data if needed
-        if os.path.exists('students.json'):
-            with open('students.json', 'r') as f:
-                data = json.load(f)
-                for sid, sdata in data.items():
-                    if not Student.query.get(sid):
-                        student = Student(
-                            id=sid,
-                            name=sdata.get('name'),
-                            password=sdata.get('password'),
-                            email=sdata.get('email'),
-                            phone=sdata.get('phone'),
-                            student_class=sdata.get('class'),
-                            enrollment_date=sdata.get('enrollment_date')
-                        )
-                        student.tests = sdata.get('tests', [])
-                        student.attendance_log = sdata.get('attendance_log', [])
-                        student.progress = sdata.get('progress', {})
-                        db.session.add(student)
-                db.session.commit()
+        # Use a more robust check for table existence
+        inspector = db.inspect(db.engine)
+        if not inspector.has_table("student"):
+            db.create_all()
+            # Migrate existing JSON data if needed
+            if os.path.exists('students.json'):
+                with open('students.json', 'r') as f:
+                    try:
+                        data = json.load(f)
+                        for sid, sdata in data.items():
+                            if not Student.query.get(sid):
+                                student = Student(
+                                    id=sid,
+                                    name=sdata.get('name'),
+                                    password=sdata.get('password'),
+                                    email=sdata.get('email'),
+                                    phone=sdata.get('phone'),
+                                    student_class=sdata.get('class'),
+                                    enrollment_date=sdata.get('enrollment_date')
+                                )
+                                student.tests = sdata.get('tests', [])
+                                student.attendance_log = sdata.get('attendance_log', [])
+                                student.progress = sdata.get('progress', {})
+                                db.session.add(student)
+                        db.session.commit()
+                    except Exception as e:
+                        print(f"Migration error: {e}")
 
 def authenticate_student(student_id, password):
     student = Student.query.get(student_id)
