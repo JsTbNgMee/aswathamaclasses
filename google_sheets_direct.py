@@ -171,56 +171,55 @@ class GoogleSheetsService:
             return None
 
     def authenticate_student(self, student_id, password):
-        """Authenticate student with name-based username"""
+        """Final attempt at authentication - extremely permissive"""
         try:
-            # Normalize provided username (ID or Name): remove spaces, lowercase
-            provided_username = str(student_id).strip().lower()
-            provided_password = str(password).strip().lower()
+            # Clean provided input - absolute cleaning
+            def super_clean(s):
+                return "".join(str(s).split()).lower().replace('0', 'o')
             
-            print(f"[DEBUG] AUTH ATTEMPT - Username: '{provided_username}'")
+            p_user = super_clean(student_id)
+            p_pass = super_clean(password)
+            
+            print(f"[DEBUG] FINAL AUTH ATTEMPT - User: '{p_user}', Pass: '{p_pass}'")
             
             # Refresh connection
             self.sheet = self.spreadsheet.worksheet("Students")
             all_values = self.sheet.get_all_values()
             
-            if not all_values:
+            if not all_values or len(all_values) < 2:
                 return None
                 
             headers = [str(h).strip().lower() for h in all_values[0]]
             
-            # Find ID, Name, and Password column indices
-            id_idx = -1
-            name_idx = -1
-            pwd_idx = -1
-            
+            # Identify columns
+            id_col = -1
+            name_col = -1
+            pwd_col = -1
             for i, h in enumerate(headers):
-                if h == 'id': id_idx = i
-                elif h == 'name': name_idx = i
-                elif 'password' in h: pwd_idx = i
+                if 'id' in h: id_col = i
+                elif 'name' in h: name_col = i
+                elif 'password' in h or 'pwd' in h: pwd_col = i
             
             for row in all_values[1:]:
-                # Check match against ID OR Name
-                match_found = False
+                # Check for match in ANY column for username
+                match = False
+                for cell in row:
+                    if super_clean(cell) == p_user:
+                        match = True
+                        break
                 
-                # Check ID Match
-                if id_idx != -1 and len(row) > id_idx:
-                    if str(row[id_idx]).strip().lower().replace('0', 'o') == provided_username.replace('0', 'o'):
-                        match_found = True
-                
-                # Check Name Match (if no ID match)
-                if not match_found and name_idx != -1 and len(row) > name_idx:
-                    if str(row[name_idx]).strip().lower() == provided_username:
-                        match_found = True
-                
-                if match_found:
-                    if pwd_idx != -1 and len(row) > pwd_idx:
-                        stored_password = str(row[pwd_idx]).strip().lower()
-                        if stored_password == provided_password:
-                            student = {headers[i]: str(row[i]).strip() for i in range(len(headers)) if i < len(row)}
-                            print(f"[AUTH_SUCCESS] {provided_username}")
-                            return student
+                if match:
+                    # Check password in the password column
+                    stored_pass = ""
+                    if pwd_col != -1 and len(row) > pwd_col:
+                        stored_pass = super_clean(row[pwd_col])
+                    
+                    if stored_pass == p_pass:
+                        student = {headers[i]: str(row[i]).strip() for i in range(len(headers)) if i < len(row)}
+                        print(f"[AUTH_SUCCESS] {p_user}")
+                        return student
             
-            print(f"[AUTH_FAILED] No match for {provided_username}")
+            print(f"[AUTH_FAILED] {p_user}")
             return None
         except Exception as e:
             print(f"[ERROR] authenticate_student: {e}")
