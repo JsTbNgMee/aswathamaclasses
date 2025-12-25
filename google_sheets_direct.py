@@ -171,13 +171,13 @@ class GoogleSheetsService:
             return None
 
     def authenticate_student(self, student_id, password):
-        """Authenticate student with simplified name-based matching"""
+        """Authenticate student with name-based username"""
         try:
-            # Normalize provided ID: remove spaces, lowercase, and replace '0' with 'o' for common typos
-            provided_id = str(student_id).strip().lower().replace('0', 'o')
-            provided_password = str(password).strip().lower() # Make passwords case-insensitive too for simplicity
+            # Normalize provided username (ID or Name): remove spaces, lowercase
+            provided_username = str(student_id).strip().lower()
+            provided_password = str(password).strip().lower()
             
-            print(f"[DEBUG] AUTH ATTEMPT - Cleaned ID: '{provided_id}'")
+            print(f"[DEBUG] AUTH ATTEMPT - Username: '{provided_username}'")
             
             # Refresh connection
             self.sheet = self.spreadsheet.worksheet("Students")
@@ -187,29 +187,40 @@ class GoogleSheetsService:
                 return None
                 
             headers = [str(h).strip().lower() for h in all_values[0]]
-            id_idx = headers.index('id') if 'id' in headers else 0
+            
+            # Find ID, Name, and Password column indices
+            id_idx = -1
+            name_idx = -1
+            pwd_idx = -1
+            
+            for i, h in enumerate(headers):
+                if h == 'id': id_idx = i
+                elif h == 'name': name_idx = i
+                elif 'password' in h: pwd_idx = i
             
             for row in all_values[1:]:
-                if len(row) > id_idx:
-                    # Normalize stored ID the same way
-                    stored_id = str(row[id_idx]).strip().lower().replace('0', 'o')
-                    
-                    if stored_id == provided_id:
-                        # Find password column
-                        pwd_idx = -1
-                        for i, h in enumerate(headers):
-                            if 'password' in h:
-                                pwd_idx = i
-                                break
-                        
-                        if pwd_idx != -1 and len(row) > pwd_idx:
-                            stored_password = str(row[pwd_idx]).strip().lower()
-                            if stored_password == provided_password:
-                                student = {headers[i]: str(row[i]).strip() for i in range(len(headers)) if i < len(row)}
-                                print(f"[AUTH_SUCCESS] {provided_id}")
-                                return student
+                # Check match against ID OR Name
+                match_found = False
+                
+                # Check ID Match
+                if id_idx != -1 and len(row) > id_idx:
+                    if str(row[id_idx]).strip().lower().replace('0', 'o') == provided_username.replace('0', 'o'):
+                        match_found = True
+                
+                # Check Name Match (if no ID match)
+                if not match_found and name_idx != -1 and len(row) > name_idx:
+                    if str(row[name_idx]).strip().lower() == provided_username:
+                        match_found = True
+                
+                if match_found:
+                    if pwd_idx != -1 and len(row) > pwd_idx:
+                        stored_password = str(row[pwd_idx]).strip().lower()
+                        if stored_password == provided_password:
+                            student = {headers[i]: str(row[i]).strip() for i in range(len(headers)) if i < len(row)}
+                            print(f"[AUTH_SUCCESS] {provided_username}")
+                            return student
             
-            print(f"[AUTH_FAILED] No match for {provided_id}")
+            print(f"[AUTH_FAILED] No match for {provided_username}")
             return None
         except Exception as e:
             print(f"[ERROR] authenticate_student: {e}")
