@@ -180,54 +180,43 @@ a:hover {
 }
 
 .student-login {
-    background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+    background: #000;
     color: #fff !important;
-    padding: 12px 26px !important;
-    border-radius: 6px;
-    font-weight: 700;
-    letter-spacing: 1px;
+    padding: 10px 24px !important;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
     border: none;
     transition: var(--transition);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     position: relative;
     overflow: hidden;
     margin-left: 12px;
     cursor: pointer;
 }
 
-.student-login::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.6s;
-}
-
 .student-login:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-4px);
-    background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
-}
-
-.student-login:hover::before {
-    left: 100%;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+    background: #222;
 }
 
 .student-login:active {
-    transform: translateY(-2px);
+    transform: translateY(0px);
 }
 
 .teacher-login {
     background: transparent;
-    color: var(--text-primary) !important;
-    padding: 11px 26px !important;
-    border-radius: 6px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    border: 2px solid var(--text-primary);
+    color: #000 !important;
+    padding: 10px 24px !important;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    border: 2px solid #000;
     transition: var(--transition);
     margin-left: 8px;
     position: relative;
@@ -235,30 +224,15 @@ a:hover {
     overflow: hidden;
 }
 
-.teacher-login::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: var(--text-primary);
-    z-index: -1;
-    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 .teacher-login:hover {
+    background: #000;
     color: #fff !important;
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-4px);
-}
-
-.teacher-login:hover::before {
-    left: 0;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
 }
 
 .teacher-login:active {
-    transform: translateY(-2px);
+    transform: translateY(0px);
 }
 
 .logout-link {
