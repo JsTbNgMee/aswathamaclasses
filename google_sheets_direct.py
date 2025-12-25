@@ -80,8 +80,9 @@ class GoogleSheetsService:
         try:
             id_index = self._get_headers().index('id')
             cells = self.sheet.col_values(id_index + 1)
+            target_id = str(student_id).strip().lower()
             for i, cell_value in enumerate(cells):
-                if cell_value == student_id:
+                if str(cell_value).strip().lower() == target_id:
                     return i + 1  # Row numbers start at 1
             return None
         except Exception as e:
@@ -96,17 +97,24 @@ class GoogleSheetsService:
             
             students = []
             for row in rows[1:]:  # Skip header row
-                if row and row[0]:  # Check if ID exists
+                if row and any(row):  # Check if row is not completely empty
                     student = {}
                     for i, header in enumerate(headers):
                         if i < len(row):
+                            val = row[i]
                             if header.endswith('_json'):
                                 try:
-                                    student[header.replace('_json', '')] = json.loads(row[i]) if row[i] else []
+                                    student[header.replace('_json', '')] = json.loads(val) if val else []
                                 except:
                                     student[header.replace('_json', '')] = []
                             else:
-                                student[header] = row[i]
+                                student[header] = val
+                        else:
+                            # Handle missing columns in row
+                            if header.endswith('_json'):
+                                student[header.replace('_json', '')] = []
+                            else:
+                                student[header] = ''
                     students.append(student)
             
             print(f"[INFO] Retrieved {len(students)} students from sheet")
@@ -145,25 +153,28 @@ class GoogleSheetsService:
     def authenticate_student(self, student_id, password):
         """Authenticate student by ID and password"""
         try:
-            print(f"[DEBUG] Attempting to authenticate student: {student_id}")
+            print(f"[DEBUG] Attempting to authenticate student: ID='{student_id}', PWD='{password}'")
             student = self.get_student(student_id)
             if not student:
-                print(f"[WARNING] Student {student_id} not found in sheet")
+                print(f"[WARNING] Student '{student_id}' not found in sheet")
                 return None
             
-            # Strip whitespace and ensure string comparison
+            # String conversion and cleaning
+            stored_id = str(student.get('id', '')).strip()
+            provided_id = str(student_id).strip()
             stored_password = str(student.get('password', '')).strip()
             provided_password = str(password).strip()
             
-            print(f"[DEBUG] Stored password: '{stored_password}', Provided password: '{provided_password}'")
+            print(f"[DEBUG] ID Check: '{stored_id}' == '{provided_id}'")
+            print(f"[DEBUG] Password Check: '{stored_password}' == '{provided_password}'")
             
-            if stored_password == provided_password:
+            if stored_id == provided_id and stored_password == provided_password:
                 # Return student data without password
                 result = {k: v for k, v in student.items() if k != 'password'}
                 print(f"[INFO] Student {student_id} authenticated successfully")
                 return result
             else:
-                print(f"[WARNING] Password mismatch for student {student_id}")
+                print(f"[WARNING] Auth failure for {student_id}: ID match={stored_id==provided_id}, PWD match={stored_password==provided_password}")
             return None
         except Exception as e:
             print(f"[ERROR] Failed to authenticate student: {e}")

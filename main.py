@@ -154,17 +154,19 @@ def instagram():
 def student_login():
     """Student login page"""
     if request.method == 'POST':
-        student_id = request.form.get('student_id', '').strip()
-        password = request.form.get('password', '').strip()
+        student_id = str(request.form.get('student_id', '')).strip()
+        password = str(request.form.get('password', '')).strip()
         
         from student_data import authenticate_student
         student = authenticate_student(student_id, password)
         
         if student:
-            session['student_id'] = student['id']
+            session['student_id'] = str(student['id']).strip()
             session['student_name'] = student['name']
             return redirect(url_for('student_dashboard'))
         else:
+            # Debugging - log the failure with cleaned values
+            print(f"[AUTH_FAILED] ID: '{student_id}', PWD: '{password}'")
             return render_template('student_login.html', error='Invalid Student ID or Password')
     
     return render_template('student_login.html')
