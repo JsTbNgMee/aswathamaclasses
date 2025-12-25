@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Teacher Login - ASWATHAMA CLASSES{% endblock %}
+{% block content %}
+<section class="login-section" style="padding:100px 0;">
+    <div class="container" style="max-width:400px; background:#f9f9f9; padding:40px; border:1px solid #ddd;">
+        <h2 style="text-align:center; margin-bottom:30px;">Teacher Login</h2>
+        {% if error %}<p style="color:red; text-align:center;">{{ error }}</p>{% endif %}
+        <form method="POST">
+            <div style="margin-bottom:20px;">
+                <label>Username</label>
+                <input type="text" name="username" required style="width:100%; padding:12px; margin-top:5px; border:1px solid #ddd;">
+            </div>
+            <div style="margin-bottom:30px;">
+                <label>Password</label>
+                <input type="password" name="password" required style="width:100%; padding:12px; margin-top:5px; border:1px solid #ddd;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Login</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

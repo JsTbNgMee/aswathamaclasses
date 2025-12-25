@@ -168,6 +168,87 @@ def student_logout():
     session.clear()
     return redirect(url_for('student_login'))
 
+# ==================== TEACHER ROUTES ====================
+
+@app.route('/teacher/login', methods=['GET', 'POST'])
+def teacher_login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if username == 'admin' and password == 'aswathama2024': # Teacher credentials
+            session['teacher_logged_in'] = True
+            return redirect(url_for('teacher_dashboard'))
+        return render_template('teacher_login.html', error='Invalid credentials')
+    return render_template('teacher_login.html')
+
+@app.route('/teacher/dashboard')
+def teacher_dashboard():
+    if not session.get('teacher_logged_in'):
+        return redirect(url_for('teacher_login'))
+    from student_data import get_all_students
+    return render_template('teacher_dashboard.html', students=get_all_students())
+
+@app.route('/teacher/add-student', methods=['POST'])
+def teacher_add_student():
+    if not session.get('teacher_logged_in'): return redirect(url_for('teacher_login'))
+    from student_data import add_student
+    student_data = {
+        'id': request.form.get('id'),
+        'name': request.form.get('name'),
+        'password': request.form.get('password'),
+        'class': request.form.get('class'),
+        'email': '', 'phone': '', 'enrollment_date': datetime.now().strftime('%Y-%m-%d'),
+        'marks': {'Mathematics': 0, 'Science': 0, 'Physics': 0, 'Chemistry': 0},
+        'attendance': {'total_classes': 0, 'attended': 0, 'percentage': 0},
+        'progress': {'completion': 0, 'status': 'New', 'performance': 'N/A'}
+    }
+    add_student(student_data)
+    return redirect(url_for('teacher_dashboard'))
+
+@app.route('/teacher/edit-student/<student_id>', methods=['GET', 'POST'])
+def teacher_edit_student(student_id):
+    if not session.get('teacher_logged_in'): return redirect(url_for('teacher_login'))
+    from student_data import get_student, update_student
+    student = get_student(student_id)
+    if request.method == 'POST':
+        updated_data = student.copy()
+        updated_data['name'] = request.form.get('name')
+        updated_data['class'] = request.form.get('class')
+        updated_data['email'] = request.form.get('email')
+        updated_data['phone'] = request.form.get('phone')
+        
+        # Update Marks
+        for sub in updated_data['marks']:
+            updated_data['marks'][sub] = int(request.form.get(f'mark_{sub}', 0))
+            
+        # Update Attendance
+        att = updated_data['attendance']
+        att['attended'] = int(request.form.get('attended', 0))
+        att['total_classes'] = int(request.form.get('total_classes', 0))
+        att['percentage'] = (att['attended'] / att['total_classes'] * 100) if att['total_classes'] > 0 else 0
+        
+        # Update Progress
+        prog = updated_data['progress']
+        prog['completion'] = int(request.form.get('completion', 0))
+        prog['status'] = request.form.get('status')
+        
+        update_student(student_id, updated_data)
+        return redirect(url_for('teacher_dashboard'))
+    
+    return render_template('teacher_edit.html', student=student)
+
+@app.route('/teacher/delete-student/<student_id>', methods=['POST'])
+def teacher_delete_student(student_id):
+    if not session.get('teacher_logged_in'): return redirect(url_for('teacher_login'))
+    from student_data import delete_student
+    delete_student(student_id)
+    return redirect(url_for('teacher_dashboard'))
+
+@app.route('/teacher/logout')
+def teacher_logout():
+    session.pop('teacher_logged_in', None)
+    return redirect(url_for('teacher_login'))
+
 @app.route('/contact')
 def contact():
     """Contact page - Address and contact form"""

@@ -43,6 +43,9 @@
                 {% if session.get('student_id') %}
                     <li><a href="{{ url_for('student_dashboard') }}" class="nav-link">Dashboard</a></li>
                     <li><a href="{{ url_for('student_logout') }}" class="nav-link logout-link">Logout</a></li>
+                {% elif session.get('teacher_logged_in') %}
+                    <li><a href="{{ url_for('teacher_dashboard') }}" class="nav-link">Teacher Panel</a></li>
+                    <li><a href="{{ url_for('teacher_logout') }}" class="nav-link logout-link">Logout</a></li>
                 {% else %}
                     <li><a href="{{ url_for('student_login') }}" class="nav-link student-login">Student Login</a></li>
                 {% endif %}
