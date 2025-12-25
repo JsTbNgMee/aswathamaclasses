@@ -14,8 +14,13 @@ from student_data import authenticate_student, get_student
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'aswathama-classes-secret-key-secure'
-# Use a fallback for local development if DATABASE_URL is not set
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'sqlite:///local_students.db'
+
+# Handle Render's DATABASE_URL which often starts with 'postgres://'
+db_url = os.environ.get('DATABASE_URL')
+if db_url and db_url.startswith('postgres://'):
+    db_url = db_url.replace('postgres://', 'postgresql://', 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///local_students.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 from student_data import init_db
