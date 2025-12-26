@@ -4,14 +4,28 @@
 <section class="admin-section">
     <div class="container">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-            <h1>Batch Attendance</h1>
+            <h1>Attendance System</h1>
             <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-outline">Back to Dashboard</a>
         </div>
 
+        {% if success %}
+        <div class="alert success-alert" style="background:#d4edda; color:#155724; padding:15px; border:1px solid #c3e6cb; margin-bottom:30px;">
+            <p>{{ success }}</p>
+        </div>
+        {% endif %}
+
         <form action="{{ url_for('teacher_attendance') }}" method="POST">
-            <div class="admin-card" style="padding:20px; border:1px solid #000; margin-bottom:20px;">
-                <label style="font-weight:bold;">Date:</label>
-                <input type="date" name="date" value="{{ today }}" required style="padding:10px; margin-left:10px; border:1px solid #000;">
+            <div class="admin-card" style="padding:20px; border:1px solid #000; margin-bottom:20px; display:flex; align-items:center; gap:20px;">
+                <div>
+                    <label style="font-weight:bold;">Date:</label>
+                    <input type="date" name="date" value="{{ today }}" required style="padding:10px; margin-left:10px; border:1px solid #000;">
+                </div>
+                <div class="class-filter">
+                    <button type="button" class="tab-btn active" onclick="filterByClass('all')">All</button>
+                    <button type="button" class="tab-btn" onclick="filterByClass('Class 8')">Class 8</button>
+                    <button type="button" class="tab-btn" onclick="filterByClass('Class 9')">Class 9</button>
+                    <button type="button" class="tab-btn" onclick="filterByClass('Class 10')">Class 10</button>
+                </div>
             </div>
 
             <div class="attendance-table-wrapper">
@@ -23,9 +37,9 @@
                             <th style="padding:15px; text-align:center;">Mark Absent</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="attendance-body">
                         {% for student in students %}
-                        <tr style="border-bottom:1px solid #eee;">
+                        <tr class="student-row" data-class="{{ student.class or student.student_class }}" style="border-bottom:1px solid #eee;">
                             <td style="padding:15px;">{{ student.name }} ({{ student.id }})</td>
                             <td style="padding:15px;">{{ student.class or student.student_class }}</td>
                             <td style="padding:15px; text-align:center;">
@@ -37,21 +51,34 @@
                 </table>
             </div>
 
-            <div style="margin-top:30px; display:flex; gap:10px;">
-                <button type="submit" class="btn btn-primary" style="flex-grow:1; padding:20px;">Submit Attendance (All others will be marked Present)</button>
+            <div style="margin-top:30px;">
+                <button type="submit" class="btn btn-primary" style="width:100%; padding:20px;">Submit Attendance & Get Absentees List</button>
             </div>
         </form>
     </div>
 </section>
 
 <style>
+.class-filter {
+    display: flex;
+    gap: 10px;
+}
+.tab-btn {
+    background: transparent;
+    border: 1px solid #000;
+    padding: 8px 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+.tab-btn.active, .tab-btn:hover {
+    background: #000;
+    color: #fff;
+}
 .attendance-table-wrapper {
-    max-height: 600px;
+    max-height: 500px;
     overflow-y: auto;
     border: 1px solid #000;
-}
-.attendance-table-wrapper table {
-    position: relative;
 }
 .attendance-table-wrapper thead th {
     position: sticky;
@@ -59,4 +86,22 @@
     z-index: 10;
 }
 </style>
+
+<script>
+function filterByClass(className) {
+    // Update buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    // Filter rows
+    const rows = document.querySelectorAll('.student-row');
+    rows.forEach(row => {
+        if (className === 'all' || row.getAttribute('data-class').includes(className)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+</script>
 {% endblock %}

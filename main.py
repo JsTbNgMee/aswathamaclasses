@@ -305,28 +305,35 @@ def teacher_attendance():
         return redirect(url_for('teacher_login'))
     
     service = get_sheets_service()
+    students = service.get_all_students() if service else []
+    
     if request.method == 'POST':
         date = request.form.get('date', datetime.now().strftime('%Y-%m-%d'))
         absent_ids = request.form.getlist('absent_students')
         
-        students = service.get_all_students() if service else []
-        for student in students:
-            s_id = student.get('id')
-            status = 'Absent' if s_id in absent_ids else 'Present'
-            
-            # Update student attendance log
-            full_student = service.get_student(s_id)
-            if full_student:
-                log = full_student.get('attendance_log', [])
-                # Avoid duplicate for same date
-                log = [entry for entry in log if entry.get('date') != date]
-                log.append({'date': date, 'status': status})
-                full_student['attendance_log'] = log
-                service.update_student(s_id, full_student)
+        absentee_names = []
+        if service:
+            for student in students:
+                s_id = student.get('id')
+                status = 'Absent' if s_id in absent_ids else 'Present'
+                
+                if status == 'Absent':
+                    absentee_names.append(student.get('name', s_id))
+                
+                # Update student attendance log
+                full_student = service.get_student(s_id)
+                if full_student:
+                    log = full_student.get('attendance_log', [])
+                    # Avoid duplicate for same date
+                    log = [entry for entry in log if entry.get('date') != date]
+                    log.append({'date': date, 'status': status})
+                    full_student['attendance_log'] = log
+                    service.update_student(s_id, full_student)
         
-        return redirect(url_for('teacher_dashboard'))
+        # Show success message with absentee list
+        msg = f"Attendance submitted for {date}. Absentees: {', '.join(absentee_names) if absentee_names else 'None'}"
+        return render_template('teacher_attendance.html', students=students, today=date, success=msg, absentees=absentee_names)
 
-    students = service.get_all_students() if service else []
     return render_template('teacher_attendance.html', students=students, today=datetime.now().strftime('%Y-%m-%d'))
 
 @app.route('/teacher/logout')
