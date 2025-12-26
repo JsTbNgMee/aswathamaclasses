@@ -261,6 +261,23 @@ class GoogleSheetsService:
             print(f"Error in get_leaderboard: {e}")
             return {}
 
+    def batch_update_attendance(self, attendance_data, date):
+        """Batch update attendance for multiple students at once to improve performance"""
+        try:
+            # 1. Prepare values to append
+            rows_to_append = []
+            for s_id, status in attendance_data.items():
+                rows_to_append.append([str(s_id), str(date), str(status)])
+            
+            # 2. Append all rows at once
+            if rows_to_append:
+                self.attendance_sheet.append_rows(rows_to_append)
+            
+            return True
+        except Exception as e:
+            print(f"Error in batch_update_attendance: {e}")
+            return False
+
     def sync_auth_record(self, username, password, student_id):
         try:
             all_auth = self.auth_sheet.get_all_values()
