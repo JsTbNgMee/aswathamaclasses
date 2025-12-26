@@ -11,89 +11,77 @@ class GoogleSheetsService:
     def __init__(self):
         """Initialize Google Sheets service with service account credentials"""
         try:
-            # Get service account key from environment
-            service_account_json = os.environ.get('GOOGLE_SERVICE_ACCOUNT_KEY')
-            if not service_account_json:
-                raise ValueError("GOOGLE_SERVICE_ACCOUNT_KEY environment variable not set")
-            
-            # Clean common pasting errors
-            service_account_json = service_account_json.strip()
-            if service_account_json.startswith("'") and service_account_json.endswith("'"):
-                service_account_json = service_account_json[1:-1]
-            if service_account_json.startswith('"') and service_account_json.endswith('"'):
-                service_account_json = service_account_json[1:-1]
-                
             # Authenticate with Google Sheets API
             scopes = [
                 'https://www.googleapis.com/auth/spreadsheets',
                 'https://www.googleapis.com/auth/drive'
             ]
             
-            # Use raw string handling to preserve the private key format exactly as pasted
+            # Extract credentials directly from the environment
             raw_key = os.environ.get('GOOGLE_SERVICE_ACCOUNT_KEY', '').strip()
             
-            # Remove wrapping quotes if present
+            # Clean wrapping quotes
             if (raw_key.startswith("'") and raw_key.endswith("'")) or (raw_key.startswith('"') and raw_key.endswith('"')):
                 raw_key = raw_key[1:-1]
 
+            # Specialized fix for private_key formatting which causes JWT signature errors
             try:
-                # Direct parse first
+                # 1. Try standard JSON parse
                 service_account_info = json.loads(raw_key)
             except Exception:
-                # Handle common copy-paste corruptions
-                # 1. Newlines and backslashes
-                fixed_key = raw_key.replace('\\n', '\n').replace('\\\\', '\\')
-                
-                # 2. Fix the private_key field specifically (most sensitive part)
-                if '"private_key":' in fixed_key:
-                    pk_start = fixed_key.find('"private_key":')
-                    pk_quote_start = fixed_key.find('"', pk_start + 14)
-                    pk_quote_end = fixed_key.find('"', pk_quote_start + 1)
-                    
-                    if pk_quote_start != -1 and pk_quote_end != -1:
-                        pk_content = fixed_key[pk_quote_start+1 : pk_quote_end]
-                        # Ensure the BEGIN/END headers exist and newlines are correct
-                        if "BEGIN PRIVATE KEY" in pk_content:
-                            pk_content = pk_content.replace(' ', '\n').replace('-----BEGIN\nPRIVATE\nKEY-----', '-----BEGIN PRIVATE KEY-----').replace('-----END\nPRIVATE\nKEY-----', '-----END PRIVATE KEY-----')
-                            fixed_key = fixed_key[:pk_quote_start+1] + pk_content + fixed_key[pk_quote_end:]
-                
+                # 2. Try handling escaped newlines
                 try:
-                    service_account_info = json.loads(fixed_key)
-                except Exception as e:
-                    # Final attempt: just the dict keys we need
+                    service_account_info = json.loads(raw_key.replace('\\n', '\n'))
+                except Exception:
+                    # 3. Manual Extraction Fallback
                     import re
-                    # Try to extract keys using regex if JSON is totally broken
-                    def extract(pattern):
-                        m = re.search(pattern, raw_key)
+                    def extract(key_name):
+                        m = re.search(f'"{key_name}":\s*"([^"]+)"', raw_key)
                         return m.group(1) if m else None
                     
                     service_account_info = {
                         "type": "service_account",
-                        "project_id": extract(r'"project_id":\s*"([^"]+)"'),
-                        "private_key_id": extract(r'"private_key_id":\s*"([^"]+)"'),
-                        "private_key": extract(r'"private_key":\s*"([^"]+)"'),
-                        "client_email": extract(r'"client_email":\s*"([^"]+)"'),
-                        "client_id": extract(r'"client_id":\s*"([^"]+)"'),
+                        "project_id": extract("project_id"),
+                        "private_key_id": extract("private_key_id"),
+                        "private_key": extract("private_key"),
+                        "client_email": extract("client_email"),
+                        "client_id": extract("client_id"),
                         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                         "token_uri": "https://oauth2.googleapis.com/token",
                         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                        "client_x509_cert_url": extract(r'"client_x509_cert_url":\s*"([^"]+)"')
+                        "client_x509_cert_url": extract("client_x509_cert_url")
                     }
-                    if service_account_info["private_key"]:
-                        service_account_info["private_key"] = service_account_info["private_key"].replace('\\n', '\n')
-                    else:
-                        raise ValueError(f"Complete JSON parse failure: {e}")
 
-            # Re-fetch Sheet ID and set it properly to fix LSP error
-            self.sheet_id = os.environ.get('GOOGLE_SHEETS_ID')
+            # MANDATORY: Fix the private_key format if it was escaped
+            if service_account_info.get("private_key"):
+                pk = service_account_info["private_key"]
+                # Convert literal \n to actual newlines
+                pk = pk.replace('\\n', '\n')
+                # Ensure it has correct headers and format
+                if "BEGIN PRIVATE KEY" in pk:
+                    # Remove any accidental extra spaces or double newlines that might break the signature
+                    header = "-----BEGIN PRIVATE KEY-----"
+                    footer = "-----END PRIVATE KEY-----"
+                    if header in pk and footer in pk:
+                        content_parts = pk.split(header)
+                        if len(content_parts) > 1:
+                            inner_parts = content_parts[1].split(footer)
+                            if len(inner_parts) > 0:
+                                content = inner_parts[0].strip()
+                                # Re-encode content to ensure it's clean base64 with proper line breaks
+                                clean_content = "".join(content.split())
+                                formatted_pk = header + "\n"
+                                for i in range(0, len(clean_content), 64):
+                                    formatted_pk += clean_content[i:i+64] + "\n"
+                                formatted_pk += footer + "\n"
+                                pk = formatted_pk
+                service_account_info["private_key"] = pk
+
+            self.sheet_id = os.environ.get('GOOGLE_SHEETS_ID', '')
             if not self.sheet_id:
                 raise ValueError("GOOGLE_SHEETS_ID environment variable not set")
-            
-            credentials = Credentials.from_service_account_info(
-                service_account_info,
-                scopes=scopes
-            )
-            
+                
+            credentials = Credentials.from_service_account_info(service_account_info, scopes=scopes)
             self.client = gspread.authorize(credentials)
             self.spreadsheet = self.client.open_by_key(self.sheet_id)
             
