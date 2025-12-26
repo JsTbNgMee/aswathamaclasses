@@ -6,39 +6,84 @@
         <h2 class="section-title">Academic Excellence</h2>
         <p class="section-subtitle">Celebrating our top performers in weekly tests</p>
 
-        <div class="leaderboard-grid">
-            {% if leaderboard_data %}
-                {% for test in leaderboard_data %}
-                <div class="leaderboard-card">
-                    <div class="test-header">
-                        <h3>{{ test.test_name }}</h3>
-                    </div>
-                    <ul class="topper-list">
-                        {% for topper in test.toppers %}
-                        <li class="topper-item">
-                            <span class="rank rank-{{ loop.index }}">{{ loop.index }}</span>
-                            <span class="name">{{ topper.name }}</span>
-                            <span class="marks">{{ topper.marks }} Marks</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="empty-state">
-                    <p>Leaderboard data will appear once weekly tests are conducted.</p>
-                </div>
-            {% endif %}
+        <div class="class-tabs">
+            <button class="tab-btn active" onclick="showClass('class-8')">Class 8</button>
+            <button class="tab-btn" onclick="showClass('class-9')">Class 9</button>
+            <button class="tab-btn" onclick="showClass('class-10')">Class 10</button>
         </div>
+
+        {% if leaderboard_data %}
+            {% for cls, tests in leaderboard_data.items() %}
+            <div id="class-{{ cls.split(' ')[1] }}" class="class-section {{ 'active' if loop.first else '' }}">
+                <h3 class="class-heading">{{ cls }} Rankings</h3>
+                <div class="leaderboard-grid">
+                    {% for test in tests %}
+                    <div class="leaderboard-card">
+                        <div class="test-header">
+                            <h3>{{ test.test_name }}</h3>
+                        </div>
+                        <ul class="topper-list">
+                            {% for topper in test.toppers %}
+                            <li class="topper-item">
+                                <span class="rank rank-{{ loop.index }}">{{ loop.index }}</span>
+                                <span class="name">{{ topper.name }}</span>
+                                <span class="marks">{{ topper.marks }} Marks</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <p>Leaderboard data will appear once weekly tests are conducted.</p>
+            </div>
+        {% endif %}
     </div>
 </section>
 
 <style>
+.class-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 40px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+}
+.tab-btn {
+    background: transparent;
+    border: 1px solid #000;
+    padding: 10px 25px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+.tab-btn.active, .tab-btn:hover {
+    background: #000;
+    color: #fff;
+}
+.class-section {
+    display: none;
+}
+.class-section.active {
+    display: block;
+}
+.class-heading {
+    text-align: center;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 1.5rem;
+}
 .leaderboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
-    margin-top: 40px;
 }
 .leaderboard-card {
     border: 1px solid #000;
@@ -56,7 +101,7 @@
 }
 .test-header h3 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -99,9 +144,22 @@
 }
 .empty-state {
     text-align: center;
-    grid-column: 1 / -1;
     padding: 40px;
     border: 1px dashed #000;
 }
 </style>
+
+<script>
+function showClass(classId) {
+    document.querySelectorAll('.class-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    document.getElementById(classId).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+</script>
 {% endblock %}

@@ -177,58 +177,78 @@ class GoogleSheetsService:
             return None
 
     def get_leaderboard(self):
-        """Calculate leaderboard based on latest test results"""
+        """Calculate leaderboard based on latest test results, grouped by class"""
         try:
             all_tests = self.tests_sheet.get_all_values()
             if not all_tests or len(all_tests) < 2:
-                return []
+                return {}
             
             headers = [h.lower().strip() for h in all_tests[0]]
-            # Find indices for studentid, testname, marks
             try:
                 sid_idx = headers.index('studentid')
                 name_idx = headers.index('testname')
                 marks_idx = headers.index('marks')
             except ValueError:
-                return []
+                return {}
             
-            # Map student IDs to Names
+            # Map student IDs to Names and Classes
             students = self.get_all_students()
-            student_map = {str(s.get('id')).strip().lower(): s.get('name') for s in students}
+            student_info = {str(s.get('id')).strip().lower(): {
+                'name': s.get('name'),
+                'class': str(s.get('student_class', '')).strip()
+            } for s in students}
             
-            # Group by Test Name
-            test_rankings = {}
+            # Group by Class, then by Test Name
+            class_rankings = {
+                'Class 8': {},
+                'Class 9': {},
+                'Class 10': {}
+            }
+            
             for row in all_tests[1:]:
                 if len(row) <= max(sid_idx, name_idx, marks_idx): continue
-                test_name = row[name_idx].strip()
                 s_id = str(row[sid_idx]).strip().lower()
+                test_name = row[name_idx].strip()
+                
+                info = student_info.get(s_id)
+                if not info: continue
+                
+                s_class = info['class']
+                # Normalize class name to match our keys
+                if '8' in s_class: key = 'Class 8'
+                elif '9' in s_class: key = 'Class 9'
+                elif '10' in s_class: key = 'Class 10'
+                else: continue
+                
                 try:
                     marks = int(row[marks_idx])
                 except:
                     marks = 0
                 
-                if test_name not in test_rankings:
-                    test_rankings[test_name] = []
+                if test_name not in class_rankings[key]:
+                    class_rankings[key][test_name] = []
                 
-                test_rankings[test_name].append({
-                    'name': student_map.get(s_id, s_id),
+                class_rankings[key][test_name].append({
+                    'name': info['name'],
                     'marks': marks
                 })
             
             # Sort and format for display
-            leaderboard = []
-            for test, scores in test_rankings.items():
-                # Sort by marks descending
-                sorted_scores = sorted(scores, key=lambda x: x['marks'], reverse=True)
-                leaderboard.append({
-                    'test_name': test,
-                    'toppers': sorted_scores[:3] # Top 3 per test
-                })
+            final_leaderboard = {}
+            for cls, tests in class_rankings.items():
+                if not tests: continue
+                final_leaderboard[cls] = []
+                for test, scores in tests.items():
+                    sorted_scores = sorted(scores, key=lambda x: x['marks'], reverse=True)
+                    final_leaderboard[cls].append({
+                        'test_name': test,
+                        'toppers': sorted_scores[:3]
+                    })
             
-            return leaderboard
+            return final_leaderboard
         except Exception as e:
             print(f"Error in get_leaderboard: {e}")
-            return []
+            return {}
 
     def sync_auth_record(self, username, password, student_id):
         try:
