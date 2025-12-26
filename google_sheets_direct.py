@@ -37,26 +37,52 @@ class GoogleSheetsService:
                 raw_key = raw_key[1:-1]
 
             try:
-                # First attempt: direct parse
+                # Direct parse first
                 service_account_info = json.loads(raw_key)
             except Exception:
+                # Handle common copy-paste corruptions
+                # 1. Newlines and backslashes
+                fixed_key = raw_key.replace('\\n', '\n').replace('\\\\', '\\')
+                
+                # 2. Fix the private_key field specifically (most sensitive part)
+                if '"private_key":' in fixed_key:
+                    pk_start = fixed_key.find('"private_key":')
+                    pk_quote_start = fixed_key.find('"', pk_start + 14)
+                    pk_quote_end = fixed_key.find('"', pk_quote_start + 1)
+                    
+                    if pk_quote_start != -1 and pk_quote_end != -1:
+                        pk_content = fixed_key[pk_quote_start+1 : pk_quote_end]
+                        # Ensure the BEGIN/END headers exist and newlines are correct
+                        if "BEGIN PRIVATE KEY" in pk_content:
+                            pk_content = pk_content.replace(' ', '\n').replace('-----BEGIN\nPRIVATE\nKEY-----', '-----BEGIN PRIVATE KEY-----').replace('-----END\nPRIVATE\nKEY-----', '-----END PRIVATE KEY-----')
+                            fixed_key = fixed_key[:pk_quote_start+1] + pk_content + fixed_key[pk_quote_end:]
+                
                 try:
-                    # Second attempt: handle escaped newlines
-                    fixed_key = raw_key.replace('\\n', '\n')
                     service_account_info = json.loads(fixed_key)
-                except Exception:
-                    # Third attempt: handle literal newlines and control characters
+                except Exception as e:
+                    # Final attempt: just the dict keys we need
                     import re
-                    # Remove non-printable characters except for whitespace
-                    cleaned_key = "".join(c for c in raw_key if c.isprintable() or c in "\n\r\t")
-                    # Special fix for private_key field which often has \n
-                    if '"private_key":' in cleaned_key:
-                        # Extract the private key part
-                        pk_match = re.search(r'("private_key":\s*")(.*?)(")', cleaned_key, re.DOTALL)
-                        if pk_match:
-                            pk_content = pk_match.group(2).replace('\\n', '\n')
-                            cleaned_key = cleaned_key[:pk_match.start(2)] + pk_content + cleaned_key[pk_match.end(2):]
-                    service_account_info = json.loads(cleaned_key)
+                    # Try to extract keys using regex if JSON is totally broken
+                    def extract(pattern):
+                        m = re.search(pattern, raw_key)
+                        return m.group(1) if m else None
+                    
+                    service_account_info = {
+                        "type": "service_account",
+                        "project_id": extract(r'"project_id":\s*"([^"]+)"'),
+                        "private_key_id": extract(r'"private_key_id":\s*"([^"]+)"'),
+                        "private_key": extract(r'"private_key":\s*"([^"]+)"'),
+                        "client_email": extract(r'"client_email":\s*"([^"]+)"'),
+                        "client_id": extract(r'"client_id":\s*"([^"]+)"'),
+                        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                        "token_uri": "https://oauth2.googleapis.com/token",
+                        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                        "client_x509_cert_url": extract(r'"client_x509_cert_url":\s*"([^"]+)"')
+                    }
+                    if service_account_info["private_key"]:
+                        service_account_info["private_key"] = service_account_info["private_key"].replace('\\n', '\n')
+                    else:
+                        raise ValueError(f"Complete JSON parse failure: {e}")
 
             # Re-fetch Sheet ID and set it properly to fix LSP error
             self.sheet_id = os.environ.get('GOOGLE_SHEETS_ID')
