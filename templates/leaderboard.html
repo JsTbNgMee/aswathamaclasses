@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard - ASWATHAMA CLASSES{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">Academic Excellence</h2>
+        <p class="section-subtitle">Celebrating our top performers in weekly tests</p>
+
+        <div class="leaderboard-grid">
+            {% if leaderboard_data %}
+                {% for test in leaderboard_data %}
+                <div class="leaderboard-card">
+                    <div class="test-header">
+                        <h3>{{ test.test_name }}</h3>
+                    </div>
+                    <ul class="topper-list">
+                        {% for topper in test.toppers %}
+                        <li class="topper-item">
+                            <span class="rank rank-{{ loop.index }}">{{ loop.index }}</span>
+                            <span class="name">{{ topper.name }}</span>
+                            <span class="marks">{{ topper.marks }} Marks</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>Leaderboard data will appear once weekly tests are conducted.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<style>
+.leaderboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+.leaderboard-card {
+    border: 1px solid #000;
+    padding: 20px;
+    background: #fff;
+    transition: transform 0.3s ease;
+}
+.leaderboard-card:hover {
+    transform: translateY(-5px);
+}
+.test-header {
+    border-bottom: 2px solid #000;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+.test-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.topper-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.topper-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+.topper-item:last-child {
+    border-bottom: none;
+}
+.rank {
+    width: 30px;
+    height: 30px;
+    background: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-right: 15px;
+}
+.rank-1 { background: #000; }
+.rank-2 { background: #333; }
+.rank-3 { background: #666; }
+.name {
+    flex-grow: 1;
+    font-weight: 500;
+}
+.marks {
+    font-weight: bold;
+    color: #000;
+}
+.empty-state {
+    text-align: center;
+    grid-column: 1 / -1;
+    padding: 40px;
+    border: 1px dashed #000;
+}
+</style>
+{% endblock %}

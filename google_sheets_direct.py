@@ -176,6 +176,60 @@ class GoogleSheetsService:
             print(f"Error in get_student: {e}")
             return None
 
+    def get_leaderboard(self):
+        """Calculate leaderboard based on latest test results"""
+        try:
+            all_tests = self.tests_sheet.get_all_values()
+            if not all_tests or len(all_tests) < 2:
+                return []
+            
+            headers = [h.lower().strip() for h in all_tests[0]]
+            # Find indices for studentid, testname, marks
+            try:
+                sid_idx = headers.index('studentid')
+                name_idx = headers.index('testname')
+                marks_idx = headers.index('marks')
+            except ValueError:
+                return []
+            
+            # Map student IDs to Names
+            students = self.get_all_students()
+            student_map = {str(s.get('id')).strip().lower(): s.get('name') for s in students}
+            
+            # Group by Test Name
+            test_rankings = {}
+            for row in all_tests[1:]:
+                if len(row) <= max(sid_idx, name_idx, marks_idx): continue
+                test_name = row[name_idx].strip()
+                s_id = str(row[sid_idx]).strip().lower()
+                try:
+                    marks = int(row[marks_idx])
+                except:
+                    marks = 0
+                
+                if test_name not in test_rankings:
+                    test_rankings[test_name] = []
+                
+                test_rankings[test_name].append({
+                    'name': student_map.get(s_id, s_id),
+                    'marks': marks
+                })
+            
+            # Sort and format for display
+            leaderboard = []
+            for test, scores in test_rankings.items():
+                # Sort by marks descending
+                sorted_scores = sorted(scores, key=lambda x: x['marks'], reverse=True)
+                leaderboard.append({
+                    'test_name': test,
+                    'toppers': sorted_scores[:3] # Top 3 per test
+                })
+            
+            return leaderboard
+        except Exception as e:
+            print(f"Error in get_leaderboard: {e}")
+            return []
+
     def sync_auth_record(self, username, password, student_id):
         try:
             all_auth = self.auth_sheet.get_all_values()

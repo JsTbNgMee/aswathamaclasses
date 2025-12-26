@@ -148,6 +148,13 @@ def youtube():
     videos = yt_service.get_latest_videos(max_results=12) if yt_service.is_configured() else []
     return render_template('youtube.html', videos=videos)
 
+@app.route('/leaderboard')
+def leaderboard():
+    """Leaderboard page - Display toppers for each test"""
+    service = get_sheets_service()
+    data = service.get_leaderboard() if service else []
+    return render_template('leaderboard.html', leaderboard_data=data)
+
 @app.route('/instagram')
 def instagram():
     """Instagram page - Link to Instagram profile"""
