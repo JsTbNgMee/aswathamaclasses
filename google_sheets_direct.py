@@ -1,6 +1,6 @@
 """
 Google Sheets Direct Integration - Uses official Google Sheets API via gspread
-Authenticates with service account credentials and reads/writes directly to Google Sheets
+Authenticates with service account credentials from a local JSON file
 """
 import os
 import json
@@ -10,7 +10,7 @@ from google.oauth2.service_account import Credentials
 
 class GoogleSheetsService:
     def __init__(self):
-        """Initialize Google Sheets service with service account credentials"""
+        """Initialize Google Sheets service with service account credentials from file"""
         try:
             # Authenticate with Google Sheets API
             scopes = [
@@ -18,40 +18,28 @@ class GoogleSheetsService:
                 'https://www.googleapis.com/auth/drive'
             ]
             
-            # Extract credentials directly from the environment
-            raw_key = os.environ.get('GOOGLE_SERVICE_ACCOUNT_KEY', '').strip()
-            self.sheet_id = os.environ.get('GOOGLE_SHEETS_ID', '').strip()
+            # Load credentials from file
+            creds_path = os.path.join("cred", "service_account.json")
+            if not os.path.exists(creds_path):
+                raise FileNotFoundError(f"Credentials file not found at {creds_path}")
+                
+            with open(creds_path) as f:
+                service_account_info = json.load(f)
             
-            if not raw_key:
-                raise ValueError("GOOGLE_SERVICE_ACCOUNT_KEY environment variable not set")
+            print("[INFO] Google Sheets creds loaded from file")
+            
+            self.sheet_id = os.environ.get('GOOGLE_SHEETS_ID', '').strip()
             if not self.sheet_id:
                 raise ValueError("GOOGLE_SHEETS_ID environment variable not set")
             
-            # Clean wrapping quotes
-            if (raw_key.startswith("'") and raw_key.endswith("'")) or (raw_key.startswith('"') and raw_key.endswith('"')):
-                raw_key = raw_key[1:-1]
-
-            # Parse JSON
-            try:
-                service_account_info = json.loads(raw_key)
-            except Exception:
-                # Handle literal \n sequences
-                try:
-                    service_account_info = json.loads(raw_key.replace('\\n', '\n'))
-                except Exception as e:
-                    raise ValueError(f"Failed to parse GOOGLE_SERVICE_ACCOUNT_KEY as JSON: {e}")
-
-            # Robust Private Key Formatting
-            if "private_key" in service_account_info:
+            # Robust Private Key Formatting (in case user pasted it into the file with literal \n)
+            if "private_key" in service_account_info and service_account_info["private_key"]:
                 pk = service_account_info["private_key"]
-                # Normalize newlines
                 pk = pk.replace('\\n', '\n')
-                # Ensure it has the standard PEM format
                 header = "-----BEGIN PRIVATE KEY-----"
                 footer = "-----END PRIVATE KEY-----"
                 if header in pk and footer in pk:
                     content = pk.split(header)[1].split(footer)[0].strip()
-                    # Remove all whitespace and re-wrap
                     clean_content = "".join(content.split())
                     wrapped = "\n".join(clean_content[i:i+64] for i in range(0, len(clean_content), 64))
                     service_account_info["private_key"] = f"{header}\n{wrapped}\n{footer}\n"
