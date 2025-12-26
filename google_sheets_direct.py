@@ -19,9 +19,14 @@ class GoogleSheetsService:
             ]
             
             # Load credentials from file
-            creds_path = os.path.join("cred", "service_account.json")
+            creds_path = "secret-drake-434705-j6-14adf76d54a6.json"
             if not os.path.exists(creds_path):
-                raise FileNotFoundError(f"Credentials file not found at {creds_path}")
+                # Try in cred/ as a fallback or if user puts it there
+                alt_path = os.path.join("cred", creds_path)
+                if os.path.exists(alt_path):
+                    creds_path = alt_path
+                else:
+                    raise FileNotFoundError(f"Credentials file not found at {creds_path}")
                 
             with open(creds_path) as f:
                 service_account_info = json.load(f)
