@@ -14,7 +14,11 @@
                 <input type="text" name="id" placeholder="Student ID (e.g. STU001)" required style="padding:12px; border:1px solid #ddd;">
                 <input type="text" name="name" placeholder="Full Name" required style="padding:12px; border:1px solid #ddd;">
                 <input type="password" name="password" placeholder="Password" required style="padding:12px; border:1px solid #ddd;">
-                <input type="text" name="class" placeholder="Class (e.g. Class 10)" required style="padding:12px; border:1px solid #ddd;">
+                <select name="class" required style="padding:12px; border:1px solid #ddd;">
+                    <option value="Class 8">Class 8</option>
+                    <option value="Class 9">Class 9</option>
+                    <option value="Class 10">Class 10</option>
+                </select>
                 <button type="submit" class="btn btn-primary">Add Student</button>
             </form>
         </div>

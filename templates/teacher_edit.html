@@ -14,7 +14,11 @@
                 <h3>Basic Information</h3>
                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:20px; margin-top:15px;">
                     <input type="text" name="name" value="{{ student.name }}" placeholder="Name" required style="padding:12px; border:1px solid #ddd;">
-                    <input type="text" name="class" value="{{ student.class }}" placeholder="Class" required style="padding:12px; border:1px solid #ddd;">
+                    <select name="class" required style="padding:12px; border:1px solid #ddd;">
+                        <option value="Class 8" {% if student.student_class == 'Class 8' or student.class == 'Class 8' %}selected{% endif %}>Class 8</option>
+                        <option value="Class 9" {% if student.student_class == 'Class 9' or student.class == 'Class 9' %}selected{% endif %}>Class 9</option>
+                        <option value="Class 10" {% if student.student_class == 'Class 10' or student.class == 'Class 10' %}selected{% endif %}>Class 10</option>
+                    </select>
                     <input type="email" name="email" value="{{ student.email }}" placeholder="Email" style="padding:12px; border:1px solid #ddd;">
                     <input type="text" name="phone" value="{{ student.phone }}" placeholder="Phone" style="padding:12px; border:1px solid #ddd;">
                 </div>

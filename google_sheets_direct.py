@@ -204,21 +204,30 @@ class GoogleSheetsService:
                 'Class 9': {},
                 'Class 10': {}
             }
-            
+
             for row in all_tests[1:]:
                 if len(row) <= max(sid_idx, name_idx, marks_idx): continue
                 s_id = str(row[sid_idx]).strip().lower()
                 test_name = row[name_idx].strip()
                 
                 info = student_info.get(s_id)
-                if not info: continue
+                # Fallback: If student class is not in Student info, we try to find it from the test name
+                # or default to Class 10 (most common for coaching)
+                s_class = info.get('class', '') if info else ''
                 
-                s_class = info['class']
+                if not s_class:
+                    # Attempt to extract class from test name (e.g., "Class 9 - Math")
+                    test_name_lower = test_name.lower()
+                    if 'class 8' in test_name_lower or '8th' in test_name_lower: s_class = 'Class 8'
+                    elif 'class 9' in test_name_lower or '9th' in test_name_lower: s_class = 'Class 9'
+                    elif 'class 10' in test_name_lower or '10th' in test_name_lower: s_class = 'Class 10'
+                    else: s_class = 'Class 10' # Default fallback
+                
                 # Normalize class name to match our keys
+                key = 'Class 10'
                 if '8' in s_class: key = 'Class 8'
                 elif '9' in s_class: key = 'Class 9'
                 elif '10' in s_class: key = 'Class 10'
-                else: continue
                 
                 try:
                     marks = int(row[marks_idx])
@@ -228,22 +237,24 @@ class GoogleSheetsService:
                 if test_name not in class_rankings[key]:
                     class_rankings[key][test_name] = []
                 
+                student_name = info.get('name', s_id) if info else s_id
                 class_rankings[key][test_name].append({
-                    'name': info['name'],
+                    'name': student_name,
                     'marks': marks
                 })
             
             # Sort and format for display
             final_leaderboard = {}
-            for cls, tests in class_rankings.items():
-                if not tests: continue
-                final_leaderboard[cls] = []
-                for test, scores in tests.items():
-                    sorted_scores = sorted(scores, key=lambda x: x['marks'], reverse=True)
-                    final_leaderboard[cls].append({
-                        'test_name': test,
-                        'toppers': sorted_scores[:3]
-                    })
+            if class_rankings:
+                for cls, tests in class_rankings.items():
+                    if not tests: continue
+                    final_leaderboard[cls] = []
+                    for test, scores in tests.items():
+                        sorted_scores = sorted(scores, key=lambda x: x['marks'], reverse=True)
+                        final_leaderboard[cls].append({
+                            'test_name': test,
+                            'toppers': sorted_scores[:3]
+                        })
             
             return final_leaderboard
         except Exception as e:
