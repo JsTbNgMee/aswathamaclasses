@@ -299,6 +299,36 @@ def teacher_delete_student(student_id):
         service.delete_student(student_id)
     return redirect(url_for('teacher_dashboard'))
 
+@app.route('/teacher/attendance', methods=['GET', 'POST'])
+def teacher_attendance():
+    if not session.get('teacher_logged_in'):
+        return redirect(url_for('teacher_login'))
+    
+    service = get_sheets_service()
+    if request.method == 'POST':
+        date = request.form.get('date', datetime.now().strftime('%Y-%m-%d'))
+        absent_ids = request.form.getlist('absent_students')
+        
+        students = service.get_all_students() if service else []
+        for student in students:
+            s_id = student.get('id')
+            status = 'Absent' if s_id in absent_ids else 'Present'
+            
+            # Update student attendance log
+            full_student = service.get_student(s_id)
+            if full_student:
+                log = full_student.get('attendance_log', [])
+                # Avoid duplicate for same date
+                log = [entry for entry in log if entry.get('date') != date]
+                log.append({'date': date, 'status': status})
+                full_student['attendance_log'] = log
+                service.update_student(s_id, full_student)
+        
+        return redirect(url_for('teacher_dashboard'))
+
+    students = service.get_all_students() if service else []
+    return render_template('teacher_attendance.html', students=students, today=datetime.now().strftime('%Y-%m-%d'))
+
 @app.route('/teacher/logout')
 def teacher_logout():
     session.pop('teacher_logged_in', None)

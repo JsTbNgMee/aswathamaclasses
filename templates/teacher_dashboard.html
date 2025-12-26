@@ -5,7 +5,10 @@
     <div class="container">
         <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px;">
             <h1>Teacher Dashboard</h1>
-            <a href="{{ url_for('teacher_logout') }}" class="btn btn-outline" style="padding:10px 20px;">Logout</a>
+            <div style="display:flex; gap:10px;">
+                <a href="{{ url_for('teacher_attendance') }}" class="btn btn-primary" style="padding:10px 20px;">Mark Attendance</a>
+                <a href="{{ url_for('teacher_logout') }}" class="btn btn-outline" style="padding:10px 20px;">Logout</a>
+            </div>
         </div>
 
         <div class="admin-card" style="background:#f9f9f9; padding:30px; border:1px solid #ddd; margin-bottom:40px;">
