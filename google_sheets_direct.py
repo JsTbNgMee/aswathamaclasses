@@ -112,6 +112,11 @@ class GoogleSheetsService:
             return None
     
     def get_all_students(self):
+        """Get all students with simple caching"""
+        # Simple cache for 30 seconds
+        if hasattr(self, '_students_cache') and (time.time() - self._students_cache_time < 30):
+            return self._students_cache
+            
         try:
             headers = self._get_headers()
             rows = self.sheet.get_all_values()
@@ -120,6 +125,9 @@ class GoogleSheetsService:
                 if row and any(row):
                     student = {headers[i]: row[i] for i in range(len(headers)) if i < len(row)}
                     students.append(student)
+            
+            self._students_cache = students
+            self._students_cache_time = time.time()
             return students
         except:
             return []
@@ -177,7 +185,10 @@ class GoogleSheetsService:
             return None
 
     def get_leaderboard(self):
-        """Calculate leaderboard based on latest test results, grouped by class"""
+        """Calculate leaderboard with caching"""
+        if hasattr(self, '_leaderboard_cache') and (time.time() - self._leaderboard_cache_time < 60):
+            return self._leaderboard_cache
+
         try:
             all_tests = self.tests_sheet.get_all_values()
             if not all_tests or len(all_tests) < 2:
@@ -256,6 +267,8 @@ class GoogleSheetsService:
                             'toppers': sorted_scores[:3]
                         })
             
+            self._leaderboard_cache = final_leaderboard
+            self._leaderboard_cache_time = time.time()
             return final_leaderboard
         except Exception as e:
             print(f"Error in get_leaderboard: {e}")

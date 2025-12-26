@@ -311,24 +311,17 @@ def teacher_attendance():
         date = request.form.get('date', datetime.now().strftime('%Y-%m-%d'))
         absent_ids = request.form.getlist('absent_students')
         
+        attendance_map = {}
         absentee_names = []
+        for student in students:
+            s_id = student.get('id')
+            status = 'Absent' if s_id in absent_ids else 'Present'
+            attendance_map[s_id] = status
+            if status == 'Absent':
+                absentee_names.append(student.get('name', s_id))
+        
         if service:
-            for student in students:
-                s_id = student.get('id')
-                status = 'Absent' if s_id in absent_ids else 'Present'
-                
-                if status == 'Absent':
-                    absentee_names.append(student.get('name', s_id))
-                
-                # Update student attendance log
-                full_student = service.get_student(s_id)
-                if full_student:
-                    log = full_student.get('attendance_log', [])
-                    # Avoid duplicate for same date
-                    log = [entry for entry in log if entry.get('date') != date]
-                    log.append({'date': date, 'status': status})
-                    full_student['attendance_log'] = log
-                    service.update_student(s_id, full_student)
+            service.batch_update_attendance(attendance_map, date)
         
         # Show success message with absentee list
         msg = f"Attendance submitted for {date}. Absentees: {', '.join(absentee_names) if absentee_names else 'None'}"
