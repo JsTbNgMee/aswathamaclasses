@@ -10,7 +10,7 @@ from google.oauth2.service_account import Credentials
 
 class GoogleSheetsService:
     def __init__(self):
-        """Initialize Google Sheets service with service account credentials from file"""
+        """Initialize Google Sheets service with service account credentials from environment variable"""
         try:
             # Authenticate with Google Sheets API
             scopes = [
@@ -18,20 +18,14 @@ class GoogleSheetsService:
                 'https://www.googleapis.com/auth/drive'
             ]
             
-            # Load credentials from file
-            creds_path = "service_account.json"
-            if not os.path.exists(creds_path):
-                # Try in cred/ as a fallback or if user puts it there
-                alt_path = os.path.join("cred", creds_path)
-                if os.path.exists(alt_path):
-                    creds_path = alt_path
-                else:
-                    raise FileNotFoundError(f"Credentials file not found at {creds_path}")
+            # Load credentials from environment variable
+            creds_json = os.environ.get("GOOGLE_SHEETS_CREDS")
+            if not creds_json:
+                raise ValueError("GOOGLE_SHEETS_CREDS environment variable not set")
                 
-            with open(creds_path) as f:
-                service_account_info = json.load(f)
+            service_account_info = json.loads(creds_json)
             
-            print("[INFO] Google Sheets creds loaded from file")
+            print("[INFO] Google Sheets creds loaded from environment variable")
             
             self.sheet_id = os.environ.get('GOOGLE_SHEETS_ID', '').strip()
             if not self.sheet_id:

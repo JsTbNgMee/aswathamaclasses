@@ -5,6 +5,9 @@ Author: Senior Full-Stack Developer
 Description: A premium, minimalist coaching institute website with black & white theme
 """
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from datetime import datetime
 import os
@@ -166,7 +169,6 @@ def student_login():
             session['student_name'] = student.get('name', username)
             return redirect(url_for('student_dashboard'))
         else:
-            print(f"[AUTH_FAILED] User: '{username}', PWD: '{password}'")
             return render_template('student_login.html', error='Invalid Student Name/ID or Password')
     
     return render_template('student_login.html')
