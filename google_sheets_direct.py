@@ -74,14 +74,24 @@ class GoogleSheetsService:
                         clean_content = "".join(content.split())
                         
                         # Re-wrap the clean content at 64 characters per line (Standard PEM format)
+                        # CRITICAL: Standard PEM requires exactly 64 chars per line and a trailing newline
                         wrapped_content = ""
                         for i in range(0, len(clean_content), 64):
                             wrapped_content += clean_content[i:i+64] + "\n"
                         
-                        # Reconstruct the full key
+                        # Reconstruct the full key exactly
                         pk = f"{header}\n{wrapped_content}{footer}\n"
+                        print(f"[DEBUG] Formatted private key length: {len(pk)}")
                     except Exception as e:
                         print(f"[DEBUG] PEM formatting failed: {e}")
+                
+                # Fallback: if headers are missing but it looks like a key, try to wrap it
+                elif len(pk) > 100 and "-----" not in pk:
+                    clean_content = "".join(pk.split())
+                    wrapped_content = ""
+                    for i in range(0, len(clean_content), 64):
+                        wrapped_content += clean_content[i:i+64] + "\n"
+                    pk = f"{header}\n{wrapped_content}{footer}\n"
                 
                 service_account_info["private_key"] = pk
 
