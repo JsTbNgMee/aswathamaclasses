@@ -329,6 +329,33 @@ def teacher_attendance():
 
     return render_template('teacher_attendance.html', students=students, today=datetime.now().strftime('%Y-%m-%d'))
 
+@app.route('/teacher/tests', methods=['GET', 'POST'])
+def teacher_tests():
+    if not session.get('teacher_logged_in'):
+        return redirect(url_for('teacher_login'))
+    
+    service = get_sheets_service()
+    students = service.get_all_students() if service else []
+    
+    if request.method == 'POST':
+        test_name = request.form.get('test_name')
+        test_date = request.form.get('test_date')
+        total_marks = request.form.get('total_marks')
+        
+        test_data = {}
+        for student in students:
+            s_id = student.get('id')
+            marks = request.form.get(f'marks_{s_id}')
+            if marks is not None and marks.strip() != '':
+                test_data[s_id] = marks
+        
+        if service and test_data:
+            service.batch_add_tests(test_data, test_name, test_date, total_marks)
+            msg = f"Successfully added marks for '{test_name}' on {test_date}."
+            return render_template('teacher_tests.html', students=students, today=test_date, success=msg)
+
+    return render_template('teacher_tests.html', students=students, today=datetime.now().strftime('%Y-%m-%d'))
+
 @app.route('/teacher/logout')
 def teacher_logout():
     session.pop('teacher_logged_in', None)

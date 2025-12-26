@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-12 px-6">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <h1 class="text-3xl font-bold">ADD TEST MARKS</h1>
+            <a href="{{ url_for('teacher_dashboard') }}" class="px-6 py-2 border border-black hover:bg-black hover:text-white transition-colors duration-300">BACK TO DASHBOARD</a>
+        </div>
+
+        {% if success %}
+        <div class="bg-black text-white p-4 mb-8">
+            <p>{{ success }}</p>
+        </div>
+        {% endif %}
+
+        <form method="POST" class="space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold uppercase mb-2">CLASS</label>
+                    <select id="classFilter" name="class" class="w-full p-3 border border-black focus:outline-none" onchange="filterStudents()">
+                        <option value="All">ALL CLASSES</option>
+                        <option value="Class 8">CLASS 8</option>
+                        <option value="Class 9">CLASS 9</option>
+                        <option value="Class 10">CLASS 10</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold uppercase mb-2">TEST NAME</label>
+                    <input type="text" name="test_name" placeholder="e.g. Unit Test 1 - Math" class="w-full p-3 border border-black focus:outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold uppercase mb-2">TEST DATE</label>
+                    <input type="date" name="test_date" value="{{ today }}" class="w-full p-3 border border-black focus:outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold uppercase mb-2">TOTAL MARKS</label>
+                    <input type="number" name="total_marks" placeholder="e.g. 50" class="w-full p-3 border border-black focus:outline-none" required>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto border border-black">
+                <table class="w-full text-left">
+                    <thead class="bg-black text-white">
+                        <tr>
+                            <th class="p-4 border-r border-white/20">STUDENT NAME</th>
+                            <th class="p-4 border-r border-white/20">CLASS</th>
+                            <th class="p-4">MARKS OBTAINED</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentList">
+                        {% for student in students %}
+                        <tr class="student-row border-b border-black last:border-0 hover:bg-gray-50" data-class="{{ student.student_class }}">
+                            <td class="p-4 border-r border-black font-medium">{{ student.name }}</td>
+                            <td class="p-4 border-r border-black">{{ student.student_class }}</td>
+                            <td class="p-4">
+                                <input type="number" name="marks_{{ student.id }}" class="w-full p-2 border border-black/20 focus:border-black focus:outline-none" placeholder="Enter marks">
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="px-10 py-4 bg-black text-white font-bold hover:bg-gray-800 transition-colors duration-300 uppercase tracking-widest">
+                    SUBMIT TEST MARKS
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+function filterStudents() {
+    const filter = document.getElementById('classFilter').value;
+    const rows = document.querySelectorAll('.student-row');
+    
+    rows.forEach(row => {
+        if (filter === 'All' || row.dataset.class === filter) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

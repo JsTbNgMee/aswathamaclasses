@@ -291,6 +291,24 @@ class GoogleSheetsService:
             print(f"Error in batch_update_attendance: {e}")
             return False
 
+    def batch_add_tests(self, test_data, test_name, date, total_marks):
+        """Batch add test marks for multiple students"""
+        try:
+            rows_to_append = []
+            for s_id, marks in test_data.items():
+                if marks is not None and str(marks).strip() != '':
+                    rows_to_append.append([str(s_id), str(test_name), str(date), str(marks), str(total_marks)])
+            
+            if rows_to_append:
+                self.tests_sheet.append_rows(rows_to_append)
+                # Invalidate leaderboard cache since new data added
+                if hasattr(self, '_leaderboard_cache'):
+                    delattr(self, '_leaderboard_cache')
+            return True
+        except Exception as e:
+            print(f"Error in batch_add_tests: {e}")
+            return False
+
     def sync_auth_record(self, username, password, student_id):
         try:
             all_auth = self.auth_sheet.get_all_values()
