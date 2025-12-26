@@ -52,29 +52,37 @@ class GoogleSheetsService:
                         "client_x509_cert_url": extract("client_x509_cert_url")
                     }
 
-            # MANDATORY: Fix the private_key format if it was escaped
+            # MANDATORY: Fix the private_key format
             if service_account_info.get("private_key"):
                 pk = service_account_info["private_key"]
-                # Convert literal \n to actual newlines
-                pk = pk.replace('\\n', '\n')
-                # Ensure it has correct headers and format
-                if "BEGIN PRIVATE KEY" in pk:
-                    # Remove any accidental extra spaces or double newlines that might break the signature
-                    header = "-----BEGIN PRIVATE KEY-----"
-                    footer = "-----END PRIVATE KEY-----"
-                    if header in pk and footer in pk:
-                        content_parts = pk.split(header)
-                        if len(content_parts) > 1:
-                            inner_parts = content_parts[1].split(footer)
-                            if len(inner_parts) > 0:
-                                content = inner_parts[0].strip()
-                                # Re-encode content to ensure it's clean base64 with proper line breaks
-                                clean_content = "".join(content.split())
-                                formatted_pk = header + "\n"
-                                for i in range(0, len(clean_content), 64):
-                                    formatted_pk += clean_content[i:i+64] + "\n"
-                                formatted_pk += footer + "\n"
-                                pk = formatted_pk
+                
+                # 1. First, normalize all types of escaped newlines to actual newlines
+                pk = pk.replace('\\n', '\n').replace('\\r', '').replace('\r', '')
+                
+                # 2. Extract the core content between BEGIN and END headers
+                header = "-----BEGIN PRIVATE KEY-----"
+                footer = "-----END PRIVATE KEY-----"
+                
+                if header in pk and footer in pk:
+                    try:
+                        # Isolate the base64 part
+                        parts = pk.split(header)
+                        content_and_footer = parts[1].split(footer)
+                        content = content_and_footer[0].strip()
+                        
+                        # Remove ALL whitespace from the content part
+                        clean_content = "".join(content.split())
+                        
+                        # Re-wrap the clean content at 64 characters per line (Standard PEM format)
+                        wrapped_content = ""
+                        for i in range(0, len(clean_content), 64):
+                            wrapped_content += clean_content[i:i+64] + "\n"
+                        
+                        # Reconstruct the full key
+                        pk = f"{header}\n{wrapped_content}{footer}\n"
+                    except Exception as e:
+                        print(f"[DEBUG] PEM formatting failed: {e}")
+                
                 service_account_info["private_key"] = pk
 
             self.sheet_id = os.environ.get('GOOGLE_SHEETS_ID', '')
