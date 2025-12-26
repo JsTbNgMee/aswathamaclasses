@@ -5,6 +5,7 @@ Authenticates with service account credentials and reads/writes directly to Goog
 import os
 import json
 import gspread
+import time
 from google.oauth2.service_account import Credentials
 
 class GoogleSheetsService:
@@ -19,95 +20,62 @@ class GoogleSheetsService:
             
             # Extract credentials directly from the environment
             raw_key = os.environ.get('GOOGLE_SERVICE_ACCOUNT_KEY', '').strip()
+            self.sheet_id = os.environ.get('GOOGLE_SHEETS_ID', '').strip()
+            
+            if not raw_key:
+                raise ValueError("GOOGLE_SERVICE_ACCOUNT_KEY environment variable not set")
+            if not self.sheet_id:
+                raise ValueError("GOOGLE_SHEETS_ID environment variable not set")
             
             # Clean wrapping quotes
             if (raw_key.startswith("'") and raw_key.endswith("'")) or (raw_key.startswith('"') and raw_key.endswith('"')):
                 raw_key = raw_key[1:-1]
 
-            # Specialized fix for private_key formatting which causes JWT signature errors
+            # Parse JSON
             try:
-                # 1. Try standard JSON parse
                 service_account_info = json.loads(raw_key)
             except Exception:
-                # 2. Try handling escaped newlines
+                # Handle literal \n sequences
                 try:
                     service_account_info = json.loads(raw_key.replace('\\n', '\n'))
-                except Exception:
-                    # 3. Manual Extraction Fallback
-                    import re
-                    def extract(key_name):
-                        m = re.search(f'"{key_name}":\s*"([^"]+)"', raw_key)
-                        return m.group(1) if m else None
-                    
-                    service_account_info = {
-                        "type": "service_account",
-                        "project_id": extract("project_id"),
-                        "private_key_id": extract("private_key_id"),
-                        "private_key": extract("private_key"),
-                        "client_email": extract("client_email"),
-                        "client_id": extract("client_id"),
-                        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                        "token_uri": "https://oauth2.googleapis.com/token",
-                        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                        "client_x509_cert_url": extract("client_x509_cert_url")
-                    }
+                except Exception as e:
+                    raise ValueError(f"Failed to parse GOOGLE_SERVICE_ACCOUNT_KEY as JSON: {e}")
 
-            # MANDATORY: Fix the private_key format
-            if service_account_info.get("private_key"):
+            # Robust Private Key Formatting
+            if "private_key" in service_account_info:
                 pk = service_account_info["private_key"]
-                
-                # 1. First, normalize all types of escaped newlines to actual newlines
-                pk = pk.replace('\\n', '\n').replace('\\r', '').replace('\r', '')
-                
-                # 2. Extract the core content between BEGIN and END headers
+                # Normalize newlines
+                pk = pk.replace('\\n', '\n')
+                # Ensure it has the standard PEM format
                 header = "-----BEGIN PRIVATE KEY-----"
                 footer = "-----END PRIVATE KEY-----"
-                
                 if header in pk and footer in pk:
-                    try:
-                        # Isolate the base64 part
-                        parts = pk.split(header)
-                        content_and_footer = parts[1].split(footer)
-                        content = content_and_footer[0].strip()
-                        
-                        # Remove ALL whitespace from the content part
-                        clean_content = "".join(content.split())
-                        
-                        # Re-wrap the clean content at 64 characters per line (Standard PEM format)
-                        # CRITICAL: Standard PEM requires exactly 64 chars per line and a trailing newline
-                        wrapped_content = ""
-                        for i in range(0, len(clean_content), 64):
-                            wrapped_content += clean_content[i:i+64] + "\n"
-                        
-                        # Reconstruct the full key exactly
-                        pk = f"{header}\n{wrapped_content}{footer}\n"
-                        print(f"[DEBUG] Formatted private key length: {len(pk)}")
-                    except Exception as e:
-                        print(f"[DEBUG] PEM formatting failed: {e}")
-                
-                # Fallback: if headers are missing but it looks like a key, try to wrap it
-                elif len(pk) > 100 and "-----" not in pk:
-                    clean_content = "".join(pk.split())
-                    wrapped_content = ""
-                    for i in range(0, len(clean_content), 64):
-                        wrapped_content += clean_content[i:i+64] + "\n"
-                    pk = f"{header}\n{wrapped_content}{footer}\n"
-                
-                service_account_info["private_key"] = pk
+                    content = pk.split(header)[1].split(footer)[0].strip()
+                    # Remove all whitespace and re-wrap
+                    clean_content = "".join(content.split())
+                    wrapped = "\n".join(clean_content[i:i+64] for i in range(0, len(clean_content), 64))
+                    service_account_info["private_key"] = f"{header}\n{wrapped}\n{footer}\n"
 
-            self.sheet_id = os.environ.get('GOOGLE_SHEETS_ID', '')
-            if not self.sheet_id:
-                raise ValueError("GOOGLE_SHEETS_ID environment variable not set")
-                
+            # Create credentials
             credentials = Credentials.from_service_account_info(service_account_info, scopes=scopes)
             self.client = gspread.authorize(credentials)
-            self.spreadsheet = self.client.open_by_key(self.sheet_id)
             
-            # Ensure required sheets exist
-            self.sheet = self._get_or_create_sheet("Students", ["id", "name", "password", "email", "phone", "student_class", "enrollment_date"])
-            self.auth_sheet = self._get_or_create_sheet("StudentAuth", ["Username", "Password", "StudentID"])
-            self.tests_sheet = self._get_or_create_sheet("Tests", ["StudentID", "TestName", "Date", "Marks", "Total"])
-            self.attendance_sheet = self._get_or_create_sheet("Attendance", ["StudentID", "Date", "Status"])
+            # Add simple retry for quota limits during initialization
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    self.spreadsheet = self.client.open_by_key(self.sheet_id)
+                    # Ensure required sheets exist
+                    self.sheet = self._get_or_create_sheet("Students", ["id", "name", "password", "email", "phone", "student_class", "enrollment_date"])
+                    self.auth_sheet = self._get_or_create_sheet("StudentAuth", ["Username", "Password", "StudentID"])
+                    self.tests_sheet = self._get_or_create_sheet("Tests", ["StudentID", "TestName", "Date", "Marks", "Total"])
+                    self.attendance_sheet = self._get_or_create_sheet("Attendance", ["StudentID", "Date", "Status"])
+                    break
+                except Exception as e:
+                    if "429" in str(e) and attempt < max_retries - 1:
+                        time.sleep(2 * (attempt + 1))
+                        continue
+                    raise e
             
             print("[INFO] Google Sheets service initialized successfully")
             
