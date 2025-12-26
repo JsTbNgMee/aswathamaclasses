@@ -73,7 +73,9 @@ class GoogleSheetsService:
             print("[INFO] Google Sheets service initialized successfully")
             
         except Exception as e:
-            print(f"[ERROR] Failed to initialize Google Sheets service: {e}")
+            import traceback
+            error_msg = str(e) if str(e) else f"{type(e).__name__}: {traceback.format_exc()}"
+            print(f"[ERROR] Failed to initialize Google Sheets service: {error_msg}")
             raise
 
     def _get_or_create_sheet(self, title, headers):
@@ -292,8 +294,12 @@ def init_sheets_service(app):
     global sheets_service
     try:
         sheets_service = GoogleSheetsService()
+        print("[INFO] Sheets service initialized successfully in init function")
     except Exception as e:
-        print(f"[ERROR] Failed to initialize sheets service: {e}")
+        import traceback
+        error_msg = str(e) if str(e) else f"{type(e).__name__}: See traceback above"
+        print(f"[ERROR] Failed to initialize sheets service: {error_msg}")
+        print(f"[DEBUG] Traceback: {traceback.format_exc()}")
 
 def get_sheets_service():
     return sheets_service
