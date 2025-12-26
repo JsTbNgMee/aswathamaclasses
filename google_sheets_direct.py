@@ -19,7 +19,7 @@ class GoogleSheetsService:
             ]
             
             # Load credentials from file
-            creds_path = "secret-drake-434705-j6-14adf76d54a6.json"
+            creds_path = "service_account.json"
             if not os.path.exists(creds_path):
                 # Try in cred/ as a fallback or if user puts it there
                 alt_path = os.path.join("cred", creds_path)
