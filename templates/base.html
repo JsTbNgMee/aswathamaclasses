@@ -4,15 +4,37 @@
     <!-- Meta Tags for SEO and Responsiveness -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="ASWATHAMA CLASSES - Professional Coaching Institute for Mathematics & Science">
-    <meta name="keywords" content="coaching, classes, mathematics, science, education, practical learning">
     <meta name="author" content="ASWATHAMA CLASSES">
+    
+    <!-- SEO Block -->
+    {% block seo %}
+    <meta name="description" content="ASWATHAMA CLASSES - Professional Coaching Institute for Mathematics & Science. Learn practically with expert guidance.">
+    <meta name="keywords" content="coaching, classes, mathematics, science, education, practical learning, aswathama classes">
+    <link rel="canonical" href="{{ request.url }}">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:title" content="ASWATHAMA CLASSES - Learn Practically">
+    <meta property="og:description" content="Professional Coaching Institute for Mathematics & Science. Foundation building for Class 8, 9, and 10.">
+    <meta property="og:image" content="{{ url_for('static', filename='images/og-image.jpg', _external=True) }}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.url }}">
+    <meta property="twitter:title" content="ASWATHAMA CLASSES - Learn Practically">
+    <meta property="twitter:description" content="Professional Coaching Institute for Mathematics & Science. Foundation building for Class 8, 9, and 10.">
+    <meta property="twitter:image" content="{{ url_for('static', filename='images/og-image.jpg', _external=True) }}">
+    {% endblock %}
 
     <!-- Title Block -->
     <title>{% block title %}ASWATHAMA CLASSES - Learn Practically{% endblock %}</title>
 
     <!-- CSS Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
 </head>
 <body>
     <!-- Navigation Bar -->

@@ -1,0 +1,27 @@
+You are an expert full-stack SEO-optimized Flask developer. I want you to apply full SEO optimization to my website "ASWATHAMA CLASSES". The project uses Flask (Python backend) + HTML templates (Jinja). Your task is to automatically detect all templates and update them for SEO without breaking functionality.
+
+Apply the following changes to ALL public-facing pages:
+1️⃣ Add unique <title>, <meta description>, <meta keywords>, <meta author>, and <meta viewport> tags to each template.
+2️⃣ Add Open Graph tags for social sharing:
+   <meta property="og:title" ...> , og:description, og:image, og:url, og:type="website"
+3️⃣ Add alt="" tags to every <img> tag using a descriptive name based on context
+4️⃣ Add proper H1, H2 structure on every page (Home page must include H1 = "ASWATHAMA CLASSES – Maths & Science Coaching for Class 8, 9, 10")
+5️⃣ Add internal links using Jinja — include navigation links for Courses, Admission, Fees, Contact, About, Gallery
+6️⃣ Add JSON-LD structured data schema in homepage template:
+   EducationalOrganization schema with name, address, url, instagram, youtube links
+7️⃣ Add canonical tags to each page
+8️⃣ Minify CSS/JS includes and implement lazy-loading for images (loading="lazy")
+9️⃣ Ensure fast performance & SEO scoring by compressing images via width/height attributes and using async/defer on JS scripts
+
+Also:
+🔹 Modify base.html (or main template) to include SEO reusable block tags using Jinja blocks:
+   {% block seo %}{% endblock %}
+🔹 Update environment for Flask to enable gzip compression if not already
+🔹 Make sure all SEO changes are VALID HTML and do NOT break any existing Flask routes or Jinja logic.
+
+After modifications:
+- Show me ALL changed files and explain where SEO was applied
+- Do NOT delete any functionality like dashboards, attendance, or backend logic
+- Only improve SEO, metadata, template structure, performance.
+
+Now scan the project files and begin modifying templates and static files accordingly.

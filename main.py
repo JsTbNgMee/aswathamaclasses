@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask_compress import Compress
 from datetime import datetime
 import os
 from youtube_service import yt_service
@@ -17,6 +18,9 @@ from google_sheets_direct import init_sheets_service, get_sheets_service
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'aswathama-classes-secret-key-secure'
+
+# Enable Gzip compression
+Compress(app)
 
 # Initialize Google Sheets service
 init_sheets_service(app)

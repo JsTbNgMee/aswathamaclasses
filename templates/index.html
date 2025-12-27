@@ -2,11 +2,48 @@
 
 {% block title %}ASWATHAMA CLASSES - Learn Practically{% endblock %}
 
+{% block seo %}
+    <meta name="description" content="ASWATHAMA CLASSES – Expert Maths & Science Coaching for Class 8, 9, 10 in a practical learning environment. Build a strong foundation with Swaroop Kawale.">
+    <meta name="keywords" content="ASWATHAMA CLASSES, Maths coaching, Science coaching, Class 8 coaching, Class 9 coaching, Class 10 coaching, practical learning">
+    <link rel="canonical" href="{{ request.url }}">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="ASWATHAMA CLASSES – Maths & Science Coaching for Class 8, 9, 10">
+    <meta property="og:description" content="Expert coaching in Mathematics & Science for Classes 8, 9 & 10. Building strong foundations through practical learning.">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EducationalOrganization",
+      "name": "ASWATHAMA CLASSES",
+      "description": "Professional Coaching Institute for Mathematics & Science for Classes 8, 9, and 10.",
+      "url": "{{ request.url_root }}",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Main Branch",
+        "addressLocality": "Your City",
+        "addressRegion": "Your State",
+        "postalCode": "Your Zip",
+        "addressCountry": "IN"
+      },
+      "founder": {
+        "@type": "Person",
+        "name": "Swaroop Kawale"
+      },
+      "sameAs": [
+        "https://www.youtube.com/@ASHWATHAMACLASSES",
+        "https://www.instagram.com/ashwathamaclasses/"
+      ]
+    }
+    </script>
+{% endblock %}
+
 {% block content %}
 <!-- Hero Section -->
 <section class="hero">
     <div class="hero-content">
-        <h1>ASWATHAMA CLASSES</h1>
+        <h1>ASWATHAMA CLASSES – Maths & Science Coaching for Class 8, 9, 10</h1>
         <p class="tagline">Learn Practically</p>
         <p class="hero-description">Expert coaching in Mathematics & Science for Classes 8, 9 & 10. Building strong foundations through practical learning.</p>
         <div class="hero-buttons">

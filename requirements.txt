@@ -6,3 +6,4 @@ google-auth==2.41.1
 google-auth
 gspread
 python-dotenv
+flask-compress
