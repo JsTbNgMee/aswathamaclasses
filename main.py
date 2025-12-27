@@ -408,6 +408,39 @@ def submit_contact():
         print(f"Error: {str(e)}")
         return jsonify({'success': False, 'message': 'An error occurred. Please try again.'}), 500
 
+@app.after_request
+def add_security_headers(response):
+    """Add security headers to every response"""
+    # Content Security Policy
+    # We allow scripts from self, and certain trusted domains for embeds/styles
+    csp = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com; "
+        "img-src 'self' data: https:; "
+        "frame-src 'self' https://drive.google.com https://www.google.com https://www.youtube.com; "
+        "connect-src 'self';"
+    )
+    response.headers['Content-Security-Policy'] = csp
+    
+    # HSTS - 1 year
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
+    
+    # Clickjacking protection
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    
+    # XSS Protection
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    
+    # Cross-Origin Opener Policy
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+    
+    # Referrer Policy
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    
+    return response
+
 @app.route('/robots.txt')
 def robots():
     """Serve robots.txt dynamically"""
