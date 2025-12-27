@@ -8,9 +8,9 @@ Description: A premium, minimalist coaching institute website with black & white
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, make_response
 from flask_compress import Compress
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from youtube_service import yt_service
 from google_sheets_direct import init_sheets_service, get_sheets_service
@@ -407,6 +407,50 @@ def submit_contact():
     except Exception as e:
         print(f"Error: {str(e)}")
         return jsonify({'success': False, 'message': 'An error occurred. Please try again.'}), 500
+
+@app.route('/robots.txt')
+def robots():
+    """Serve robots.txt dynamically"""
+    lines = [
+        "User-agent: *",
+        "Allow: /",
+        f"Sitemap: {request.url_root.rstrip('/')}/sitemap.xml"
+    ]
+    response = make_response("\n".join(lines))
+    response.headers["Content-Type"] = "text/plain"
+    return response
+
+@app.route('/sitemap.xml')
+def sitemap():
+    """Generate sitemap.xml dynamically"""
+    pages = []
+    ten_days_ago = (datetime.now() - timedelta(days=10)).date().isoformat()
+    
+    # List of static routes to include in sitemap
+    static_routes = [
+        ('home', 1.0, 'daily'),
+        ('about', 0.8, 'monthly'),
+        ('courses', 0.9, 'weekly'),
+        ('admissions', 0.9, 'weekly'),
+        ('fees', 0.7, 'monthly'),
+        ('gallery', 0.7, 'weekly'),
+        ('youtube', 0.8, 'weekly'),
+        ('leaderboard', 0.9, 'daily'),
+        ('contact', 0.8, 'monthly')
+    ]
+    
+    for rule, priority, changefreq in static_routes:
+        pages.append({
+            "loc": url_for(rule, _external=True),
+            "lastmod": ten_days_ago,
+            "priority": priority,
+            "changefreq": changefreq
+        })
+        
+    sitemap_xml = render_template('sitemap.xml', urls=pages)
+    response = make_response(sitemap_xml)
+    response.headers["Content-Type"] = "application/xml"
+    return response
 
 # ==================== ERROR HANDLERS ====================
 
