@@ -457,7 +457,8 @@ def robots():
 def sitemap():
     """Generate sitemap.xml dynamically"""
     pages = []
-    ten_days_ago = (datetime.now() - timedelta(days=10)).date().isoformat()
+    # Use today's date for lastmod to ensure search engines see it as fresh
+    today = datetime.now().date().isoformat()
     
     # List of static routes to include in sitemap
     static_routes = [
@@ -473,12 +474,15 @@ def sitemap():
     ]
     
     for rule, priority, changefreq in static_routes:
-        pages.append({
-            "loc": url_for(rule, _external=True),
-            "lastmod": ten_days_ago,
-            "priority": priority,
-            "changefreq": changefreq
-        })
+        try:
+            pages.append({
+                "loc": url_for(rule, _external=True),
+                "lastmod": today,
+                "priority": priority,
+                "changefreq": changefreq
+            })
+        except Exception as e:
+            print(f"Error generating URL for {rule}: {e}")
         
     sitemap_xml = render_template('sitemap.xml', urls=pages)
     response = make_response(sitemap_xml)
