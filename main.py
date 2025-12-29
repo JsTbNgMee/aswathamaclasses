@@ -1,5 +1,5 @@
 """
-ASWATHAMA CLASSES - Professional Coaching Institute Website
+ASHWATHAMA CLASSES - Professional Coaching Institute Website
 Backend: Flask
 Author: Senior Full-Stack Developer
 Description: A premium, minimalist coaching institute website with black & white theme

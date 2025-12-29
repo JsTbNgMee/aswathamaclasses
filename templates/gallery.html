@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
 {% block seo %}
-    <meta name="description" content="Glimpses of ASWATHAMA CLASSES learning environment. See our students in action and our practical coaching setup.">
+    <meta name="description" content="Glimpses of ASHWATHAMA CLASSES learning environment. See our students in action and our practical coaching setup.">
     <meta name="keywords" content="gallery, classroom photos, coaching environment, students">
     <link rel="canonical" href="{{ request.url }}">
 {% endblock %}
 
-{% block title %}Gallery - ASWATHAMA CLASSES{% endblock %}
+{% block title %}Gallery - ASHWATHAMA CLASSES{% endblock %}
 
 {% block content %}
 <section class="page-header">
@@ -20,7 +20,7 @@
         <div class="gallery-grid">
             {% for item in gallery_items %}
             <div class="gallery-item">
-                <img src="{{ item.url }}" alt="ASWATHAMA CLASSES Student Activity - Gallery Image {{ loop.index }}" class="gallery-image" loading="lazy">
+                <img src="{{ item.url }}" alt="ASHWATHAMA CLASSES Student Activity - Gallery Image {{ loop.index }}" class="gallery-image" loading="lazy">
             </div>
             {% endfor %}
         </div>
