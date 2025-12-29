@@ -85,79 +85,74 @@
     </nav>
 
     <script>
-        // Full Screen Menu Toggle
-        const navToggle = document.getElementById('navToggle');
-        const navWrapper = document.getElementById('navWrapper');
-        const navLinks = document.querySelectorAll('.nav-link');
+        function initializeNavbar() {
+            const navToggle = document.getElementById('navToggle');
+            const navWrapper = document.getElementById('navWrapper');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
 
-        navToggle.addEventListener('click', () => {
-            navToggle.classList.toggle('active');
-            navWrapper.classList.toggle('active');
-            document.body.style.overflow = navWrapper.classList.contains('active') ? 'hidden' : '';
-        });
+            // Full Screen Menu Toggle
+            if (navToggle && navWrapper) {
+                navToggle.addEventListener('click', () => {
+                    navToggle.classList.toggle('active');
+                    navWrapper.classList.toggle('active');
+                    document.body.style.overflow = navWrapper.classList.contains('active') ? 'hidden' : '';
+                });
 
-        // Close menu on link click
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                navToggle.classList.remove('active');
-                navWrapper.classList.remove('active');
-                document.body.style.overflow = '';
-            });
-        });
-
-        // Scroll Effect
-        window.addEventListener('scroll', () => {
-            const navbar = document.querySelector('.navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
+                // Close menu on link click
+                navLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        navToggle.classList.remove('active');
+                        navWrapper.classList.remove('active');
+                        document.body.style.overflow = '';
+                    });
+                });
             }
-        });
 
-        // Theme Toggle Logic
-        const themeToggle = document.getElementById('themeToggle');
-        const body = document.body;
-        const modeText = themeToggle.querySelector('.mode-text');
+            // Scroll Effect
+            window.addEventListener('scroll', () => {
+                const navbar = document.querySelector('.navbar');
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
 
-        function applyTheme(theme) {
-            if (theme === 'dark') {
-                body.classList.add('dark-mode');
-                if (modeText) modeText.textContent = 'Light Mode';
-            } else {
-                body.classList.remove('dark-mode');
-                if (modeText) modeText.textContent = 'Dark Mode';
+            // Theme Toggle Logic
+            if (themeToggle) {
+                const modeText = themeToggle.querySelector('.mode-text');
+
+                function applyTheme(theme) {
+                    if (theme === 'dark') {
+                        body.classList.add('dark-mode');
+                        if (modeText) modeText.textContent = 'Light Mode';
+                    } else {
+                        body.classList.remove('dark-mode');
+                        if (modeText) modeText.textContent = 'Dark Mode';
+                    }
+                }
+
+                // Check for saved preference
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                applyTheme(savedTheme);
+
+                themeToggle.addEventListener('click', () => {
+                    const isDark = body.classList.contains('dark-mode');
+                    const newTheme = isDark ? 'light' : 'dark';
+                    applyTheme(newTheme);
+                    localStorage.setItem('theme', newTheme);
+                });
             }
         }
 
-        // Check for saved preference
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        applyTheme(savedTheme);
-
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                const isDark = body.classList.contains('dark-mode');
-                const newTheme = isDark ? 'light' : 'dark';
-                applyTheme(newTheme);
-                localStorage.setItem('theme', newTheme);
-            });
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeNavbar);
+        } else {
+            initializeNavbar();
         }
-
-        document.getElementById('navToggle').addEventListener('click', function() {
-            const navWrapper = document.querySelector('.nav-wrapper');
-            navWrapper.classList.toggle('active');
-            this.classList.toggle('active');
-            document.body.style.overflow = navWrapper.classList.contains('active') ? 'hidden' : '';
-        });
-
-        // Close menu on link click
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                document.querySelector('.nav-wrapper').classList.remove('active');
-                document.getElementById('navToggle').classList.remove('active');
-                document.body.style.overflow = '';
-            });
-        });
     </script>
 
     <!-- Main Content Block -->
