@@ -367,7 +367,8 @@ a:hover {
         width: 100% !important;
         height: 0 !important;
         background: #fff !important;
-        display: block !important;
+        display: flex !important;
+        flex-direction: column !important;
         overflow-y: auto !important;
         transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         z-index: 999 !important;
@@ -379,6 +380,7 @@ a:hover {
         height: calc(100vh - 60px) !important;
         visibility: visible !important;
         padding: 20px !important;
+        overflow-y: auto !important;
     }
 
     .nav-menu {
@@ -387,6 +389,7 @@ a:hover {
         list-style: none !important;
         padding: 0 !important;
         margin: 0 !important;
+        flex: 1 !important;
     }
 
     .nav-link {
