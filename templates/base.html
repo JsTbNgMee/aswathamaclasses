@@ -46,14 +46,14 @@
                 <a href="{{ url_for('home') }}">ASWATHAMA</a>
             </div>
 
-            <!-- Mobile Menu Toggle -->
+            <!-- Full Screen Menu Toggle -->
             <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
                 <span class="hamburger-line"></span>
                 <span class="hamburger-line"></span>
                 <span class="hamburger-line"></span>
             </button>
 
-            <!-- Navigation Links -->
+            <!-- Navigation Overlay -->
             <div class="nav-wrapper" id="navWrapper">
                 <ul class="nav-menu">
                     <li><a href="{{ url_for('home') }}" class="nav-link">Home</a></li>
@@ -67,39 +67,56 @@
                     <li><a href="{{ url_for('instagram') }}" class="nav-link">Instagram</a></li>
                     <li><a href="{{ url_for('contact') }}" class="nav-link">Contact</a></li>
                 </ul>
-                <div class="nav-auth-mobile">
+                <div class="nav-auth-desktop">
+                    <button id="themeToggle" class="theme-toggle" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); padding: 12px 24px; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 600; transition: var(--transition);">
+                        <span class="mode-text">Dark Mode</span>
+                    </button>
                     {% if session.get('student_id') %}
                         <a href="{{ url_for('student_dashboard') }}" class="nav-btn btn-black">Dashboard</a>
-                        <a href="{{ url_for('student_logout') }}" class="nav-link logout-link">Logout</a>
+                        <a href="{{ url_for('student_logout') }}" class="nav-btn btn-outline">Logout</a>
                     {% elif session.get('teacher_logged_in') %}
                         <a href="{{ url_for('teacher_dashboard') }}" class="nav-btn btn-black">Panel</a>
-                        <a href="{{ url_for('teacher_logout') }}" class="nav-link logout-link">Logout</a>
+                        <a href="{{ url_for('teacher_logout') }}" class="nav-btn btn-outline">Logout</a>
                     {% else %}
-                        <a href="{{ url_for('student_login') }}" class="nav-btn btn-black">Student Login</a>
-                        <a href="{{ url_for('teacher_login') }}" class="nav-btn btn-outline">Teacher Login</a>
+                        <a href="{{ url_for('student_login') }}" class="nav-btn btn-black">Student</a>
+                        <a href="{{ url_for('teacher_login') }}" class="nav-btn btn-outline">Teacher</a>
                     {% endif %}
                 </div>
-            </div>
-
-            <div class="nav-auth-desktop">
-                <button id="themeToggle" class="theme-toggle" style="margin-right: 12px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: var(--transition);">
-                    <span class="mode-text">Dark Mode</span>
-                </button>
-                {% if session.get('student_id') %}
-                    <a href="{{ url_for('student_dashboard') }}" class="nav-btn">Dashboard</a>
-                    <a href="{{ url_for('student_logout') }}" class="nav-link logout-link">Logout</a>
-                {% elif session.get('teacher_logged_in') %}
-                    <a href="{{ url_for('teacher_dashboard') }}" class="nav-btn">Panel</a>
-                    <a href="{{ url_for('teacher_logout') }}" class="nav-link logout-link">Logout</a>
-                {% else %}
-                    <a href="{{ url_for('student_login') }}" class="nav-btn btn-black">Student</a>
-                    <a href="{{ url_for('teacher_login') }}" class="nav-btn btn-outline">Teacher</a>
-                {% endif %}
             </div>
         </div>
     </nav>
 
     <script>
+        // Full Screen Menu Toggle
+        const navToggle = document.getElementById('navToggle');
+        const navWrapper = document.getElementById('navWrapper');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            navWrapper.classList.toggle('active');
+            document.body.style.overflow = navWrapper.classList.contains('active') ? 'hidden' : '';
+        });
+
+        // Close menu on link click
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navToggle.classList.remove('active');
+                navWrapper.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+
+        // Scroll Effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
         // Theme Toggle Logic
         const themeToggle = document.getElementById('themeToggle');
         const body = document.body;
