@@ -159,6 +159,11 @@ def leaderboard():
     data = service.get_leaderboard() if service else []
     return render_template('leaderboard.html', leaderboard_data=data)
 
+@app.route('/exams')
+def exams():
+    """Exams & Timetable page - Board exam schedules and countdowns"""
+    return render_template('exams.html')
+
 @app.route('/instagram')
 def instagram():
     """Instagram page - Link to Instagram profile"""

@@ -1,0 +1,77 @@
+Update my website by adding a new Exams & Timetable feature + live countdowns. Use the following instructions and schedules.
+
+──────────────────────────────
+1️⃣ COUNTDOWN SECTION
+Add a new countdown component (homepage) showing:
+- CBSE Class 10 Boards Start: 17 Feb 2026
+- CBSE Class 10 Boards End: 10 Mar 2026
+- Karnataka SSLC (KSEAB) Class 10 Main Exam Start: 18 Mar 2026
+- Karnataka SSLC Main Exam End: 02 Apr 2026
+- Karnataka SSLC Re-exam Window: 18 May – 25 May 2026
+
+Make countdown live, auto-updating, animated numbers, modern UI.
+
+──────────────────────────────
+2️⃣ NEW PAGE – “Exams & Timetable”
+Create a brand-new page/section called: Exams & Timetable
+Add a link in Navbar → "Exams & Timetable"
+
+Inside this page, include:
+A) “Class 10 Preparatory Schedule”
+– Let it be editable, simple table, placeholder content for now.
+
+B) Tabs or Toggle Switch for:
+   ✔ CBSE (NCERT) Timetable
+   ✔ Karnataka SSLC (KSEAB) Timetable
+
+──────────────────────────────
+3️⃣ ADD TABLES EXACTLY AS FOLLOWS
+
+CBSE (NCERT) Class 10 Board Exam 2026 – Subject Schedule
+(Theory Phase I)
+| Date        | Subject                       |
+|-------------|------------------------------|
+| 17 Feb 2026 | Mathematics                  |
+| 21 Feb 2026 | English                      |
+| 25 Feb 2026 | Science                      |
+| 02 Mar 2026 | Hindi                        |
+| 07 Mar 2026 | Social Science               |
+| 09–10 Mar   | Other Languages/Optional     |
+
+Add text:
+– Practical exams happen January 2026
+– Timing usually 10:30 AM – 1:30 PM
+
+──────────────────────────────
+
+Karnataka SSLC (KSEAB) Class 10 Main Exam 2026 – Subject Schedule
+(Main Exam 1 – March Session)
+| Date        | Subject                                         |
+|-------------|-------------------------------------------------|
+| 18 Mar 2026 | First Language                                  |
+| 20 Mar 2026 | Mathematics, Sociology                          |
+| 23 Mar 2026 | Science, Political Science, Music               |
+| 25 Mar 2026 | Second Language                                 |
+| 28 Mar 2026 | Social Science                                  |
+| 30 Mar 2026 | Third Language                                  |
+| 01–02 Apr   | Junior Technical Subjects / Wrap-up             |
+
+Supplementary Exam:
+– 18 May – 25 May 2026
+
+──────────────────────────────
+4️⃣ DESIGN REQUIREMENTS
+– Must be fully responsive (mobile-friendly)
+– Must NOT break any existing sections
+– Use modern cards, soft shadows, rounded corners
+– Optional: add color-based subject tags (Math – blue, Science – green) only if easy
+
+──────────────────────────────
+5️⃣ OPTIONAL (If possible automatically)
+Add a “Revision Countdown Reminder” box:
+– Shows how many days left until the next exam
+– Motivational line: “Every day counts. Prepare Smart.”
+
+──────────────────────────────
+
+Do NOT remove any existing feature. Only add new components as instructed.

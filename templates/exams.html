@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+
+{% block seo %}
+    <meta name="description" content="Exams & Timetable for Class 10 CBSE and Karnataka SSLC 2026. Check board exam schedules, preparation materials, and countdown to board exams.">
+    <meta name="keywords" content="Class 10 exams, CBSE board exams 2026, Karnataka SSLC 2026, exam timetable, exam schedule">
+    <link rel="canonical" href="{{ request.url }}">
+{% endblock %}
+
+{% block title %}Exams & Timetable - ASHWATHAMA CLASSES{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Exams & Timetable</h1>
+</section>
+
+<!-- Exam Countdown Section -->
+<section class="exam-countdown-section">
+    <div class="container">
+        <h2>Upcoming Exam Deadlines</h2>
+        <div class="countdown-cards">
+            <div class="countdown-card cbse-exam">
+                <h3>CBSE Class 10 Boards</h3>
+                <p class="exam-dates">17 Feb – 10 Mar 2026</p>
+                <div class="countdown-timer" id="cbseCountdown">
+                    <div class="countdown-unit">
+                        <div class="countdown-number" id="cbseDays">0</div>
+                        <div class="countdown-label">Days</div>
+                    </div>
+                    <div class="countdown-unit">
+                        <div class="countdown-number" id="cbseHours">0</div>
+                        <div class="countdown-label">Hours</div>
+                    </div>
+                    <div class="countdown-unit">
+                        <div class="countdown-number" id="cbseMinutes">0</div>
+                        <div class="countdown-label">Minutes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="countdown-card karnataka-exam">
+                <h3>Karnataka SSLC Exam</h3>
+                <p class="exam-dates">18 Mar – 02 Apr 2026</p>
+                <div class="countdown-timer" id="karnatakaCountdown">
+                    <div class="countdown-unit">
+                        <div class="countdown-number" id="karnatakaDay">0</div>
+                        <div class="countdown-label">Days</div>
+                    </div>
+                    <div class="countdown-unit">
+                        <div class="countdown-number" id="karnatakaHours">0</div>
+                        <div class="countdown-label">Hours</div>
+                    </div>
+                    <div class="countdown-unit">
+                        <div class="countdown-number" id="karnatakaMinutes">0</div>
+                        <div class="countdown-label">Minutes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="countdown-card reexam">
+                <h3>Karnataka Re-exam Window</h3>
+                <p class="exam-dates">18 May – 25 May 2026</p>
+                <div class="countdown-timer" id="reexamCountdown">
+                    <div class="countdown-unit">
+                        <div class="countdown-number" id="reexamDays">0</div>
+                        <div class="countdown-label">Days</div>
+                    </div>
+                    <div class="countdown-unit">
+                        <div class="countdown-number" id="reexamHours">0</div>
+                        <div class="countdown-label">Hours</div>
+                    </div>
+                    <div class="countdown-unit">
+                        <div class="countdown-number" id="reexamMinutes">0</div>
+                        <div class="countdown-label">Minutes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Motivational Box -->
+        <div class="revision-reminder">
+            <p><strong>Every day counts. Prepare Smart.</strong></p>
+        </div>
+    </div>
+</section>
+
+<!-- Class 10 Preparatory Schedule -->
+<section class="exam-prep-schedule">
+    <div class="container">
+        <h2>Class 10 Preparatory Schedule</h2>
+        <p class="section-subtitle">Strategic preparation timeline for board exam success</p>
+        
+        <div class="prep-table-wrapper">
+            <table class="prep-schedule-table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Focus Area</th>
+                        <th>Activities</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>September – October 2025</strong></td>
+                        <td>Foundation Building</td>
+                        <td>Concept clarity, Problem-solving practice</td>
+                    </tr>
+                    <tr>
+                        <td><strong>November – December 2025</strong></td>
+                        <td>Topic Completion</td>
+                        <td>Complete all chapters, Practice tests</td>
+                    </tr>
+                    <tr>
+                        <td><strong>January 2026</strong></td>
+                        <td>Practical Exams</td>
+                        <td>Lab work, Practical assessments</td>
+                    </tr>
+                    <tr>
+                        <td><strong>February – March 2026</strong></td>
+                        <td>Board Exam Prep</td>
+                        <td>Mock tests, Revision, Time management</td>
+                    </tr>
+                    <tr>
+                        <td><strong>March – April 2026</strong></td>
+                        <td>Final Review</td>
+                        <td>Doubt clearing, Last-minute revision</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Exam Timetables - Tabs Section -->
+<section class="exam-timetables">
+    <div class="container">
+        <h2>Board Exam Timetables 2026</h2>
+        
+        <!-- Tab Toggle -->
+        <div class="tabs-toggle">
+            <button class="tab-btn active" onclick="switchTab('cbse')">CBSE (NCERT)</button>
+            <button class="tab-btn" onclick="switchTab('karnataka')">Karnataka SSLC (KSEAB)</button>
+        </div>
+
+        <!-- CBSE Tab -->
+        <div id="cbse" class="tab-content active">
+            <h3>CBSE Class 10 Board Exam 2026 – Subject Schedule</h3>
+            <p class="exam-info">Theory Phase I | Practical exams happen January 2026 | Timing usually 10:30 AM – 1:30 PM</p>
+            
+            <div class="table-wrapper">
+                <table class="exam-timetable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Subject</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>17 Feb 2026</td>
+                            <td><span class="subject-badge math">Mathematics</span></td>
+                        </tr>
+                        <tr>
+                            <td>21 Feb 2026</td>
+                            <td><span class="subject-badge english">English</span></td>
+                        </tr>
+                        <tr>
+                            <td>25 Feb 2026</td>
+                            <td><span class="subject-badge science">Science</span></td>
+                        </tr>
+                        <tr>
+                            <td>02 Mar 2026</td>
+                            <td><span class="subject-badge hindi">Hindi</span></td>
+                        </tr>
+                        <tr>
+                            <td>07 Mar 2026</td>
+                            <td><span class="subject-badge soc-sci">Social Science</span></td>
+                        </tr>
+                        <tr>
+                            <td>09–10 Mar</td>
+                            <td><span class="subject-badge other">Other Languages/Optional</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Karnataka SSLC Tab -->
+        <div id="karnataka" class="tab-content">
+            <h3>Karnataka SSLC Class 10 Main Exam 2026 – Subject Schedule</h3>
+            <p class="exam-info">Main Exam 1 – March Session</p>
+            
+            <div class="table-wrapper">
+                <table class="exam-timetable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Subjects</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>18 Mar 2026</td>
+                            <td><span class="subject-badge lang">First Language</span></td>
+                        </tr>
+                        <tr>
+                            <td>20 Mar 2026</td>
+                            <td><span class="subject-badge math">Mathematics</span> | <span class="subject-badge soc-sci">Sociology</span></td>
+                        </tr>
+                        <tr>
+                            <td>23 Mar 2026</td>
+                            <td><span class="subject-badge science">Science</span> | <span class="subject-badge soc-sci">Political Science</span> | <span class="subject-badge other">Music</span></td>
+                        </tr>
+                        <tr>
+                            <td>25 Mar 2026</td>
+                            <td><span class="subject-badge lang">Second Language</span></td>
+                        </tr>
+                        <tr>
+                            <td>28 Mar 2026</td>
+                            <td><span class="subject-badge soc-sci">Social Science</span></td>
+                        </tr>
+                        <tr>
+                            <td>30 Mar 2026</td>
+                            <td><span class="subject-badge lang">Third Language</span></td>
+                        </tr>
+                        <tr>
+                            <td>01–02 Apr</td>
+                            <td><span class="subject-badge other">Junior Technical / Wrap-up</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 style="margin-top: 40px; margin-bottom: 20px;">Supplementary Exam</h4>
+            <p class="exam-info">18 May – 25 May 2026</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="container">
+        <h2>Ready to Excel in Your Exams?</h2>
+        <p>Join ASHWATHAMA CLASSES for expert guidance and practical learning.</p>
+        <a href="{{ url_for('admissions') }}" class="btn btn-primary">Enroll Now</a>
+    </div>
+</section>
+
+<script>
+    function switchTab(tabName) {
+        // Hide all tabs
+        const tabs = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        
+        // Show selected tab
+        document.getElementById(tabName).classList.add('active');
+        
+        // Update button states
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    function updateCountdown(examDate, countdownId, daysId, hoursId, minutesId) {
+        const now = new Date().getTime();
+        const examinationDate = new Date(examDate).getTime();
+        const distance = examinationDate - now;
+
+        if (distance > 0) {
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+
+            document.getElementById(daysId).textContent = days;
+            document.getElementById(hoursId).textContent = hours;
+            document.getElementById(minutesId).textContent = minutes;
+        } else {
+            document.getElementById(daysId).textContent = '0';
+            document.getElementById(hoursId).textContent = '0';
+            document.getElementById(minutesId).textContent = '0';
+        }
+    }
+
+    // Update countdowns every second
+    setInterval(() => {
+        updateCountdown('2026-02-17T10:30:00', 'cbseCountdown', 'cbseDays', 'cbseHours', 'cbseMinutes');
+        updateCountdown('2026-03-18T10:30:00', 'karnatakaCountdown', 'karnatakaDay', 'karnatakaHours', 'karnatakaMinutes');
+        updateCountdown('2026-05-18T10:30:00', 'reexamCountdown', 'reexamDays', 'reexamHours', 'reexamMinutes');
+    }, 1000);
+
+    // Initial update
+    updateCountdown('2026-02-17T10:30:00', 'cbseCountdown', 'cbseDays', 'cbseHours', 'cbseMinutes');
+    updateCountdown('2026-03-18T10:30:00', 'karnatakaCountdown', 'karnatakaDay', 'karnatakaHours', 'karnatakaMinutes');
+    updateCountdown('2026-05-18T10:30:00', 'reexamCountdown', 'reexamDays', 'reexamHours', 'reexamMinutes');
+</script>
+{% endblock %}
