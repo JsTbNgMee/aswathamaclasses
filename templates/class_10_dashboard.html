@@ -481,6 +481,8 @@
                     <button onclick="setActiveTab('prep1')" id="tab-prep1" class="tab-btn">Prep 1</button>
                     <button onclick="setActiveTab('prep2')" id="tab-prep2" class="tab-btn">Prep 2</button>
                     <button onclick="setActiveTab('prep3')" id="tab-prep3" class="tab-btn">Prep 3</button>
+                    <button onclick="setActiveTab('tests')" id="tab-tests" class="tab-btn">Tests</button>
+                    <button onclick="setActiveTab('attendance')" id="tab-attendance" class="tab-btn">Attendance</button>
                     <button onclick="setActiveTab('materials')" id="tab-materials" class="tab-btn">Materials</button>
                 </div>
 
@@ -492,6 +494,60 @@
             <!-- Table Views -->
             <div id="exam-tables">
                 <!-- Tables injected by JS -->
+            </div>
+
+            <!-- Test Marks Section -->
+            <div id="content-tests" class="tab-content" style="display: none;">
+                <div class="exam-table">
+                    <div style="padding: 24px; background: white; border-radius: 24px;">
+                        <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.05em;">Weekly Test History</h3>
+                        {% if student.tests %}
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            {% for test in student.tests|reverse %}
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #f1f5f9; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                <div>
+                                    <strong style="display: block; font-size: 16px; color: #0f172a;">{{ test.name }}</strong>
+                                    <small style="color: #64748b; font-size: 13px;">{{ test.date }}</small>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span style="font-size: 20px; font-weight: 900; color: #0f172a;">{{ test.marks }}/{{ test.total }}</span>
+                                    <div style="font-size: 12px; color: #6366f1; font-weight: 700;">{{ ((test.marks|int)/(test.total|int)*100)|round|int }}%</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p style="color: #94a3b8; text-align: center; padding: 40px; font-weight: 500;">No test records available yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Section -->
+            <div id="content-attendance" class="tab-content" style="display: none;">
+                <div class="exam-table">
+                    <div style="padding: 24px; background: white; border-radius: 24px;">
+                        <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.05em;">Attendance Status</h3>
+                        <div style="text-align: center; margin-bottom: 32px; padding: 32px; background: #0f172a; color: white; border-radius: 16px;">
+                            <div style="font-size: 48px; font-weight: 900;">{{ student.attendance_percentage|default(0)|round(1) }}%</div>
+                            <div style="font-size: 14px; opacity: 0.7; margin-top: 8px;">Overall Attendance</div>
+                        </div>
+                        
+                        <h4 style="margin-bottom: 16px; font-size: 13px; text-transform: uppercase; font-weight: 900; letter-spacing: 0.05em; color: #64748b;">Recent Attendance Log</h4>
+                        {% if student.attendance_log %}
+                        <div style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                            {% for log in student.attendance_log|reverse %}
+                            <div style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #f1f5f9; background: #f8fafc;">
+                                <span style="color: #0f172a; font-weight: 500;">{{ log.date }}</span>
+                                <span style="font-weight: 700; color: {% if log.status|lower == 'present' %}#059669{% else %}#dc2626{% endif %};">{{ log.status|upper }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p style="color: #94a3b8; text-align: center; padding: 40px; font-weight: 500;">No attendance records available yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
 
             <!-- Goal Card -->
