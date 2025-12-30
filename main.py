@@ -202,7 +202,8 @@ def student_dashboard():
         return redirect(url_for('student_login'))
     
     # Class 10 students get the exam insights dashboard
-    if student.get('class') == 'Class 10':
+    student_class = student.get('student_class') or student.get('class') or ''
+    if 'Class 10' in student_class or '10' in student_class:
         return render_template('class_10_dashboard.html', student=student)
     
     # Classes 8 and 9 get the standard dashboard
