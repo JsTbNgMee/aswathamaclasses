@@ -201,6 +201,11 @@ def student_dashboard():
         session.clear()
         return redirect(url_for('student_login'))
     
+    # Class 10 students get the exam insights dashboard
+    if student.get('class') == 'Class 10':
+        return render_template('class_10_dashboard.html', student=student)
+    
+    # Classes 8 and 9 get the standard dashboard
     return render_template('student_dashboard.html', student=student)
 
 @app.route('/student/logout')
