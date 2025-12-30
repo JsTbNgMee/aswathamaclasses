@@ -1,68 +1,468 @@
 {% extends 'base.html' %}
 {% block title %}Class 10 Exam Dashboard - ASHWATHAMA CLASSES{% endblock %}
-{% block content %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Class 10 SSLC Exam Insights 2026</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        #watermark {
-            position: fixed;
-            top: 1rem;
-            left: 1.5rem;
-            z-index: 99999;
-            font-size: 9px;
-            font-weight: 800;
-            color: #ffffff;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            pointer-events: none;
-            user-select: none;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 4px 12px;
-            border-radius: 20px;
-            backdrop-filter: blur(8px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 6px;
+{% block content %}
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    #watermark {
+        position: fixed;
+        top: 1rem;
+        left: 1.5rem;
+        z-index: 99999;
+        font-size: 9px;
+        font-weight: 800;
+        color: #ffffff;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        pointer-events: none;
+        user-select: none;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 4px 12px;
+        border-radius: 20px;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .exam-dashboard {
+        background: #fafbfc;
+        color: #0f172a;
+        min-height: 100vh;
+        padding-bottom: 48px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .exam-header {
+        background: #0f172a;
+        color: white;
+        padding: 64px 24px 96px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .exam-header h1 {
+        font-size: 48px;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+    }
+
+    .exam-header p {
+        color: #94a3b8;
+        font-style: italic;
+        font-size: 18px;
+        font-weight: 500;
+        margin: 0 auto;
+        max-width: 640px;
+        min-height: 48px;
+    }
+
+    .exam-header .logout-btn {
+        margin-top: 24px;
+        display: inline-block;
+        background: #334155;
+        color: white;
+        padding: 8px 24px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 14px;
+        text-decoration: none;
+        transition: background 0.3s;
+    }
+
+    .exam-header .logout-btn:hover {
+        background: #1e293b;
+    }
+
+    .exam-main {
+        max-width: 1536px;
+        margin: 0 auto;
+        padding: 0 24px;
+        margin-top: -64px;
+        position: relative;
+        z-index: 20;
+    }
+
+    .countdown-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .countdown-card {
+        padding: 16px;
+        border-radius: 12px;
+        color: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .countdown-card .phase-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        opacity: 0.8;
+        margin-bottom: 8px;
+    }
+
+    .countdown-card .timer-value {
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
+    }
+
+    .countdown-card .days-num {
+        font-size: 24px;
+        font-weight: 900;
+    }
+
+    .countdown-card .days-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        opacity: 0.7;
+    }
+
+    .controls-section {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    @media (min-width: 768px) {
+        .controls-section {
+            flex-direction: row;
+        }
+    }
+
+    .tabs-container {
+        background: white;
+        padding: 6px;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+        display: flex;
+        overflow-x: auto;
+        gap: 0;
+        flex: 1;
+    }
+
+    .tab-btn {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px 16px;
+        border-radius: 9px;
+        font-weight: 700;
+        font-size: 12px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .tab-btn.active {
+        background: #0f172a;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .search-box {
+        flex: 1;
+        position: relative;
+        min-width: 200px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 12px 16px 12px 44px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        border-color: #6366f1;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .exam-table {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        margin-bottom: 32px;
+    }
+
+    .exam-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .exam-table thead {
+        background: #f1f5f9;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .exam-table th {
+        padding: 20px;
+        text-align: left;
+        font-weight: 900;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #64748b;
+    }
+
+    .exam-table td {
+        padding: 18px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 15px;
+    }
+
+    .exam-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .goal-card {
+        background: #0f172a;
+        border-radius: 48px;
+        padding: 40px;
+        color: white;
+        margin-top: 48px;
+        margin-bottom: 48px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .goal-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 256px;
+        height: 256px;
+        background: rgba(99, 102, 241, 0.1);
+        border-radius: 9999px;
+        filter: blur(48px);
+        margin-top: -128px;
+        margin-right: -128px;
+    }
+
+    .goal-content {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        z-index: 10;
+    }
+
+    @media (min-width: 768px) {
+        .goal-content {
+            flex-direction: row;
+        }
+    }
+
+    .goal-text h2 {
+        font-size: 30px;
+        font-weight: 900;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+    }
+
+    .goal-text p {
+        color: #cbd5e1;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 1.5;
+        max-width: 560px;
+    }
+
+    .goal-badges {
+        display: flex;
+        gap: 16px;
+    }
+
+    .badge {
+        padding: 20px 32px;
+        border-radius: 24px;
+        text-align: center;
+        backdrop-filter: blur(8px);
+    }
+
+    .badge-label {
+        font-size: 10px;
+        font-weight: 900;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin-bottom: 8px;
+    }
+
+    .badge-value {
+        font-size: 20px;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+    }
+
+    .badge.secondary {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .badge.primary {
+        background: #6366f1;
+        box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.3);
+    }
+
+    .badge-value.underline {
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 4px;
+    }
+
+    .footer-text {
+        text-align: center;
+        margin-top: 64px;
+        opacity: 0.3;
+        padding-bottom: 64px;
+        font-size: 10px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.5em;
+    }
+
+    .materials-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+    }
+
+    .material-link {
+        padding: 32px;
+        border-radius: 40px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: all 0.3s;
+    }
+
+    .material-link.highlight {
+        background: #1e293b;
+        color: white;
+        border-color: #6366f1;
+    }
+
+    .material-link:hover {
+        border-color: #6366f1;
+    }
+
+    .material-link h3 {
+        font-weight: 900;
+        font-size: 20px;
+        margin-bottom: 8px;
+    }
+
+    .material-link .type-label {
+        font-size: 10px;
+        font-weight: 900;
+        text-transform: uppercase;
+        opacity: 0.6;
+    }
+
+    .material-link .access-info {
+        margin-top: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 900;
+        font-size: 12px;
+        text-transform: uppercase;
+    }
+
+    @media (max-width: 768px) {
+        .countdown-grid {
+            grid-template-columns: repeat(2, 1fr);
         }
 
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        
-        .transition-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    </style>
-</head>
-<body class="bg-[#fafbfc] text-slate-900">
+        .exam-header h1 {
+            font-size: 32px;
+        }
 
+        .goal-card {
+            padding: 30px 20px;
+        }
+
+        .goal-content {
+            gap: 20px;
+        }
+
+        .goal-text h2 {
+            font-size: 22px;
+        }
+
+        .exam-table th,
+        .exam-table td {
+            padding: 12px 10px;
+            font-size: 13px;
+        }
+    }
+</style>
+
+<div class="exam-dashboard">
     <div id="watermark">
         <span style="opacity: 0.6;">🎓</span>
         ASHWATHAMA CLASSES · Class 10 Exam Portal
     </div>
 
     <!-- PIN LOCK SCREEN -->
-    <div id="lock-screen" class="fixed inset-0 bg-slate-900 z-[10000] flex items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center">
-            <div class="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 mx-auto mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </div>
-            <h1 class="text-2xl font-black text-slate-900 mb-2 tracking-tight">Access Locked</h1>
-            <p class="text-slate-500 text-sm mb-6 font-medium uppercase tracking-widest">Enter Pin to View Dashboard</p>
-            <div class="space-y-4">
-                <input type="password" id="pin-input" maxlength="4" placeholder="••••" 
-                    class="w-full text-center text-3xl font-black tracking-[1em] py-4 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 focus:outline-none transition-all">
-                <button onclick="checkPin()" class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all active:scale-95">
+    <div id="lock-screen" style="position: fixed; inset: 0; background: #0f172a; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 24px;">
+        <div style="background: white; padding: 32px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); max-width: 400px; width: 100%; text-align: center;">
+            <div style="width: 64px; height: 64px; background: #e0e7ff; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #6366f1; margin: 0 auto 24px; font-size: 32px;">🔒</div>
+            <h1 style="font-size: 24px; font-weight: 900; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.02em;">Access Locked</h1>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 24px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em;">Enter Pin to View Dashboard</p>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <input type="password" id="pin-input" maxlength="4" placeholder="••••" style="width: 100%; text-align: center; font-size: 24px; font-weight: 900; letter-spacing: 0.1em; padding: 16px; border: 2px solid #e2e8f0; border-radius: 16px; transition: all 0.3s;">
+                <button onclick="checkPin()" style="width: 100%; background: #0f172a; color: white; font-weight: 900; padding: 16px; border-radius: 16px; border: none; cursor: pointer; font-size: 14px; text-transform: uppercase; transition: all 0.3s;">
                     Unlock Dashboard
                 </button>
             </div>
@@ -70,351 +470,321 @@
     </div>
 
     <!-- MAIN DASHBOARD -->
-    <div id="dashboard" class="hidden min-h-screen pb-12">
+    <div id="dashboard" style="display: none;">
         <!-- Header -->
-        <header class="bg-slate-900 text-white pt-16 pb-24 px-6 text-center relative overflow-hidden">
-            <div class="max-w-4xl mx-auto relative z-10">
-                <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1 rounded-full text-indigo-300 text-[10px] font-black uppercase mb-4 backdrop-blur-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-                    SSLC Achievement Portal
+        <div class="exam-header">
+            <div style="max-width: 1024px; margin: 0 auto; position: relative; z-index: 10;">
+                <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 6px 12px; border-radius: 9999px; color: #93c5fd; font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 16px; backdrop-filter: blur(8px);">
+                    ⭐ SSLC Achievement Portal
                 </div>
-                <h1 class="text-3xl md:text-5xl font-black tracking-tighter mb-4 uppercase">EXAM INSIGHTS 2026</h1>
-                <p id="quote-text" class="text-slate-400 italic text-sm md:text-lg font-medium max-w-xl mx-auto min-h-[3rem]">
-                    "Success is the sum of small efforts repeated daily."
-                </p>
-                <div class="mt-6">
-                    <a href="{{ url_for('student_logout') }}" class="inline-block bg-slate-700 hover:bg-slate-600 text-white px-6 py-2 rounded-lg font-bold text-sm transition-all">
-                        Logout
-                    </a>
-                </div>
+                <h1>EXAM INSIGHTS 2026</h1>
+                <p id="quote-text">"Success is the sum of small efforts repeated daily."</p>
+                <a href="{{ url_for('student_logout') }}" class="logout-btn">Logout</a>
             </div>
-        </header>
+        </div>
 
-        <main class="max-w-6xl mx-auto px-6 -mt-16 relative z-20">
+        <div class="exam-main">
             <!-- Phase Countdowns -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" id="phase-timers">
+            <div class="countdown-grid" id="phase-timers">
                 <!-- Timers injected by JS -->
             </div>
 
             <!-- Controls -->
-            <div class="flex flex-col md:flex-row gap-4 mb-8">
-                <div class="flex-1 bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 flex overflow-x-auto no-scrollbar scroll-smooth">
-                    <button onclick="setActiveTab('final')" id="tab-final" class="tab-btn flex-1 min-w-[120px] py-2.5 px-4 rounded-xl font-bold text-xs transition-all duration-200">Final Exam</button>
-                    <button onclick="setActiveTab('prep1')" id="tab-prep1" class="tab-btn flex-1 min-w-[120px] py-2.5 px-4 rounded-xl font-bold text-xs transition-all duration-200">Prep 1</button>
-                    <button onclick="setActiveTab('prep2')" id="tab-prep2" class="tab-btn flex-1 min-w-[120px] py-2.5 px-4 rounded-xl font-bold text-xs transition-all duration-200">Prep 2</button>
-                    <button onclick="setActiveTab('prep3')" id="tab-prep3" class="tab-btn flex-1 min-w-[120px] py-2.5 px-4 rounded-xl font-bold text-xs transition-all duration-200">Prep 3</button>
-                    <button onclick="setActiveTab('materials')" id="tab-materials" class="tab-btn flex-1 min-w-[120px] py-2.5 px-4 rounded-xl font-bold text-xs transition-all duration-200">Materials</button>
+            <div class="controls-section">
+                <div class="tabs-container">
+                    <button onclick="setActiveTab('final')" id="tab-final" class="tab-btn active">Final Exam</button>
+                    <button onclick="setActiveTab('prep1')" id="tab-prep1" class="tab-btn">Prep 1</button>
+                    <button onclick="setActiveTab('prep2')" id="tab-prep2" class="tab-btn">Prep 2</button>
+                    <button onclick="setActiveTab('prep3')" id="tab-prep3" class="tab-btn">Prep 3</button>
+                    <button onclick="setActiveTab('materials')" id="tab-materials" class="tab-btn">Materials</button>
                 </div>
 
-                <div class="relative w-full md:w-80">
-                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    <input type="text" id="search-input" oninput="handleSearch()" placeholder="Quick subject search..." 
-                        class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm">
+                <div class="search-box">
+                    <input type="text" id="search-input" oninput="handleSearch()" placeholder="Quick subject search..." style="box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
                 </div>
             </div>
 
             <!-- Table Views -->
-            <div id="exam-tables" class="space-y-6">
+            <div id="exam-tables">
                 <!-- Tables injected by JS -->
             </div>
 
             <!-- Goal Card -->
-            <div class="mt-12 bg-slate-900 rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl border border-white/5">
-                <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mt-32 -mr-32"></div>
-                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                    <div class="text-center md:text-left">
-                        <h2 class="text-3xl font-black mb-3 flex items-center justify-center md:justify-start gap-3 tracking-tighter">
-                            <svg class="text-indigo-400" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></circle></svg>
-                            SSLC SUCCESS GOAL 2026
-                        </h2>
-                        <p class="text-slate-400 text-base max-w-lg font-medium leading-relaxed">
-                            Stay disciplined. Use the preparatory rounds as mirrors for your final performance. Study the materials and prepare smart!
-                        </p>
+            <div class="goal-card">
+                <div class="goal-content">
+                    <div class="goal-text">
+                        <h2>⊙ SSLC Success Goal 2026</h2>
+                        <p>Stay disciplined. Use the preparatory rounds as mirrors for your final performance. Study the materials and prepare smart!</p>
                     </div>
-                    <div class="flex gap-4">
-                       <div class="bg-white/5 border border-white/10 p-5 px-8 rounded-3xl text-center backdrop-blur-md">
-                          <p class="text-[10px] font-black uppercase text-indigo-400 mb-1">Mantra</p>
-                          <p class="text-xl font-black tracking-tighter italic">Consistency</p>
-                       </div>
-                       <div class="bg-indigo-600 p-5 px-8 rounded-3xl text-center shadow-xl shadow-indigo-600/30">
-                          <p class="text-[10px] font-black uppercase text-white/70 mb-1">Target</p>
-                          <p class="text-xl font-black tracking-tighter underline underline-offset-4 decoration-2">Distinction</p>
-                       </div>
+                    <div class="goal-badges">
+                        <div class="badge secondary">
+                            <div class="badge-label">Mantra</div>
+                            <div class="badge-value" style="font-style: italic;">Consistency</div>
+                        </div>
+                        <div class="badge primary">
+                            <div class="badge-label">Target</div>
+                            <div class="badge-value underline">Distinction</div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
 
-        <footer class="text-center mt-16 opacity-30 pb-16">
-            <p class="text-[10px] font-black uppercase tracking-[0.5em]">Academic Excellence Framework · 2026</p>
-        </footer>
+        <div class="footer-text">Academic Excellence Framework · 2026</div>
     </div>
+</div>
 
-    <script>
-        const PIN = "2026";
-        const EXAM_DATA = {
-            final: {
-                title: 'Final SSLC Exam 2026',
-                startDate: '2026-03-18T10:00:00',
-                color: 'bg-rose-600',
-                schedule: [
-                    { date: '18-03-2026', iso: '2026-03-18T10:00:00', subject: 'English (1st Language)', time: '10:00 AM' },
-                    { date: '23-03-2026', iso: '2026-03-23T10:00:00', subject: 'Science', time: '10:00 AM' },
-                    { date: '25-03-2026', iso: '2026-03-25T10:00:00', subject: 'Kannada (2nd Language)', time: '10:00 AM' },
-                    { date: '28-03-2026', iso: '2026-03-28T10:00:00', subject: 'Mathematics', time: '10:00 AM' },
-                    { date: '30-03-2026', iso: '2026-03-30T10:00:00', subject: 'Hindi (3rd Language)', time: '10:00 AM' },
-                    { date: '02-04-2026', iso: '2026-04-02T10:00:00', subject: 'Social Science (SST)', time: '10:00 AM' },
-                ]
-            },
-            prep1: {
-                title: 'Preparatory-1',
-                startDate: '2026-01-05T10:00:00',
-                color: 'bg-indigo-600',
-                schedule: [
-                    { date: '05-01-2026', iso: '2026-01-05T10:00:00', subject: 'English (1st Language)', time: '10:00 AM' },
-                    { date: '06-01-2026', iso: '2026-01-06T10:00:00', subject: 'Mathematics', time: '10:00 AM' },
-                    { date: '07-01-2026', iso: '2026-01-07T10:00:00', subject: 'Kannada (2nd Language)', time: '10:00 AM' },
-                    { date: '08-01-2026', iso: '2026-01-08T10:00:00', subject: 'Hindi (3rd Language)', time: '10:00 AM' },
-                    { date: '09-01-2026', iso: '2026-01-09T10:00:00', subject: 'Science', time: '10:00 AM' },
-                    { date: '10-01-2026', iso: '2026-01-10T10:00:00', subject: 'Social Science (SST)', time: '10:00 AM' },
-                ]
-            },
-            prep2: {
-                title: 'Preparatory-2',
-                startDate: '2026-01-27T10:00:00',
-                color: 'bg-emerald-600',
-                schedule: [
-                    { date: '27-01-2026', iso: '2026-01-27T10:00:00', subject: 'English (1st Language)', time: '10:00 AM' },
-                    { date: '28-01-2026', iso: '2026-01-28T10:00:00', subject: 'Mathematics', time: '10:00 AM' },
-                    { date: '29-01-2026', iso: '2026-01-29T10:00:00', subject: 'Kannada (2nd Language)', time: '10:00 AM' },
-                    { date: '30-01-2026', iso: '2026-01-30T10:00:00', subject: 'Hindi (3rd Language)', time: '10:00 AM' },
-                    { date: '31-01-2026', iso: '2026-01-31T10:00:00', subject: 'Science', time: '10:00 AM' },
-                    { date: '02-02-2026', iso: '2026-02-02T10:00:00', subject: 'Social Science (SST)', time: '10:00 AM' },
-                ]
-            },
-            prep3: {
-                title: 'Preparatory-3',
-                startDate: '2026-02-23T10:00:00',
-                color: 'bg-amber-600',
-                schedule: [
-                    { date: '23-02-2026', iso: '2026-02-23T10:00:00', subject: 'English (1st Language)', time: '10:00 AM' },
-                    { date: '24-02-2026', iso: '2026-02-24T10:00:00', subject: 'Mathematics', time: '10:00 AM' },
-                    { date: '25-02-2026', iso: '2026-02-25T10:00:00', subject: 'Kannada (2nd Language)', time: '10:00 AM' },
-                    { date: '26-02-2026', iso: '2026-02-26T10:00:00', subject: 'Hindi (3rd Language)', time: '10:00 AM' },
-                    { date: '27-02-2026', iso: '2026-02-27T10:00:00', subject: 'Science', time: '10:00 AM' },
-                    { date: '28-02-2026', iso: '2026-02-28T10:00:00', subject: 'Social Science (SST)', time: '10:00 AM' },
-                ]
-            }
-        };
-
-        const QUOTES = [
-            "Success is the sum of small efforts repeated daily.",
-            "Your only limit is your mind. Keep pushing!",
-            "The future belongs to those who prepare for it today.",
-            "Stay focused, stay humble, work hard.",
-            "One day at a time. You've got this!"
-        ];
-
-        const MATERIAL_LINKS = [
-            { name: 'KSEAB Official Portal', url: 'https://kseeb.karnataka.gov.in/KOSMIG/', type: 'Official Department', highlight: true },
-            { name: 'Full Materials Folder', url: 'https://drive.google.com/drive/folders/1ayOsI6C0eVI-wfU7_c0gF8jylZan9xCj?usp=sharing', type: 'All-in-One' },
-            { name: 'English (1st Lang)', url: 'https://drive.google.com/drive/folders/1TDTlnfrJHKmfzUDvsGjiDWHtx7BOcN5T?usp=drive_link', type: 'Language' },
-            { name: 'Kannada (2nd Lang)', url: 'https://drive.google.com/drive/folders/14HsO5I3_OPr5c-vimm4a51mXypdF05rn?usp=drive_link', type: 'Language' },
-            { name: 'Hindi (3rd Lang)', url: 'https://drive.google.com/drive/folders/1v-DALIdFn0ik3l6fVssx6md2EmQWxh4P?usp=drive_link', type: 'Language' },
-            { name: 'Mathematics', url: 'https://drive.google.com/drive/folders/1sFMflnaw2TU3_Z9jvgNc84Zry_3nyGp8?usp=drive_link', type: 'Core' },
-            { name: 'Science', url: 'https://drive.google.com/drive/folders/1upSwyzKHsw3WoDCQfu35eEHT8TjasulL?usp=drive_link', type: 'Core' },
-            { name: 'Social Science', url: 'https://drive.google.com/drive/folders/1yCf3sH-ukXs86IPCbnfJbA9padCnAjN4?usp=drive_link', type: 'Core' },
-        ];
-
-        let activeTab = 'final';
-
-        function checkPin() {
-            const input = document.getElementById('pin-input');
-            if (input.value === PIN) {
-                document.getElementById('lock-screen').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                initDashboard();
-            } else {
-                input.value = '';
-                input.classList.add('border-red-500');
-                setTimeout(() => input.classList.remove('border-red-500'), 500);
-            }
+<script>
+    const PIN = "2026";
+    const EXAM_DATA = {
+        final: {
+            title: 'Final SSLC Exam 2026',
+            startDate: '2026-03-18T10:00:00',
+            color: '#dc2626',
+            schedule: [
+                { date: '18-03-2026', iso: '2026-03-18T10:00:00', subject: 'English (1st Language)', time: '10:00 AM' },
+                { date: '23-03-2026', iso: '2026-03-23T10:00:00', subject: 'Science', time: '10:00 AM' },
+                { date: '25-03-2026', iso: '2026-03-25T10:00:00', subject: 'Kannada (2nd Language)', time: '10:00 AM' },
+                { date: '28-03-2026', iso: '2026-03-28T10:00:00', subject: 'Mathematics', time: '10:00 AM' },
+                { date: '30-03-2026', iso: '2026-03-30T10:00:00', subject: 'Hindi (3rd Language)', time: '10:00 AM' },
+                { date: '02-04-2026', iso: '2026-04-02T10:00:00', subject: 'Social Science (SST)', time: '10:00 AM' },
+            ]
+        },
+        prep1: {
+            title: 'Preparatory-1',
+            startDate: '2026-01-05T10:00:00',
+            color: '#6366f1',
+            schedule: [
+                { date: '05-01-2026', iso: '2026-01-05T10:00:00', subject: 'English (1st Language)', time: '10:00 AM' },
+                { date: '06-01-2026', iso: '2026-01-06T10:00:00', subject: 'Mathematics', time: '10:00 AM' },
+                { date: '07-01-2026', iso: '2026-01-07T10:00:00', subject: 'Kannada (2nd Language)', time: '10:00 AM' },
+                { date: '08-01-2026', iso: '2026-01-08T10:00:00', subject: 'Hindi (3rd Language)', time: '10:00 AM' },
+                { date: '09-01-2026', iso: '2026-01-09T10:00:00', subject: 'Science', time: '10:00 AM' },
+                { date: '10-01-2026', iso: '2026-01-10T10:00:00', subject: 'Social Science (SST)', time: '10:00 AM' },
+            ]
+        },
+        prep2: {
+            title: 'Preparatory-2',
+            startDate: '2026-01-27T10:00:00',
+            color: '#059669',
+            schedule: [
+                { date: '27-01-2026', iso: '2026-01-27T10:00:00', subject: 'English (1st Language)', time: '10:00 AM' },
+                { date: '28-01-2026', iso: '2026-01-28T10:00:00', subject: 'Mathematics', time: '10:00 AM' },
+                { date: '29-01-2026', iso: '2026-01-29T10:00:00', subject: 'Kannada (2nd Language)', time: '10:00 AM' },
+                { date: '30-01-2026', iso: '2026-01-30T10:00:00', subject: 'Hindi (3rd Language)', time: '10:00 AM' },
+                { date: '31-01-2026', iso: '2026-01-31T10:00:00', subject: 'Science', time: '10:00 AM' },
+                { date: '02-02-2026', iso: '2026-02-02T10:00:00', subject: 'Social Science (SST)', time: '10:00 AM' },
+            ]
+        },
+        prep3: {
+            title: 'Preparatory-3',
+            startDate: '2026-02-23T10:00:00',
+            color: '#b45309',
+            schedule: [
+                { date: '23-02-2026', iso: '2026-02-23T10:00:00', subject: 'English (1st Language)', time: '10:00 AM' },
+                { date: '24-02-2026', iso: '2026-02-24T10:00:00', subject: 'Mathematics', time: '10:00 AM' },
+                { date: '25-02-2026', iso: '2026-02-25T10:00:00', subject: 'Kannada (2nd Language)', time: '10:00 AM' },
+                { date: '26-02-2026', iso: '2026-02-26T10:00:00', subject: 'Hindi (3rd Language)', time: '10:00 AM' },
+                { date: '27-02-2026', iso: '2026-02-27T10:00:00', subject: 'Science', time: '10:00 AM' },
+                { date: '28-02-2026', iso: '2026-02-28T10:00:00', subject: 'Social Science (SST)', time: '10:00 AM' },
+            ]
         }
+    };
 
-        function initDashboard() {
-            renderTimers();
-            renderTables();
-            setActiveTab('final');
-            startGlobalIntervals();
+    const QUOTES = [
+        "Success is the sum of small efforts repeated daily.",
+        "Your only limit is your mind. Keep pushing!",
+        "The future belongs to those who prepare for it today.",
+        "Stay focused, stay humble, work hard.",
+        "One day at a time. You've got this!"
+    ];
+
+    const MATERIAL_LINKS = [
+        { name: 'KSEAB Official Portal', url: 'https://kseeb.karnataka.gov.in/KOSMIG/', type: 'Official Department', highlight: true },
+        { name: 'Full Materials Folder', url: 'https://drive.google.com/drive/folders/1ayOsI6C0eVI-wfU7_c0gF8jylZan9xCj?usp=sharing', type: 'All-in-One' },
+        { name: 'English (1st Lang)', url: 'https://drive.google.com/drive/folders/1TDTlnfrJHKmfzUDvsGjiDWHtx7BOcN5T?usp=drive_link', type: 'Language' },
+        { name: 'Kannada (2nd Lang)', url: 'https://drive.google.com/drive/folders/14HsO5I3_OPr5c-vimm4a51mXypdF05rn?usp=drive_link', type: 'Language' },
+        { name: 'Hindi (3rd Lang)', url: 'https://drive.google.com/drive/folders/1v-DALIdFn0ik3l6fVssx6md2EmQWxh4P?usp=drive_link', type: 'Language' },
+        { name: 'Mathematics', url: 'https://drive.google.com/drive/folders/1sFMflnaw2TU3_Z9jvgNc84Zry_3nyGp8?usp=drive_link', type: 'Core' },
+        { name: 'Science', url: 'https://drive.google.com/drive/folders/1upSwyzKHsw3WoDCQfu35eEHT8TjasulL?usp=drive_link', type: 'Core' },
+        { name: 'Social Science', url: 'https://drive.google.com/drive/folders/1yCf3sH-ukXs86IPCbnfJbA9padCnAjN4?usp=drive_link', type: 'Core' },
+    ];
+
+    let activeTab = 'final';
+
+    function checkPin() {
+        const input = document.getElementById('pin-input');
+        if (input.value === PIN) {
+            document.getElementById('lock-screen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            initDashboard();
+        } else {
+            input.value = '';
+            input.style.borderColor = '#ef4444';
+            setTimeout(() => input.style.borderColor = '#e2e8f0', 500);
         }
+    }
 
-        function renderTimers() {
-            const container = document.getElementById('phase-timers');
-            container.innerHTML = Object.keys(EXAM_DATA).map(key => {
-                const phase = EXAM_DATA[key];
-                return `
-                    <div class="p-4 rounded-xl text-white shadow-sm flex flex-col justify-center ${phase.color}">
-                        <span class="text-[10px] uppercase font-black tracking-widest opacity-80 mb-1">${phase.title}</span>
-                        <div class="flex gap-2 items-baseline">
-                            <span id="timer-phase-${key}" class="text-2xl font-black">0</span>
-                            <span class="text-[10px] uppercase opacity-70">Days left</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
+    function initDashboard() {
+        renderTimers();
+        renderTables();
+        setActiveTab('final');
+        startGlobalIntervals();
+    }
 
-        function renderTables() {
-            const container = document.getElementById('exam-tables');
-            let html = '';
-            
-            Object.keys(EXAM_DATA).forEach(key => {
-                const phase = EXAM_DATA[key];
-                html += `
-                    <div id="content-${key}" class="tab-content bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[10px] uppercase font-black tracking-widest">
-                                    <tr>
-                                        <th class="px-8 py-5">Exam Date</th>
-                                        <th class="px-8 py-5">Subject</th>
-                                        <th class="px-8 py-5">Time</th>
-                                        <th class="px-8 py-5 text-right">Countdown</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100">
-                                    ${phase.schedule.map((exam, i) => `
-                                        <tr class="exam-row hover:bg-indigo-50/30 transition-all duration-200 group" data-subject="${exam.subject.toLowerCase()}" data-date="${exam.date}">
-                                            <td class="px-8 py-6">
-                                                <span class="text-sm font-bold text-slate-800 tracking-tight group-hover:text-indigo-900">${exam.date}</span>
-                                            </td>
-                                            <td class="px-8 py-6">
-                                                <span class="text-base font-black text-slate-900 tracking-tighter block leading-tight">${exam.subject}</span>
-                                            </td>
-                                            <td class="px-8 py-6">
-                                                <span class="text-xs font-medium text-slate-500 tracking-tight bg-slate-100 px-2 py-1 rounded-lg">${exam.time}</span>
-                                            </td>
-                                            <td class="px-8 py-6 flex justify-end">
-                                                <div id="timer-row-${key}-${i}" class="flex items-center gap-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">
-                                                    Loading...
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Add Materials Tab
-            html += `
-                <div id="content-materials" class="tab-content space-y-6">
-                    <div class="bg-indigo-50 border border-indigo-100 rounded-3xl p-6 flex gap-5 items-start shadow-sm">
-                        <div class="bg-indigo-600 p-3 rounded-2xl text-white shadow-lg shadow-indigo-200">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                        </div>
-                        <div class="text-sm">
-                            <h4 class="font-black text-indigo-900 uppercase tracking-tight text-xs mb-2">Official Student Corner Guide</h4>
-                            <p class="text-indigo-800 leading-relaxed font-medium">
-                                Visit <span class="font-black underline italic">kseab.karnataka.gov.in</span> on your phone. Click the <span class="font-black">three horizontal lines</span> (top-right). Select <span class="font-black bg-indigo-200/50 px-1 rounded">SSLC</span>, then choose <span class="font-black text-indigo-900 italic">SSLC STUDENT CORNER</span>.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        ${MATERIAL_LINKS.map(link => `
-                            <a href="${link.url}" target="_blank" class="group p-8 rounded-[2.5rem] border transition-all duration-300 flex flex-col justify-between ${link.highlight ? 'bg-indigo-900 text-white' : 'bg-white border-slate-200 shadow-sm hover:border-indigo-400'}">
-                                <div>
-                                    <h3 class="font-black text-xl mb-2">${link.name}</h3>
-                                    <span class="text-[10px] font-black uppercase tracking-widest opacity-60">${link.type}</span>
-                                </div>
-                                <div class="mt-6 flex items-center justify-between font-black text-xs uppercase">
-                                    <span>Access</span>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                                </div>
-                            </a>
-                        `).join('')}
+    function renderTimers() {
+        const container = document.getElementById('phase-timers');
+        container.innerHTML = Object.keys(EXAM_DATA).map(key => {
+            const phase = EXAM_DATA[key];
+            return `
+                <div style="padding: 16px; border-radius: 12px; color: white; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); background: ${phase.color}; display: flex; flex-direction: column; justify-content: center;">
+                    <span style="font-size: 10px; text-transform: uppercase; font-weight: 900; letter-spacing: 0.1em; opacity: 0.8; margin-bottom: 8px;">${phase.title}</span>
+                    <div style="display: flex; gap: 8px; align-items: baseline;">
+                        <span id="timer-phase-${key}" style="font-size: 24px; font-weight: 900;">0</span>
+                        <span style="font-size: 10px; text-transform: uppercase; opacity: 0.7;">Days left</span>
                     </div>
                 </div>
             `;
-            
-            container.innerHTML = html;
-        }
+        }).join('');
+    }
 
-        function setActiveTab(id) {
-            activeTab = id;
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById('content-' + id).classList.add('active');
-            
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('bg-slate-900', 'text-white', 'shadow-lg'));
-            document.getElementById('tab-' + id).classList.add('bg-slate-900', 'text-white', 'shadow-lg');
-            
-            document.getElementById('search-input').value = '';
-            handleSearch();
-        }
+    function renderTables() {
+        const container = document.getElementById('exam-tables');
+        let html = '';
+        
+        Object.keys(EXAM_DATA).forEach(key => {
+            const phase = EXAM_DATA[key];
+            html += `
+                <div id="content-${key}" class="tab-content" style="${key === 'final' ? '' : 'display: none;'}">
+                    <div class="exam-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Exam Date</th>
+                                    <th>Subject</th>
+                                    <th>Time</th>
+                                    <th style="text-align: right;">Countdown</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${phase.schedule.map((exam, i) => `
+                                    <tr class="exam-row" data-subject="${exam.subject.toLowerCase()}" data-date="${exam.date}">
+                                        <td style="font-weight: 600;">${exam.date}</td>
+                                        <td style="font-weight: 900;">${exam.subject}</td>
+                                        <td><span style="font-size: 12px; font-weight: 500; background: #f1f5f9; padding: 4px 8px; border-radius: 6px;">${exam.time}</span></td>
+                                        <td style="text-align: right;">
+                                            <div id="timer-row-${key}-${i}" style="font-size: 12px; font-weight: 700; color: #6366f1; background: #f0f4ff; padding: 4px 8px; border-radius: 4px; border: 1px solid #c7d2fe; display: inline-block;">
+                                                Loading...
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        });
 
-        function handleSearch() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const rows = document.querySelectorAll('.exam-row');
-            rows.forEach(row => {
-                const subject = row.getAttribute('data-subject');
-                const date = row.getAttribute('data-date');
-                if (subject.includes(query) || date.includes(query)) {
-                    row.classList.remove('hidden');
+        // Materials Tab
+        html += `
+            <div id="content-materials" class="tab-content" style="display: none;">
+                <div style="background: #f0f4ff; border: 1px solid #c7d2fe; border-radius: 24px; padding: 24px; margin-bottom: 32px;">
+                    <h4 style="font-weight: 900; color: #1e293b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; font-size: 12px;">📚 Official Student Corner Guide</h4>
+                    <p style="color: #1e293b; line-height: 1.6; font-weight: 500; font-size: 14px;">
+                        Visit <strong>kseab.karnataka.gov.in</strong> on your phone. Click the three lines (top-right). Select <strong>SSLC</strong>, then <strong>SSLC STUDENT CORNER</strong>.
+                    </p>
+                </div>
+                <div class="materials-section">
+                    ${MATERIAL_LINKS.map(link => `
+                        <a href="${link.url}" target="_blank" class="material-link ${link.highlight ? 'highlight' : ''}">
+                            <div>
+                                <h3>${link.name}</h3>
+                                <span class="type-label">${link.type}</span>
+                            </div>
+                            <div class="access-info">
+                                <span>Access</span>
+                                <span>→</span>
+                            </div>
+                        </a>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+    }
+
+    function setActiveTab(id) {
+        activeTab = id;
+        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+        document.getElementById('content-' + id).style.display = 'block';
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+        
+        document.getElementById('search-input').value = '';
+        handleSearch();
+    }
+
+    function handleSearch() {
+        const query = document.getElementById('search-input').value.toLowerCase();
+        const rows = document.querySelectorAll('.exam-row');
+        rows.forEach(row => {
+            const subject = row.getAttribute('data-subject');
+            const date = row.getAttribute('data-date');
+            if (subject.includes(query) || date.includes(query)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function startGlobalIntervals() {
+        setInterval(updateAllTimers, 1000);
+        updateAllTimers();
+
+        let quoteIdx = 0;
+        setInterval(() => {
+            quoteIdx = (quoteIdx + 1) % QUOTES.length;
+            document.getElementById('quote-text').innerText = `"${QUOTES[quoteIdx]}"`;
+        }, 8000);
+    }
+
+    function updateAllTimers() {
+        const now = new Date().getTime();
+
+        Object.keys(EXAM_DATA).forEach(key => {
+            const target = new Date(EXAM_DATA[key].startDate).getTime();
+            const diff = target - now;
+            const days = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+            const el = document.getElementById('timer-phase-' + key);
+            if (el) el.innerText = days;
+
+            EXAM_DATA[key].schedule.forEach((exam, i) => {
+                const rowEl = document.getElementById(`timer-row-${key}-${i}`);
+                if (!rowEl) return;
+
+                const examTarget = new Date(exam.iso).getTime();
+                const examDiff = examTarget - now;
+
+                if (examDiff <= 0) {
+                    rowEl.innerText = "Completed";
+                    rowEl.style.color = '#64748b';
                 } else {
-                    row.classList.add('hidden');
+                    const d = Math.floor(examDiff / (1000 * 60 * 60 * 24));
+                    const h = Math.floor((examDiff / (1000 * 60 * 60)) % 24);
+                    const m = Math.floor((examDiff / (1000 * 60)) % 60);
+                    rowEl.innerText = `${d}d ${h}h ${m}m`;
                 }
             });
-        }
-
-        function startGlobalIntervals() {
-            setInterval(updateAllTimers, 1000);
-            updateAllTimers();
-
-            let quoteIdx = 0;
-            setInterval(() => {
-                quoteIdx = (quoteIdx + 1) % QUOTES.length;
-                document.getElementById('quote-text').innerText = `"${QUOTES[quoteIdx]}"`;
-            }, 8000);
-        }
-
-        function updateAllTimers() {
-            const now = new Date().getTime();
-
-            Object.keys(EXAM_DATA).forEach(key => {
-                const target = new Date(EXAM_DATA[key].startDate).getTime();
-                const diff = target - now;
-                const days = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
-                const el = document.getElementById('timer-phase-' + key);
-                if (el) el.innerText = days;
-
-                EXAM_DATA[key].schedule.forEach((exam, i) => {
-                    const rowEl = document.getElementById(`timer-row-${key}-${i}`);
-                    if (!rowEl) return;
-
-                    const examTarget = new Date(exam.iso).getTime();
-                    const examDiff = examTarget - now;
-
-                    if (examDiff <= 0) {
-                        rowEl.innerText = "Completed";
-                        rowEl.className = "text-slate-400 text-xs font-medium";
-                    } else {
-                        const d = Math.floor(examDiff / (1000 * 60 * 60 * 24));
-                        const h = Math.floor((examDiff / (1000 * 60 * 60)) % 24);
-                        const m = Math.floor((examDiff / (1000 * 60)) % 60);
-                        rowEl.innerText = `${d}d ${h}h ${m}m`;
-                    }
-                });
-            });
-        }
-
-        // Auto-unlock for authenticated students
-        window.addEventListener('load', function() {
-            checkPin();
         });
-    </script>
-</body>
-</html>
+    }
 
+    // Auto-unlock for authenticated students
+    window.addEventListener('load', function() {
+        checkPin();
+    });
+</script>
 {% endblock %}
