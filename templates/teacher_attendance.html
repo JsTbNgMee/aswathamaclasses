@@ -14,6 +14,28 @@
         </div>
         {% endif %}
 
+        {% if absentees_by_class %}
+        <div class="absentee-summary" style="margin-bottom: 30px; border: 2px solid #000; padding: 20px; background: #fff;">
+            <h2 style="margin-top: 0; border-bottom: 2px solid #000; padding-bottom: 10px;">Absentee Lists</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                {% for s_class, names in absentees_by_class.items() %}
+                <div class="class-absentees" style="border: 1px solid #ddd; padding: 15px; position: relative;">
+                    <h3 style="margin-top: 0;">{{ s_class }}</h3>
+                    <div style="white-space: pre-wrap; margin-bottom: 15px;">Todays absentees
+{% for name in names %}{{ loop.index }}. {{ name }}
+{% endfor %}</div>
+                    <a href="https://wa.me/?text={{ whatsapp_messages[s_class]|urlencode }}" 
+                       target="_blank" 
+                       class="btn btn-primary" 
+                       style="display: block; text-align: center; background: #25D366; border: none;">
+                        Send on WhatsApp
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         <form action="{{ url_for('teacher_attendance') }}" method="POST">
             <div class="admin-card" style="padding:20px; border:1px solid #000; margin-bottom:20px; display:flex; align-items:center; gap:20px;">
                 <div>

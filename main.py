@@ -335,12 +335,35 @@ def teacher_attendance():
             if status == 'Absent':
                 absentee_names.append(student.get('name', s_id))
         
+        # Group absentees by class
+        absentees_by_class = {}
+        for student in students:
+            s_id = student.get('id')
+            if s_id in absent_ids:
+                s_class = student.get('class') or student.get('student_class') or 'Unknown'
+                if s_class not in absentees_by_class:
+                    absentees_by_class[s_class] = []
+                absentees_by_class[s_class].append(student.get('name', s_id))
+        
+        # Format WhatsApp message
+        whatsapp_messages = {}
+        for s_class, names in absentees_by_class.items():
+            msg_text = f"Todays absentees ({s_class})\n"
+            for i, name in enumerate(names, 1):
+                msg_text += f"{i}. {name}\n"
+            whatsapp_messages[s_class] = msg_text
+
         if service:
             service.batch_update_attendance(attendance_map, date)
         
         # Show success message with absentee list
-        msg = f"Attendance submitted for {date}. Absentees: {', '.join(absentee_names) if absentee_names else 'None'}"
-        return render_template('teacher_attendance.html', students=students, today=date, success=msg, absentees=absentee_names)
+        msg = f"Attendance submitted for {date}."
+        return render_template('teacher_attendance.html', 
+                             students=students, 
+                             today=date, 
+                             success=msg, 
+                             absentees_by_class=absentees_by_class,
+                             whatsapp_messages=whatsapp_messages)
 
     return render_template('teacher_attendance.html', students=students, today=datetime.now().strftime('%Y-%m-%d'))
 
