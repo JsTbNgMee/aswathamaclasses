@@ -1,0 +1,88 @@
+Convert this website (ashwathama.online) into a fully functional, cross-platform Progressive Web App (PWA) that supports installation on:
+
+- Android (Chrome / Edge)
+- iOS (Safari – Add to Home Screen)
+- Desktop (Windows, macOS, Linux via Chrome / Edge)
+
+Requirements:
+
+1. Web App Manifest
+Create a manifest.json with:
+- name: "Ashwathama"
+- short_name: "Ashwathama"
+- description: "Ashwathama Learning Platform"
+- start_url: "/?source=pwa"
+- scope: "/"
+- display: "standalone"
+- orientation: "portrait"
+- theme_color: "#0f172a"
+- background_color: "#ffffff"
+- icons:
+  - 192x192
+  - 512x512
+  - maskable versions for Android
+
+2. Service Worker
+Create service-worker.js that:
+- Caches HTML, CSS, JS, images, and fonts
+- Uses a cache-first strategy for static assets
+- Enables offline access
+- Handles updates safely
+
+3. Install Prompt – Android & Desktop
+- Use the beforeinstallprompt event
+- Show a custom install banner or modal with:
+  Text: "Install Ashwathama App for faster access"
+- Buttons:
+  - Install
+  - Later
+- Do NOT use the browser default mini-infobar
+- Show prompt only if the app is not installed
+- Store dismissal choice in localStorage
+- Auto-detect Android and Desktop browsers
+
+4. Install Support – Apple (iOS Safari)
+Since iOS does not support beforeinstallprompt:
+- Detect iOS Safari users
+- Show a custom instruction banner:
+  “To install Ashwathama App:
+   1. Tap the Share icon
+   2. Tap ‘Add to Home Screen’”
+- Include icons (share icon + plus icon)
+- Hide banner once dismissed or after installation
+
+5. Desktop (PC / Laptop) Support
+- Enable installability for Chrome & Edge on Windows/macOS
+- Ensure standalone window opens without browser UI
+- App icon appears in desktop/start menu
+
+6. Apple Web App Meta Tags
+Add the following to <head>:
+- apple-mobile-web-app-capable: yes
+- apple-mobile-web-app-status-bar-style: black-translucent
+- apple-mobile-web-app-title: Ashwathama
+- apple-touch-icon
+
+7. UX Requirements
+- Install banner must be responsive and modern
+- Fixed bottom banner or centered modal
+- Smooth fade-in / slide animation
+- Dark-mode friendly
+- Must not annoy users (show max once per session if dismissed)
+
+8. Files
+- Modify or create:
+  - index.html
+  - manifest.json
+  - service-worker.js
+- Use pure HTML, CSS, and JavaScript
+- No external libraries
+
+9. Final Output
+Provide:
+- Complete code snippets
+- Clear comments explaining logic
+- Steps to test installation on:
+  - Android
+  - iPhone (Safari)
+  - PC (Chrome / Edge)
