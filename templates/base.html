@@ -211,6 +211,22 @@
     </footer>
 
     <!-- PWA Install Banners -->
+    <div id="update-popup-overlay" class="pwa-overlay" style="display: none; background: rgba(0,0,0,0.6);">
+        <div class="pwa-modal" id="update-popup-content">
+            <button id="update-close-btn" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--pwa-text); opacity: 0.6;">&times;</button>
+            <div class="pwa-modal-header" style="margin-top: 10px;">
+                <span id="update-type-tag" style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 15px;"></span>
+            </div>
+            <div class="pwa-modal-body">
+                <h3 id="update-title"></h3>
+                <p id="update-description"></p>
+            </div>
+            <div id="update-actions" class="pwa-modal-footer" style="display: none;">
+                <a id="update-link" href="#" target="_blank" class="pwa-btn-primary" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">Learn More</a>
+            </div>
+        </div>
+    </div>
+
     <div id="pwa-modal-overlay" class="pwa-overlay" style="display: none;">
         <div class="pwa-modal">
             <div class="pwa-modal-header">
@@ -436,6 +452,68 @@
         window.addEventListener('appinstalled', () => {
             pwaOverlay.style.display = 'none';
             deferredPrompt = null;
+        });
+
+        // Updates Popup Logic
+        async function checkUpdates() {
+            try {
+                const response = await fetch('/api/updates');
+                const updates = await response.json();
+                
+                if (updates && updates.length > 0) {
+                    const update = updates[0]; // Highest priority
+                    const updateId = `update_${update.title.replace(/\s+/g, '_')}_${update.start_date}`;
+                    
+                    if (localStorage.getItem(updateId)) return;
+                    
+                    const overlay = document.getElementById('update-popup-overlay');
+                    const title = document.getElementById('update-title');
+                    const desc = document.getElementById('update-description');
+                    const typeTag = document.getElementById('update-type-tag');
+                    const actions = document.getElementById('update-actions');
+                    const link = document.getElementById('update-link');
+                    
+                    title.textContent = update.title;
+                    desc.textContent = update.description;
+                    typeTag.textContent = update.type || 'Notice';
+                    
+                    // Style by type
+                    if (update.type === 'IMPORTANT') {
+                        typeTag.style.background = '#fee2e2';
+                        typeTag.style.color = '#dc2626';
+                        document.getElementById('update-popup-content').style.border = '2px solid #ef4444';
+                    } else if (update.type === 'NEW') {
+                        typeTag.style.background = '#dcfce7';
+                        typeTag.style.color = '#16a34a';
+                    } else if (update.type === 'VIDEO') {
+                        typeTag.style.background = '#dbeafe';
+                        typeTag.style.color = '#2563eb';
+                        if (link) link.textContent = 'Watch Video';
+                    } else {
+                        typeTag.style.background = 'rgba(0,0,0,0.05)';
+                        typeTag.style.color = 'var(--pwa-text)';
+                    }
+                    
+                    if (update.link) {
+                        link.href = update.link;
+                        actions.style.display = 'flex';
+                    }
+                    
+                    overlay.style.display = 'flex';
+                    
+                    document.getElementById('update-close-btn').onclick = () => {
+                        overlay.style.display = 'none';
+                        localStorage.setItem(updateId, 'dismissed');
+                    };
+                }
+            } catch (err) {
+                console.error('Failed to fetch updates:', err);
+            }
+        }
+        
+        window.addEventListener('load', () => {
+            // Delay check slightly to not block initial load
+            setTimeout(checkUpdates, 1500);
         });
     </script>
 </body>

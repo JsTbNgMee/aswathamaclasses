@@ -475,6 +475,15 @@ def add_security_headers(response):
     
     return response
 
+@app.route('/api/updates')
+def get_updates():
+    """Fetch active updates from Google Sheets"""
+    service = get_sheets_service()
+    if not service:
+        return jsonify([])
+    updates = service.get_active_updates()
+    return jsonify(updates)
+
 @app.route('/manifest.json')
 def manifest():
     return app.send_static_file('manifest.json')

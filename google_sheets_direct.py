@@ -57,6 +57,7 @@ class GoogleSheetsService:
                     self.auth_sheet = self._get_or_create_sheet("StudentAuth", ["Username", "Password", "StudentID"])
                     self.tests_sheet = self._get_or_create_sheet("Tests", ["StudentID", "TestName", "Date", "Marks", "Total"])
                     self.attendance_sheet = self._get_or_create_sheet("Attendance", ["StudentID", "Date", "Status"])
+                    self.updates_sheet = self._get_or_create_sheet("Updates", ["title", "description", "link", "type", "start_date", "end_date", "priority"])
                     break
                 except Exception as e:
                     if "429" in str(e) and attempt < max_retries - 1:
@@ -415,6 +416,43 @@ class GoogleSheetsService:
             return True
         except:
             return False
+    
+    def get_active_updates(self):
+        """Fetch and filter active updates from the Updates sheet"""
+        try:
+            all_rows = self.updates_sheet.get_all_values()
+            if not all_rows or len(all_rows) < 2:
+                return []
+                
+            headers = [h.lower().strip() for h in all_rows[0]]
+            updates = []
+            today = datetime.now().date()
+            
+            for row in all_rows[1:]:
+                if not any(row): continue
+                update = {headers[i]: row[i] for i in range(len(headers)) if i < len(row)}
+                
+                # Parse dates
+                try:
+                    start_date = datetime.strptime(update.get('start_date', ''), '%Y-%m-%d').date()
+                    end_date = datetime.strptime(update.get('end_date', ''), '%Y-%m-%d').date()
+                except:
+                    continue
+                    
+                # Filter by date
+                if start_date <= today <= end_date:
+                    try:
+                        update['priority'] = int(update.get('priority', 0))
+                    except:
+                        update['priority'] = 0
+                    updates.append(update)
+            
+            # Sort by priority descending
+            updates.sort(key=lambda x: x['priority'], reverse=True)
+            return updates
+        except Exception as e:
+            print(f"Error fetching updates: {e}")
+            return []
 
 sheets_service = None
 def init_sheets_service(app):
