@@ -425,11 +425,20 @@
         const iosInstructions = document.getElementById('ios-instructions');
 
         const showPwaModal = () => {
-            if (localStorage.getItem('pwa-dismissed')) return;
-            pwaOverlay.style.display = 'flex';
+            console.log('Attempting to show PWA modal...');
+            const pwaOverlay = document.getElementById('pwa-modal-overlay');
+            if (pwaOverlay) {
+                pwaOverlay.style.display = 'flex';
+                pwaOverlay.style.visibility = 'visible';
+                pwaOverlay.style.opacity = '1';
+                console.log('Modal display set to flex');
+            } else {
+                console.error('PWA modal element not found!');
+            }
         };
 
         window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('beforeinstallprompt event fired');
             e.preventDefault();
             deferredPrompt = e;
             showPwaModal();
