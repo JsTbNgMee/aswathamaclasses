@@ -213,7 +213,13 @@
                 const textElem = document.getElementById('typing-text');
                 
                 if (textElem) {
-                    typeWriter('ASHWATHAMA', textElem, 150, () => {
+                    typeWriter('ASWATHAMA CLASSES', textElem, 150, () => {
+                        const byElem = document.createElement('p');
+                        byElem.textContent = 'by Swaroop Sir';
+                        byElem.style.cssText = 'color: rgba(255,255,255,0.6); font-family: "Inter", sans-serif; font-size: 14px; margin-top: 10px; opacity: 0; transition: opacity 1s ease;';
+                        textElem.parentNode.appendChild(byElem);
+                        setTimeout(() => byElem.style.opacity = '1', 100);
+
                         // After typing is done, wait to reach ~10 seconds total or until load
                         const currentTime = Date.now();
                         const startTime = window.performance.timing.navigationStart;
