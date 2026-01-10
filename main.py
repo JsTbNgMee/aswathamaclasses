@@ -254,6 +254,29 @@ def teacher_add_student():
         service.sync_auth_record(student_data.get('name'), student_data.get('password'), student_data.get('id'))
     return redirect(url_for('teacher_dashboard'))
 
+@app.route('/teacher/updates', methods=['GET', 'POST'])
+def teacher_updates():
+    if not session.get('teacher_logged_in'):
+        return redirect(url_for('teacher_login'))
+    
+    service = get_sheets_service()
+    if request.method == 'POST':
+        update_data = [
+            request.form.get('title'),
+            request.form.get('description'),
+            request.form.get('link'),
+            request.form.get('type'),
+            request.form.get('start_date'),
+            request.form.get('end_date'),
+            request.form.get('priority')
+        ]
+        if service:
+            service.updates_sheet.append_row(update_data)
+        return redirect(url_for('teacher_updates'))
+    
+    updates = service.get_active_updates() if service else []
+    return render_template('teacher_updates.html', updates=updates)
+
 @app.route('/teacher/edit-student/<student_id>', methods=['GET', 'POST'])
 def teacher_edit_student(student_id):
     if not session.get('teacher_logged_in'): return redirect(url_for('teacher_login'))
