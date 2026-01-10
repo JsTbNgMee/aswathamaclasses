@@ -211,45 +211,151 @@
     </footer>
 
     <!-- PWA Install Banners -->
-    <div id="pwa-install-banner" class="pwa-banner" style="display: none;">
-        <div class="pwa-content">
-            <p>Install Ashwathama App for faster access</p>
-            <div class="pwa-buttons">
-                <button id="pwa-install-btn" class="btn-black">Install</button>
-                <button id="pwa-later-btn" class="btn-outline">Later</button>
+    <div id="pwa-modal-overlay" class="pwa-overlay" style="display: none;">
+        <div class="pwa-modal">
+            <div class="pwa-modal-header">
+                <img src="{{ url_for('static', filename='images/pwa-icon-192.png') }}" alt="App Icon" class="pwa-app-icon">
+            </div>
+            <div class="pwa-modal-body">
+                <h3>Install Ashwathama App</h3>
+                <p>Faster access, offline support, and app-like experience</p>
+            </div>
+            <div id="android-desktop-actions" class="pwa-modal-footer">
+                <button id="pwa-install-btn" class="pwa-btn-primary">Install</button>
+                <button id="pwa-later-btn" class="pwa-btn-secondary">Not now</button>
+            </div>
+            <div id="ios-instructions" class="pwa-modal-footer" style="display: none;">
+                <p class="ios-msg">To install Ashwathama:<br>Tap <strong>Share</strong> icon then <strong>'Add to Home Screen'</strong></p>
+                <button id="ios-close-btn" class="pwa-btn-secondary">Close</button>
             </div>
         </div>
     </div>
 
-    <div id="ios-install-banner" class="pwa-banner" style="display: none;">
-        <div class="pwa-content">
-            <p>To install Ashwathama App: <br> 1. Tap the Share icon <br> 2. Tap 'Add to Home Screen'</p>
-            <button id="ios-close-btn" class="btn-outline">Close</button>
-        </div>
-    </div>
-
     <style>
-        .pwa-banner {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            z-index: 10000;
-            animation: slideUp 0.5s ease;
+        :root {
+            --pwa-glass: rgba(255, 255, 255, 0.7);
+            --pwa-blur: 15px;
+            --pwa-border: rgba(255, 255, 255, 0.3);
+            --pwa-text: #0f172a;
+            --pwa-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
-        .pwa-content { text-align: center; }
-        .pwa-content p { margin-bottom: 15px; font-weight: 500; }
-        .pwa-buttons { display: flex; gap: 10px; justify-content: center; }
-        @keyframes slideUp {
-            from { transform: translateY(100%); opacity: 0; }
+
+        .dark-mode {
+            --pwa-glass: rgba(15, 23, 42, 0.8);
+            --pwa-border: rgba(255, 255, 255, 0.1);
+            --pwa-text: #f8fafc;
+        }
+
+        .pwa-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .pwa-modal {
+            background: var(--pwa-glass);
+            backdrop-filter: blur(var(--pwa-blur));
+            border: 1px solid var(--pwa-border);
+            border-radius: 24px;
+            padding: 32px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--pwa-shadow);
+            text-align: center;
+            animation: modalFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            color: var(--pwa-text);
+        }
+
+        @keyframes modalFadeUp {
+            from { transform: translateY(30px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-        .dark-mode .pwa-banner { background: #1e293b; color: white; }
+
+        .pwa-app-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .pwa-modal-body h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .pwa-modal-body p {
+            font-size: 15px;
+            opacity: 0.8;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .pwa-modal-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .pwa-btn-primary {
+            background: #0f172a;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .dark-mode .pwa-btn-primary {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .pwa-btn-secondary {
+            background: transparent;
+            color: var(--pwa-text);
+            border: 1px solid var(--pwa-border);
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .pwa-btn-primary:active, .pwa-btn-secondary:active {
+            transform: scale(0.97);
+        }
+
+        .ios-msg {
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: left;
+            background: rgba(0,0,0,0.05);
+            padding: 15px;
+            border-radius: 12px;
+        }
+        
+        .dark-mode .ios-msg {
+            background: rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 480px) {
+            .pwa-modal {
+                padding: 24px;
+                border-radius: 20px;
+            }
+        }
     </style>
 
     <script>
@@ -264,15 +370,19 @@
 
         // PWA Install Logic
         let deferredPrompt;
-        const pwaBanner = document.getElementById('pwa-install-banner');
-        const iosBanner = document.getElementById('ios-install-banner');
+        const pwaOverlay = document.getElementById('pwa-modal-overlay');
+        const androidDesktopActions = document.getElementById('android-desktop-actions');
+        const iosInstructions = document.getElementById('ios-instructions');
+
+        const showPwaModal = () => {
+            if (localStorage.getItem('pwa-dismissed')) return;
+            pwaOverlay.style.display = 'flex';
+        };
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            if (!localStorage.getItem('pwa-dismissed')) {
-                pwaBanner.style.display = 'block';
-            }
+            showPwaModal();
         });
 
         document.getElementById('pwa-install-btn')?.addEventListener('click', async () => {
@@ -280,12 +390,12 @@
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 deferredPrompt = null;
-                pwaBanner.style.display = 'none';
+                pwaOverlay.style.display = 'none';
             }
         });
 
         document.getElementById('pwa-later-btn')?.addEventListener('click', () => {
-            pwaBanner.style.display = 'none';
+            pwaOverlay.style.display = 'none';
             localStorage.setItem('pwa-dismissed', 'true');
         });
 
@@ -296,13 +406,21 @@
         };
         const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
 
-        if (isIos() && !isInStandaloneMode() && !sessionStorage.getItem('ios-pwa-dismissed')) {
-            iosBanner.style.display = 'block';
+        if (isIos() && !isInStandaloneMode() && !localStorage.getItem('pwa-dismissed')) {
+            androidDesktopActions.style.display = 'none';
+            iosInstructions.style.display = 'flex';
+            pwaOverlay.style.display = 'flex';
         }
 
         document.getElementById('ios-close-btn')?.addEventListener('click', () => {
-            iosBanner.style.display = 'none';
-            sessionStorage.setItem('ios-pwa-dismissed', 'true');
+            pwaOverlay.style.display = 'none';
+            localStorage.setItem('pwa-dismissed', 'true');
+        });
+
+        // Auto-close if installed
+        window.addEventListener('appinstalled', () => {
+            pwaOverlay.style.display = 'none';
+            deferredPrompt = null;
         });
     </script>
 </body>

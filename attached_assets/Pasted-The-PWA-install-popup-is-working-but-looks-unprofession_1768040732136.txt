@@ -1,0 +1,70 @@
+The PWA install popup is working but looks unprofessional.
+Redesign and rebuild it with a premium, modern UI.
+
+Goals:
+- Make the install prompt look like a real startup / big-tech web app
+- Smooth animations
+- Clean glassmorphism style
+- Mobile-first, but works perfectly on desktop
+
+Requirements:
+
+1. Install Popup UI
+Create a centered modal (not browser default) with:
+- App icon at the top
+- Title: "Install Ashwathama App"
+- Description: "Faster access, offline support, and app-like experience"
+- Two buttons:
+  - Primary: Install
+  - Secondary: Not now
+
+Design:
+- Glassmorphism / soft blur background
+- Rounded corners (16–20px)
+- Dark theme friendly
+- Subtle shadow
+- Slide-up + fade-in animation
+
+2. Behavior (Android + Desktop)
+- Use beforeinstallprompt event
+- Prevent browser mini-infobar
+- Show popup only if app is not installed
+- Store dismissal in localStorage
+- Do not show popup again if dismissed
+- Close popup after install attempt
+
+3. Apple iOS Support
+Since iOS Safari does not support install events:
+- Detect iOS Safari users
+- Show a custom instruction banner/modal instead of install button
+- Text:
+  "To install Ashwathama:
+   Tap Share → Add to Home Screen"
+- Include icons or visual cues
+- Allow dismissal and remember it in localStorage
+
+4. Desktop Support (PC / Mac)
+- Ensure PWA is installable on Chrome and Edge
+- App must open in standalone mode after install
+- Popup should scale properly on large screens
+
+5. Technical Rules
+- Pure HTML, CSS, and JavaScript
+- No external libraries
+- Use manifest.json and service-worker.js if not already present
+- Clean, commented code
+- Accessible (buttons clickable, readable text)
+
+6. Files to Modify or Create
+- index.html (popup HTML + JS logic)
+- CSS (inline or separate)
+- Keep existing site content untouched
+
+7. Output
+Return:
+- Final code snippets
+- Explanation of how install detection works
+- Steps to test on:
+  - Android Chrome
+  - iOS Safari
+  - Windows / macOS Chrome or Edge
