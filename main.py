@@ -475,6 +475,17 @@ def add_security_headers(response):
     
     return response
 
+@app.route('/manifest.json')
+def manifest():
+    return app.send_static_file('manifest.json')
+
+@app.route('/service-worker.js')
+def service_worker():
+    response = make_response(app.send_static_file('service-worker.js'))
+    response.headers['Content-Type'] = 'application/javascript'
+    response.headers['Service-Worker-Allowed'] = '/'
+    return response
+
 @app.route('/robots.txt')
 def robots():
     """Serve robots.txt dynamically"""
