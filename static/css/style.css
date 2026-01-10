@@ -48,7 +48,25 @@ body.dark-mode .btn-outline {
 }
 
 body.dark-mode .nav-wrapper {
-    background: rgba(255, 255, 255, 0.05);
+    background: #121212;
+}
+
+body.dark-mode .nav-link {
+    color: #ffffff !important;
+}
+
+@media (max-width: 1024px) {
+    body.dark-mode .navbar {
+        background: #121212 !important;
+        border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    body.dark-mode .nav-wrapper {
+        background: #121212 !important;
+    }
+    body.dark-mode .nav-link {
+        color: #fff !important;
+        border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+    }
 }
 
 body.dark-mode .btn-black {

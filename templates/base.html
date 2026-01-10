@@ -303,8 +303,23 @@
 
         .pwa-modal-footer {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             gap: 12px;
+            justify-content: center;
+        }
+
+        .pwa-btn-primary, .pwa-btn-secondary {
+            flex: 1;
+            max-width: 160px;
+        }
+
+        @media (max-width: 480px) {
+            .pwa-modal-footer {
+                flex-direction: column;
+            }
+            .pwa-btn-primary, .pwa-btn-secondary {
+                max-width: none;
+            }
         }
 
         .pwa-btn-primary {
